@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+
+  mariadb:
+    image: mariadb:11
+    container_name: cesizen-db
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: cesizen
+      MARIADB_USER: user
+      MARIADB_PASSWORD: password
+    ports:
+      - "3310:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - appnet
+
+  backend:
+    build:
+      context: ./cesizen-back
+      dockerfile: Dockerfile
+    container_name: cesizen-back
+    restart: always
+    depends_on:
+      - mariadb
+    ports:
+      - "8080:8080"
+    networks:
+      - appnet
+
+  frontend:
+    build:
+      context: ./cesizen-front
+      dockerfile: Dockerfile
+    container_name: cesizen-front
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+    networks:
+      - appnet
+
+networks:
+  appnet:
+
+volumes:
+  mariadb_data:
