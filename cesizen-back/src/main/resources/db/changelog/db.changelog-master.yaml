@@ -1,5 +1,3 @@
 databaseChangeLog:
-  - changeSet:
-      id: init
-      author: damien
-      changes: []
+  - include:
+      file: db/changelog/001_init_schema.sql
