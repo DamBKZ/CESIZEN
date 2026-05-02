@@ -1,0 +1,15 @@
+package com.cesizen.cesizen_back.dto.user;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class RequestResetPasswordRequest {
+
+    @NotBlank(message = "L'email est obligatoire.")
+    @Email(message = "L'email doit être valide.")
+    private String email;
+}

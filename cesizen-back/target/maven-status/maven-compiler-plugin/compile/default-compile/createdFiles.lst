@@ -1,0 +1,5 @@
+com\cesizen\cesizen_back\CesizenBackApplication.class
+com\cesizen\cesizen_back\entity\Role.class
+com\cesizen\cesizen_back\config\SecurityConfig.class
+com\cesizen\cesizen_back\entity\User.class
+com\cesizen\cesizen_back\repository\UserRepository.class
