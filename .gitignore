@@ -5,19 +5,16 @@ target/
 *.jar
 *.war
 *.ear
-
 ### IntelliJ ###
 .idea/
 *.iml
-
 ### Node / Angular ###
-node_modules/
-dist/
+**/node_modules/
+**/dist/
 *.map
-
 ### OS ###
 .DS_Store
 Thumbs.db
-
 ### Env ###
 .env
+**/.env
