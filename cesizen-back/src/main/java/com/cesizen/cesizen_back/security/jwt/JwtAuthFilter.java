@@ -32,6 +32,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
+        // Pas de token — on laisse passer, Spring Security gérera les accès non autorisés
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -46,6 +47,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
 
+            // Ne pas re-authentifier si déjà authentifié dans ce contexte
             if (SecurityContextHolder.getContext().getAuthentication() != null) {
                 filterChain.doFilter(request, response);
                 return;
@@ -61,6 +63,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
 
+            // On utilise les authorities directement depuis l'entité User (UserDetails)
+            // plutôt que de reconstruire depuis le token — plus sûr et cohérent
             var authToken = new UsernamePasswordAuthenticationToken(
                     user,
                     null,
@@ -73,11 +77,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             log.error("Erreur dans JwtAuthFilter : {}", e.getMessage());
+            // On ne bloque pas la chaîne — Spring Security refusera l'accès si non authentifié
         }
 
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * Les routes /auth/** sont publiques — inutile de traiter le filtre JWT dessus.
+     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return request.getServletPath().startsWith("/auth");
