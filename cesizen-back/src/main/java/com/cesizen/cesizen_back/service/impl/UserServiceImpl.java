@@ -1,6 +1,5 @@
 package com.cesizen.cesizen_back.service.impl;
 
-
 import com.cesizen.cesizen_back.entity.User;
 import com.cesizen.cesizen_back.service.RoleService;
 import com.cesizen.cesizen_back.service.UserService;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -81,8 +81,21 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public User findById(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
     // -------------------------------------------------------------------------
-    // MISE À JOUR
+    // MISE À JOUR PROFIL
     // -------------------------------------------------------------------------
 
     @Override
@@ -104,5 +117,69 @@ public class UserServiceImpl implements UserService {
         user.setPseudo(newPseudo);
 
         return userRepository.save(user);
+    }
+
+    // -------------------------------------------------------------------------
+    // CHANGEMENT DE MOT DE PASSE
+    // -------------------------------------------------------------------------
+
+    @Override
+    @Transactional
+    public void changePassword(String userId, String currentPassword, String newPassword) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Le mot de passe actuel est incorrect.");
+        }
+
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Le nouveau mot de passe doit être différent de l'actuel.");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    // -------------------------------------------------------------------------
+    // ADMIN — ACTIVATION / DÉSACTIVATION / SUPPRESSION
+    // -------------------------------------------------------------------------
+
+    @Override
+    @Transactional
+    public void deactivate(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
+
+        if (!user.isActive()) {
+            throw new IllegalStateException("Ce compte est déjà désactivé.");
+        }
+
+        user.setActive(false);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void activate(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
+
+        if (user.isActive()) {
+            throw new IllegalStateException("Ce compte est déjà actif.");
+        }
+
+        user.setActive(true);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void delete(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
+
+        userRepository.delete(user);
     }
 }

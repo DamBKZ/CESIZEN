@@ -33,18 +33,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            // CSRF désactivé — API stateless JWT
             .csrf(AbstractHttpConfigurer::disable)
-
-            // CORS configuré explicitement
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-            // Pas de session
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-
-            // En-têtes de sécurité HTTP
             .headers(headers -> headers
                 .frameOptions(frame -> frame.deny())
                 .contentTypeOptions(ct -> {})
@@ -52,17 +45,13 @@ public class SecurityConfig {
                     rp.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)
                 )
             )
-
-            // Règles d'accès
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/users/register").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
-
-            // Gestion des erreurs d'authentification
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) -> {
                     response.setStatus(401);
@@ -75,7 +64,6 @@ public class SecurityConfig {
                     response.getWriter().write("{\"error\": \"Accès refusé.\"}");
                 })
             )
-
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -89,7 +77,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedOrigins(List.of("http://localhost:4200"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(true);

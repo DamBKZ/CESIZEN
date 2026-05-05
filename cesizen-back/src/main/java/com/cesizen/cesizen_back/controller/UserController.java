@@ -1,5 +1,6 @@
 package com.cesizen.cesizen_back.controller;
 
+import com.cesizen.cesizen_back.dto.user.ChangePasswordRequest;
 import com.cesizen.cesizen_back.dto.user.RegisterRequest;
 import com.cesizen.cesizen_back.dto.user.UpdateUserRequest;
 import com.cesizen.cesizen_back.dto.user.UserResponse;
@@ -11,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -42,9 +45,7 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponse> me(Authentication authentication) {
-
         User user = extractUser(authentication);
-
         return ResponseEntity.ok(toResponse(user));
     }
 
@@ -67,6 +68,30 @@ public class UserController {
 
         return ResponseEntity.ok(toResponse(user));
     }
+
+    // -------------------------------------------------------------------------
+    // CHANGEMENT DE MOT DE PASSE
+    // -------------------------------------------------------------------------
+
+    @PutMapping("/me/password")
+    public ResponseEntity<Map<String, String>> changePassword(
+            Authentication authentication,
+            @Valid @RequestBody ChangePasswordRequest request) {
+
+        User user = extractUser(authentication);
+
+        userService.changePassword(
+                user.getUserId(),
+                request.getCurrentPassword(),
+                request.getNewPassword()
+        );
+
+        return ResponseEntity.ok(Map.of("message", "Mot de passe mis à jour."));
+    }
+
+    // -------------------------------------------------------------------------
+    // HELPERS PRIVÉS
+    // -------------------------------------------------------------------------
 
     private User extractUser(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof User user)) {

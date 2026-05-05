@@ -47,7 +47,7 @@ public class User implements UserDetails {
     @Builder.Default
     private boolean active = true;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
         name = "roleID",
         nullable = false,
