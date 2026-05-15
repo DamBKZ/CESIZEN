@@ -46,4 +46,31 @@ public class EmailServiceImpl implements EmailService {
             throw new IllegalStateException("Impossible d'envoyer l'email de réinitialisation.");
         }
     }
+
+    @Override
+    public void sendDiagnosticResultEmail(String to, int score, String riskLevel, String date) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromAddress);
+            message.setTo(to);
+            message.setSubject("Résultats de votre diagnostic CESIZen");
+            message.setText(
+                    "Bonjour,\n\n" +
+                    "Votre diagnostic CESIZen a été complété.\n\n" +
+                    "Voici vos résultats :\n" +
+                    "- Score : " + score + "\n" +
+                    "- Niveau de risque : " + riskLevel + "\n" +
+                    "- Date : " + date + "\n\n" +
+                    "Merci d'utiliser CESIZen.\n\n" +
+                    "L'équipe CESIZen"
+            );
+
+            mailSender.send(message);
+            log.info("Email de diagnostic envoyé à {}", to);
+
+        } catch (Exception e) {
+            log.error("Échec de l'envoi de l'email de diagnostic à {} : {}", to, e.getMessage());
+            throw new IllegalStateException("Impossible d'envoyer l'email de diagnostic.");
+        }
+    }
 }
