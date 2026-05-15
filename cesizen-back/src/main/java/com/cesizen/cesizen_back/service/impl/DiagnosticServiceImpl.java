@@ -6,11 +6,14 @@ import com.cesizen.cesizen_back.dto.user.DiagnosticResponse;
 import com.cesizen.cesizen_back.entity.DiagnosticAnswer;
 import com.cesizen.cesizen_back.entity.DiagnosticEvent;
 import com.cesizen.cesizen_back.entity.DiagnosticSurvey;
+import com.cesizen.cesizen_back.event.DiagnosticCompletedEvent;
 import com.cesizen.cesizen_back.repository.DiagnosticEventRepository;
 import com.cesizen.cesizen_back.repository.DiagnosticSurveyRepository;
 import com.cesizen.cesizen_back.service.DiagnosticService;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,6 +25,8 @@ public class DiagnosticServiceImpl implements DiagnosticService {
 
     private final DiagnosticEventRepository eventRepository;
     private final DiagnosticSurveyRepository surveyRepository;
+    private final ApplicationEventPublisher eventPublisher;
+
 
 
     @Override
@@ -60,6 +65,9 @@ public class DiagnosticServiceImpl implements DiagnosticService {
         survey.setAnswers(answers);
 
         survey = surveyRepository.save(survey);
+
+        eventPublisher.publishEvent(new DiagnosticCompletedEvent(this, survey));
+
 
         return DiagnosticResponse.builder()
                 .surveyId(survey.getSurveyId())
