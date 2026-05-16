@@ -1,0 +1,12 @@
+<header class="header">
+    <div class="left">
+        <span class="app-title">CESIZEN</span>
+    </div>
+
+    @if (isAuthenticated()) {
+    <div class="right">
+        <span class="user">{{ user()?.pseudo }}</span>
+        <button class="logout-btn" (click)="logout()">Déconnexion</button>
+    </div>
+    }
+</header>

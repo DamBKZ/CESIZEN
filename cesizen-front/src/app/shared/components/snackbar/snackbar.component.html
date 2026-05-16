@@ -1,0 +1,6 @@
+@if (snackbar()) {
+<div class="snackbar" [class.success]="snackbar()?.type === 'success'" [class.error]="snackbar()?.type === 'error'"
+    [class.info]="snackbar()?.type === 'info'">
+    {{ snackbar()?.message }}
+</div>
+}
