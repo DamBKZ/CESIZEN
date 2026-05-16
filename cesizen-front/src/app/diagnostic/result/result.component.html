@@ -1,0 +1,22 @@
+<div class="result-container">
+
+    <h1>Résultat du diagnostic</h1>
+
+    @if (score() !== null) {
+    <div class="score-box">
+        <p class="label">Votre score :</p>
+        <p class="value">{{ score() }}</p>
+    </div>
+
+    <p class="interpretation">
+        {{ interpretation() }}
+    </p>
+
+    <button class="btn-primary" (click)="restart()">
+        Refaire un diagnostic
+    </button>
+    } @else {
+    <p>Chargement du résultat...</p>
+    }
+
+</div>

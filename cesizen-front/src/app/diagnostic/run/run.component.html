@@ -1,0 +1,27 @@
+<div class="run-container">
+
+    <h1>Votre diagnostic</h1>
+    <p class="subtitle">Voici les événements que vous avez sélectionnés.</p>
+
+    @if (selectedEvents().length === 0) {
+    <p>Aucun événement sélectionné.</p>
+    }
+
+    <ul class="event-list">
+        @for (event of selectedEvents(); track event.id) {
+        <li class="event-item">
+            <span>{{ event.label }}</span>
+            <span class="score">+{{ event.score }}</span>
+        </li>
+        }
+    </ul>
+
+    <div class="total">
+        Score total : <strong>{{ totalScore() }}</strong>
+    </div>
+
+    <button class="btn-primary" (click)="submit()">
+        Enregistrer le diagnostic
+    </button>
+
+</div>

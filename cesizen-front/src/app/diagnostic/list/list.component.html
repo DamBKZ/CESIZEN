@@ -1,0 +1,23 @@
+<div class="list-container">
+
+    <h1>Événements de vie</h1>
+    <p class="subtitle">Sélectionnez les événements qui vous concernent.</p>
+
+    @if (events().length === 0) {
+    <p class="loading">Chargement...</p>
+    }
+
+    <ul class="event-list">
+        @for (event of events(); track event.id) {
+        <li class="event-item" [ngClass]="{ selected: selected().has(event.id) }" (click)="toggleEvent(event.id)">
+            <span>{{ event.label }}</span>
+            <span class="score">+{{ event.score }}</span>
+        </li>
+        }
+    </ul>
+
+    <button class="btn-primary" (click)="startDiagnostic()">
+        Commencer le diagnostic
+    </button>
+
+</div>
