@@ -1,0 +1,51 @@
+<div class="register-container">
+
+    <h1>Créer un compte</h1>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+        <div class="form-field">
+            <label>Pseudo</label>
+            <input type="text" formControlName="pseudo" />
+
+            @if (form.get('pseudo')?.touched && form.get('pseudo')?.invalid) {
+            <small class="error">Pseudo requis</small>
+            }
+        </div>
+
+        <div class="form-field">
+            <label>Email</label>
+            <input type="email" formControlName="email" />
+
+            @if (form.get('email')?.touched && form.get('email')?.invalid) {
+            <small class="error">Email invalide</small>
+            }
+        </div>
+
+        <div class="form-field">
+            <label>Mot de passe</label>
+            <input type="password" formControlName="password" />
+
+            @if (form.get('password')?.touched && form.get('password')?.invalid) {
+            <small class="error">6 caractères minimum</small>
+            }
+        </div>
+
+        <div class="form-field">
+            <label>Confirmer le mot de passe</label>
+            <input type="password" formControlName="confirmPassword" />
+
+            @if (form.get('confirmPassword')?.touched && form.value.password !== form.value.confirmPassword) {
+            <small class="error">Les mots de passe ne correspondent pas</small>
+            }
+        </div>
+
+        <button type="submit" class="btn-primary">Créer mon compte</button>
+
+    </form>
+
+    <div class="links">
+        <a routerLink="/login">Déjà un compte ? Se connecter</a>
+    </div>
+
+</div>
