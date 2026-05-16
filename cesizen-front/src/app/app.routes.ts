@@ -6,6 +6,11 @@ export const APP_ROUTES: Routes = [
     path: '',
     component: LayoutComponent,
     children: [
+      {
+        path: 'auth',
+        loadChildren: () =>
+          import('./auth/auth.routes').then(m => m.AUTH_ROUTES)
+      }
     ]
   }
 ];
