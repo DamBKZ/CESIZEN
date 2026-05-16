@@ -1,0 +1,33 @@
+<aside class="sidebar">
+
+    <div class="logo">
+        CESIZEN
+    </div>
+
+    @if (isAuthenticated()) {
+
+    <nav class="menu">
+
+        <a routerLink="/diagnostic" routerLinkActive="active">
+            Diagnostic
+        </a>
+
+        <a routerLink="/informations" routerLinkActive="active">
+            Informations
+        </a>
+
+        @if (role() === 'ADMIN') {
+        <a routerLink="/admin" routerLinkActive="active">
+            Administration
+        </a>
+
+        <a routerLink="/logs" routerLinkActive="active">
+            Logs
+        </a>
+        }
+
+    </nav>
+
+    }
+
+</aside>
