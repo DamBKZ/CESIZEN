@@ -1,0 +1,43 @@
+@if (info()) {
+<div class="details-container">
+
+    <h1>{{ info().title }}</h1>
+
+    <p class="meta">
+        <strong>Auteur :</strong> {{ info().author }} <br>
+        <strong>Slug :</strong> {{ info().slug }} <br>
+        <strong>Catégorie :</strong> {{ info().categoryName }} <br>
+        <strong>Créé le :</strong> {{ info().createdAt }}
+    </p>
+
+    <div class="tags">
+        @for (t of info().tags; track t) {
+        <span class="tag">{{ t }}</span>
+        }
+    </div>
+
+    <!-- ARTICLE -->
+    @if (info().type === 'ARTICLE') {
+    <div class="article-content">
+        {{ info().content }}
+    </div>
+    }
+
+    <!-- VIDEO -->
+    @if (info().type === 'VIDEO') {
+    <div class="video-wrapper">
+        <iframe [src]="getEmbedUrl(info().videoUrl)" frameborder="0" allowfullscreen></iframe>
+    </div>
+    }
+
+    <!-- PDF -->
+    @if (info().type === 'PDF') {
+    <div class="pdf-wrapper">
+        <a [href]="info().pdfUrl" target="_blank" class="pdf-link">
+            📄 Ouvrir le PDF
+        </a>
+    </div>
+    }
+
+</div>
+}
