@@ -6,7 +6,6 @@ import { UserStore } from '../../../core/stores/user.store';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [NgIf],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })

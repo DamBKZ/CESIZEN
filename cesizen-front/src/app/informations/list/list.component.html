@@ -1,0 +1,33 @@
+<div class="list-container">
+
+    <h1>Liste des informations</h1>
+
+    @for (item of items(); track item.informationId) {
+
+    <div class="info-card" (click)="open(item.informationId)">
+
+        <div class="header">
+            <h2>{{ item.title }}</h2>
+            <span class="type">{{ item.type }}</span>
+        </div>
+
+        <p class="meta">
+            <strong>Auteur :</strong> {{ item.author }} <br>
+            <strong>Slug :</strong> {{ item.slug }} <br>
+            <strong>Catégorie :</strong> {{ item.categoryName }}
+        </p>
+
+        <div class="tags">
+            @for (t of item.tags; track t) {
+            <span class="tag">{{ t }}</span>
+            }
+        </div>
+
+        <button class="edit-btn" (click)="edit(item.informationId); $event.stopPropagation()">
+            Modifier
+        </button>
+
+    </div>
+
+    }
+</div>

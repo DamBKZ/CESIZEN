@@ -1,0 +1,65 @@
+<div class="create-container">
+
+    <h1>Créer une information</h1>
+
+    <!-- AUTEUR -->
+    <input placeholder="Auteur" [ngModel]="form().author" (ngModelChange)="form().author = $event" />
+
+    <!-- SLUG -->
+    <input placeholder="Slug (unique)" [ngModel]="form().slug" (ngModelChange)="form().slug = $event" />
+
+    <!-- TAGS -->
+    <input placeholder="Tags (séparés par des virgules)" [ngModel]="form().tags"
+        (ngModelChange)="form().tags = $event.split(',').map(t => t.trim())" />
+
+    <!-- CATEGORY ID -->
+    <input placeholder="ID de la catégorie" [ngModel]="form().categoryId"
+        (ngModelChange)="form().categoryId = $event" />
+
+    <!-- TYPE -->
+    <label>Type</label>
+    <select [ngModel]="type()" (ngModelChange)="type.set($event)">
+        <option value="ARTICLE">Article</option>
+        <option value="VIDEO">Vidéo</option>
+        <option value="PDF">PDF</option>
+    </select>
+
+    <!-- ARTICLE -->
+    @if (type() === 'ARTICLE') {
+    <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" />
+
+    <textarea placeholder="Contenu" [ngModel]="form().content" (ngModelChange)="form().content = $event"></textarea>
+    }
+
+    <!-- VIDEO -->
+    @if (type() === 'VIDEO') {
+    <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" />
+
+    <input placeholder="URL de la vidéo (YouTube, MP4...)" [ngModel]="form().videoUrl"
+        (ngModelChange)="form().videoUrl = $event" />
+
+    @if (form().videoUrl) {
+    <div class="video-preview">
+        <iframe width="560" height="315" [src]="getEmbedUrl(form().videoUrl)" frameborder="0" allowfullscreen></iframe>
+    </div>
+    }
+    }
+
+    <!-- PDF -->
+    @if (type() === 'PDF') {
+    <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" />
+
+    <input placeholder="URL du PDF" [ngModel]="form().pdfUrl" (ngModelChange)="form().pdfUrl = $event" />
+
+    @if (form().pdfUrl) {
+    <a [href]="form().pdfUrl" target="_blank">
+        Voir le PDF
+    </a>
+    }
+    }
+
+    <button class="btn-primary" (click)="submit()">
+        Créer
+    </button>
+
+</div>
