@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(
@@ -24,7 +25,7 @@ public class Category {
     @Id
     @UuidGenerator
     @Column(name = "categoryID", columnDefinition = "CHAR(36)", updatable = false, nullable = false)
-    private String categoryId;
+    private UUID categoryId;
 
     @Column(name = "categoryName", nullable = false, unique = true, length = 100)
     private String name;

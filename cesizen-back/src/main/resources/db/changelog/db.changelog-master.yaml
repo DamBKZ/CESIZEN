@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/004_update_diagnostic_schema.sql
   - include:
       file: db/changelog/005_insert_diagnostic_events.sql
+  - include:
+      file: db/changelog/006_update_information_schema.sql

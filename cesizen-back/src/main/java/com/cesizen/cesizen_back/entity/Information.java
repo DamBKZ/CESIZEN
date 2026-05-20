@@ -8,6 +8,7 @@ import org.hibernate.annotations.UuidGenerator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "information")
@@ -22,7 +23,7 @@ public abstract class Information {
     @Id
     @UuidGenerator
     @Column(name = "informationID", columnDefinition = "CHAR(36)", updatable = false, nullable = false)
-    private String informationId;
+    private UUID informationId;
 
     @Column(name = "informationTitle", nullable = false, length = 150)
     private String title;

@@ -1,25 +1,27 @@
 package com.cesizen.cesizen_back.service;
 
-import com.cesizen.cesizen_back.entity.Information;
+import com.cesizen.cesizen_back.dto.user.InformationRequest;
+import com.cesizen.cesizen_back.dto.user.InformationResponse;
 import com.cesizen.cesizen_back.entity.InformationType;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.UUID;
+
 public interface InformationService {
 
-    Page<Information> findAll(Pageable pageable);
+    InformationResponse create(InformationRequest request);
 
-    Page<Information> findByCategory(String categoryId, Pageable pageable);
+    InformationResponse update(UUID id, InformationRequest request);
 
-    Page<Information> filter(InformationType type, String categoryId, Pageable pageable);
+    void delete(UUID id);
 
-    Page<Information> search(String keyword, Pageable pageable);
+    InformationResponse findById(UUID id);
 
-    Information findById(String id);
+    Page<InformationResponse> findAll(Pageable pageable);
 
-    Information create(Information info);
+    Page<InformationResponse> filter(InformationType type, UUID categoryId, Pageable pageable);
 
-    Information update(String id, Information updated);
-
-    void delete(String id);
+    Page<InformationResponse> search(String keyword, Pageable pageable);
 }

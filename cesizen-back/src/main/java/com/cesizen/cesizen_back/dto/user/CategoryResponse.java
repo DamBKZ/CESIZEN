@@ -1,14 +1,18 @@
 package com.cesizen.cesizen_back.dto.user;
 
-import lombok.Builder;
-import lombok.Data;
+import java.util.UUID;
 
-@Data
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @Builder
 public class CategoryResponse {
-
-    private String categoryId;
+    private UUID categoryId;
     private String name;
     private String description;
     private String createdAt;
 }
+
