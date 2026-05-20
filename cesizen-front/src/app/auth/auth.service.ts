@@ -65,4 +65,8 @@ export class AuthService {
       complete: () => this.ui.setLoading(false)
     });
   }
+
+  getCurrentUser() {
+    return this.userStore.user();
+  }
 }

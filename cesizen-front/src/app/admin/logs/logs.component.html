@@ -1,0 +1,41 @@
+<h1 class="title">Logs système</h1>
+
+<table mat-table [dataSource]="logs" class="mat-elevation-z2">
+
+    <!-- Utilisateur -->
+    <ng-container matColumnDef="user">
+        <th mat-header-cell *matHeaderCellDef>Utilisateur</th>
+        <td mat-cell *matCellDef="let l">
+            {{ l.user?.firstname }} {{ l.user?.lastname }}
+            <span *ngIf="!l.user">Système</span>
+        </td>
+    </ng-container>
+
+    <!-- Contenu -->
+    <ng-container matColumnDef="content">
+        <th mat-header-cell *matHeaderCellDef>Contenu</th>
+        <td mat-cell *matCellDef="let l">{{ l.content }}</td>
+    </ng-container>
+
+    <!-- Date -->
+    <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Date</th>
+        <td mat-cell *matCellDef="let l">{{ l.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+    </ng-container>
+
+    <!-- Actions -->
+    <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let l">
+
+            <button mat-icon-button color="warn" (click)="delete(l.id)">
+                <mat-icon>delete</mat-icon>
+            </button>
+
+        </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+</table>
