@@ -1,7 +1,13 @@
 package com.cesizen.cesizen_back.service.impl;
 
-import com.cesizen.cesizen_back.entity.*;
+import com.cesizen.cesizen_back.dto.user.InformationRequest;
+import com.cesizen.cesizen_back.dto.user.InformationResponse;
+import com.cesizen.cesizen_back.entity.Category;
+import com.cesizen.cesizen_back.entity.Information;
 import com.cesizen.cesizen_back.entity.InformationType;
+import com.cesizen.cesizen_back.factory.InformationFactory;
+import com.cesizen.cesizen_back.mapper.informationMapper;
+import com.cesizen.cesizen_back.repository.CategoryRepository;
 import com.cesizen.cesizen_back.repository.InformationRepository;
 import com.cesizen.cesizen_back.service.InformationService;
 
@@ -10,71 +16,66 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class InformationServiceImpl implements InformationService {
 
-    private final InformationRepository informationRepository;
+    private final InformationRepository repo;
+    private final CategoryRepository categoryRepo;
+    private final informationMapper mapper;
 
     @Override
-    public Page<Information> findAll(Pageable pageable) {
-        return informationRepository.findAll(pageable);
+    public InformationResponse create(InformationRequest req) {
+        Category category = categoryRepo.findById(req.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Catégorie introuvable"));
+
+        Information info = InformationFactory.create(req, category);
+        repo.save(info);
+
+        return mapper.toResponse(info);
     }
 
     @Override
-    public Page<Information> findByCategory(String categoryId, Pageable pageable) {
-        return informationRepository.findByCategory_CategoryId(categoryId, pageable);
+    public InformationResponse update(UUID id, InformationRequest req) {
+        Information info = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Information introuvable"));
+
+        Category category = categoryRepo.findById(req.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Catégorie introuvable"));
+
+        mapper.updateEntity(info, req, category);
+        repo.save(info);
+
+        return mapper.toResponse(info);
     }
 
     @Override
-    public Page<Information> filter(InformationType type, String categoryId, Pageable pageable) {
-        return informationRepository.findByTypeAndCategory_CategoryId(type, categoryId, pageable);
+    public void delete(UUID id) {
+        repo.deleteById(id);
     }
 
     @Override
-    public Page<Information> search(String keyword, Pageable pageable) {
-        return informationRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+    public InformationResponse findById(UUID id) {
+        return repo.findById(id)
+                .map(mapper::toResponse)
+                .orElseThrow(() -> new RuntimeException("Information introuvable"));
     }
 
     @Override
-    public Information findById(String id) {
-        return informationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Information introuvable."));
+    public Page<InformationResponse> findAll(Pageable pageable) {
+        return repo.findAll(pageable).map(mapper::toResponse);
     }
 
     @Override
-    public Information create(Information info) {
-        return informationRepository.save(info);
+    public Page<InformationResponse> filter(InformationType type, UUID categoryId, Pageable pageable) {
+        return repo.filter(type, categoryId, pageable).map(mapper::toResponse);
     }
 
     @Override
-    public Information update(String id, Information updated) {
-
-        Information existing = findById(id);
-
-        existing.setTitle(updated.getTitle());
-        existing.setCategory(updated.getCategory());
-        existing.setAuthor(updated.getAuthor());
-        existing.setTags(updated.getTags());
-        existing.setSlug(updated.getSlug());
-
-        switch (existing.getType()) {
-            case ARTICLE -> ((InformationArticle) existing).setContent(
-                    ((InformationArticle) updated).getContent()
-            );
-            case VIDEO -> ((InformationVideo) existing).setVideoUrl(
-                    ((InformationVideo) updated).getVideoUrl()
-            );
-            case PDF -> ((InformationPdf) existing).setPdfUrl(
-                    ((InformationPdf) updated).getPdfUrl()
-            );
-        }
-
-        return informationRepository.save(existing);
-    }
-
-    @Override
-    public void delete(String id) {
-        informationRepository.deleteById(id);
+    public Page<InformationResponse> search(String keyword, Pageable pageable) {
+        return repo.search(keyword, pageable).map(mapper::toResponse);
     }
 }
+

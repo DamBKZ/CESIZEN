@@ -1,18 +1,21 @@
 package com.cesizen.cesizen_back.service;
 
-import com.cesizen.cesizen_back.entity.Category;
+import com.cesizen.cesizen_back.dto.user.CategoryRequest;
+import com.cesizen.cesizen_back.dto.user.CategoryResponse;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface CategoryService {
 
-    List<Category> findAll();
+    CategoryResponse create(CategoryRequest request);
 
-    Category findById(String id);
+    CategoryResponse update(UUID id, CategoryRequest request);
 
-    Category create(Category category);
+    void delete(UUID id);
 
-    Category update(String id, Category updated);
+    CategoryResponse findById(UUID id);
 
-    void delete(String id);
+    List<CategoryResponse> findAll();
 }
+

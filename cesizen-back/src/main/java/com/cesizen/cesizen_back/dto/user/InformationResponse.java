@@ -5,17 +5,20 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 public class InformationResponse {
-
-    private String informationId;
+    private UUID informationId;
     private String title;
     private String type;
+    private String author;
+    private String slug;
+    private List<String> tags;
 
-    private String categoryId;
+    private UUID categoryId;
     private String categoryName;
 
     private String createdAt;
@@ -23,8 +26,4 @@ public class InformationResponse {
     private String content;
     private String videoUrl;
     private String pdfUrl;
-
-    private String author;
-    private List<String> tags;
-    private String slug;
 }
