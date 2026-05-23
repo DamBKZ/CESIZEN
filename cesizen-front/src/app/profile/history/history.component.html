@@ -1,11 +1,15 @@
 <h1>Historique de mes diagnostics</h1>
 
-<div *ngIf="history.length === 0">
+@if (history.length === 0) {
+<div>
     Aucun diagnostic pour le moment.
 </div>
+}
 
-<ul *ngIf="history.length > 0">
-    <li *ngFor="let item of history">
+@if (history.length > 0) {
+<ul>
+    @for (item of history; track item) {
+    <li>
         <strong>Score :</strong> {{ item.score }}
         <br>
         <strong>Niveau de risque :</strong> {{ item.riskLevel }}
@@ -13,4 +17,6 @@
         <strong>Date :</strong> {{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}
         <hr>
     </li>
+    }
 </ul>
+}

@@ -10,5 +10,10 @@ export const PROFILE_ROUTES: Routes = [
     path: 'change-password',
     loadComponent: () =>
       import('./change-password/change-password.component').then(m => m.ChangePasswordComponent)
+  },
+    {
+    path: 'history',
+    loadComponent: () =>
+      import('./history/history.component').then(m => m.HistoryComponent)
   }
 ];
