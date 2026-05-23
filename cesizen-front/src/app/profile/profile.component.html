@@ -1,0 +1,27 @@
+<h1>Mon Profil</h1>
+
+<form [formGroup]="form" (ngSubmit)="save()">
+
+    <mat-form-field appearance="outline">
+        <mat-label>Pseudo</mat-label>
+        <input matInput formControlName="pseudo">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email">
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit">
+        Enregistrer
+    </button>
+
+</form>
+
+<button mat-button color="accent" routerLink="change-password">
+    Modifier mon mot de passe
+</button>
+
+<button mat-button color="accent" routerLink="history">
+    Voir l'historique de mes diagnostics
+</button>

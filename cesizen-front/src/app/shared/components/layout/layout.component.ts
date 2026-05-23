@@ -4,6 +4,7 @@ import { LoaderComponent } from '../loader/loader.component';
 import { SnackbarComponent } from '../snackbar/snackbar.component';
 import { HeaderComponent } from "../header/header.component";
 import { SidebarComponent } from "../sidebar/sidebar.component";
+import { FooterComponent } from "../footer/footer.component";
 
 @Component({
   selector: 'app-layout',
@@ -13,7 +14,8 @@ import { SidebarComponent } from "../sidebar/sidebar.component";
     LoaderComponent,
     SnackbarComponent,
     HeaderComponent,
-    SidebarComponent
+    SidebarComponent,
+    FooterComponent
 ],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss']

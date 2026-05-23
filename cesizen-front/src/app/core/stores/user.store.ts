@@ -4,7 +4,12 @@ export interface User {
   userId: string;
   email: string;
   pseudo: string;
-  role: string;
+  userCreatedAt: string;
+  active: boolean;
+  role: {
+    roleId: string;
+    roleName: string;
+  };
 }
 
 @Injectable({
