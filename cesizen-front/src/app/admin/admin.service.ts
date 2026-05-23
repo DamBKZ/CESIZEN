@@ -5,6 +5,7 @@ import { AdminDiagnostic } from './models/diagnostic-admin.model';
 import { AdminInformation } from './models/information-admin.model';
 import { AdminLog } from './models/log-admin.model';
 import { AdminUser } from './models/user-admin.model';
+import { AdminStats } from './models/stats-admin.model';
 
 @Injectable({
   providedIn: 'root'
@@ -14,8 +15,8 @@ export class AdminService {
   private http = inject(HttpClient);
   private baseUrl = '/api/admin';
 
-  getStats(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/stats`);
+  getStats(){
+    return this.http.get<AdminStats>(`${this.baseUrl}/stats`);
   }
 
   getAllUsers() {
