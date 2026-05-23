@@ -1,5 +1,4 @@
 import { Component, computed, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserStore } from '../../../core/stores/user.store';
 
