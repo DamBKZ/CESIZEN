@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProfileService } from '../profile.service';
+import { ProfileService } from '../../core/services/profile.service';
 import { UserStore } from '../../core/stores/user.store';
 
 @Component({

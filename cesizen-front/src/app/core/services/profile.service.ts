@@ -17,4 +17,9 @@ export class ProfileService {
   return this.http.get<any[]>(`/api/diagnostic/history/${userId}`);
 }
 
+deleteAccount(userId: string) {
+  return this.http.delete(`/api/users/${userId}`);
+}
+
+
 }

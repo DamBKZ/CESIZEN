@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { ProfileService } from '../profile.service';
+import { ProfileService } from '../../core/services/profile.service';
 import { UiStore } from '../../core/stores/ui.store';
 
 @Component({

@@ -29,4 +29,7 @@ public interface UserService {
     void activate(String userId);
 
     void delete(String userId);
+
+    void deleteUser(String userId);
+
 }

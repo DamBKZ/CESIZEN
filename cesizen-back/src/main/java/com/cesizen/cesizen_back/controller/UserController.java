@@ -5,13 +5,17 @@ import com.cesizen.cesizen_back.dto.user.RegisterRequest;
 import com.cesizen.cesizen_back.dto.user.UpdateUserRequest;
 import com.cesizen.cesizen_back.dto.user.UserResponse;
 import com.cesizen.cesizen_back.entity.User;
+import com.cesizen.cesizen_back.service.EmailService;
 import com.cesizen.cesizen_back.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 
 import java.util.Map;
 
@@ -21,6 +25,9 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
+    
 
     // -------------------------------------------------------------------------
     // REGISTER
@@ -88,6 +95,27 @@ public class UserController {
 
         return ResponseEntity.ok(Map.of("message", "Mot de passe mis à jour."));
     }
+
+@DeleteMapping("/me")
+public ResponseEntity<?> deleteMyAccount(
+        @AuthenticationPrincipal User user,
+        @RequestBody Map<String, String> body) {
+
+    String password = body.get("password");
+
+    if (!passwordEncoder.matches(password, user.getPassword())) {
+        return ResponseEntity.status(403).body(Map.of("error", "Mot de passe incorrect"));
+    }
+
+    userService.deleteUser(user.getUserId());
+
+    emailService.sendAccountDeletionEmail(user.getEmail(), user.getPseudo());
+
+    return ResponseEntity.noContent().build();
+}
+
+
+
 
     // -------------------------------------------------------------------------
     // HELPERS PRIVÉS
