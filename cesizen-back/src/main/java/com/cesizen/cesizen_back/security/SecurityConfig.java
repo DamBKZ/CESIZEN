@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/users/register").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/users/me").authenticated()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

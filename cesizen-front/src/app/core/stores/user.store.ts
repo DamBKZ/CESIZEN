@@ -49,4 +49,12 @@ export class UserStore {
   setUser(user: User): void {
     this._user.set(user);
   }
+
+clear() {
+  this._user.set(null);
+  this._token.set(null);
+  localStorage.removeItem('access_token');
+}
+
+
 }
