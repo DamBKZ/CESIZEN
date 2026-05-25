@@ -4,7 +4,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { AdminService } from '../admin.service';
 import { AdminStats } from '../models/stats-admin.model';
-import { AdminChartComponent } from "../admin-chart/admin-chart.component";
 
 @Component({
   selector: 'app-dashboard',
@@ -12,9 +11,8 @@ import { AdminChartComponent } from "../admin-chart/admin-chart.component";
   imports: [
     CommonModule,
     MatCardModule,
-    MatIconModule,
-    AdminChartComponent
-],
+    MatIconModule
+  ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })

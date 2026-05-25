@@ -1,18 +1,14 @@
 <h1 class="title">Dashboard Administrateur</h1>
 
 <div class="kpi-grid">
-    <mat-card class="kpi-card" *ngFor="let s of stats">
-        <mat-icon>{{ s.icon }}</mat-icon>
+    @for (s of stats; track s.key) {
+    <mat-card class="kpi-card">
+        <mat-icon class="kpi-icon">{{ s.icon }}</mat-icon>
+
         <div class="kpi-content">
             <span class="kpi-value">{{ s.value }}</span>
             <span class="kpi-label">{{ s.label }}</span>
         </div>
     </mat-card>
+    }
 </div>
-
-<mat-card class="chart-card">
-    <mat-card-title>Activité des diagnostics</mat-card-title>
-    <mat-card-content>
-        <app-admin-chart></app-admin-chart>
-    </mat-card-content>
-</mat-card>

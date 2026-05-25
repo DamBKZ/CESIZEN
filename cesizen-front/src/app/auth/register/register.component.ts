@@ -21,8 +21,13 @@ export class RegisterComponent {
     confirmPassword: ['', Validators.required]
   });
 
+  get passwordsDontMatch(): boolean {
+    const { password, confirmPassword } = this.form.value;
+    return password && confirmPassword && password !== confirmPassword;
+  }
+
   submit(): void {
-    if (this.form.invalid || this.form.value.password !== this.form.value.confirmPassword) {
+    if (this.form.invalid || this.passwordsDontMatch) {
       this.form.markAllAsTouched();
       return;
     }

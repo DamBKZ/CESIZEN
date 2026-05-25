@@ -19,7 +19,7 @@ export const RoleGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  if (expectedRoles.includes(user.role)) {
+  if (expectedRoles.includes(user.role.roleName)) {
     return true;
   }
 

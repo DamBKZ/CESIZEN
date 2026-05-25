@@ -16,21 +16,18 @@
         }
     </div>
 
-    <!-- ARTICLE -->
     @if (info().type === 'ARTICLE') {
     <div class="article-content">
         {{ info().content }}
     </div>
     }
 
-    <!-- VIDEO -->
     @if (info().type === 'VIDEO') {
     <div class="video-wrapper">
         <iframe [src]="getEmbedUrl(info().videoUrl)" frameborder="0" allowfullscreen></iframe>
     </div>
     }
 
-    <!-- PDF -->
     @if (info().type === 'PDF') {
     <div class="pdf-wrapper">
         <a [href]="info().pdfUrl" target="_blank" class="pdf-link">

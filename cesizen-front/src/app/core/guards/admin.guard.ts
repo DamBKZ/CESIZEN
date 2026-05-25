@@ -13,7 +13,7 @@ export const adminGuard: CanActivateFn = () => {
   }
 
   // 2) Vérifie le rôle ADMIN
-  if (userStore.role() !== 'ADMIN') {
+  if (userStore.role()?.roleName !== 'ADMIN') {
     router.navigate(['/forbidden']);
     return false;
   }

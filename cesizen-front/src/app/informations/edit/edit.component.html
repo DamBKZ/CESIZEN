@@ -2,21 +2,16 @@
 
     <h1>Modifier une information</h1>
 
-    <!-- AUTEUR -->
     <input placeholder="Auteur" [ngModel]="form().author" (ngModelChange)="form().author = $event" />
 
-    <!-- SLUG -->
     <input placeholder="Slug" [ngModel]="form().slug" (ngModelChange)="form().slug = $event" />
 
-    <!-- TAGS -->
     <input placeholder="Tags (séparés par des virgules)" [ngModel]="form().tags?.join(', ')"
         (ngModelChange)="form().tags = $event.split(',').map(t => t.trim())" />
 
-    <!-- CATEGORY ID -->
     <input placeholder="ID de la catégorie" [ngModel]="form().categoryId"
         (ngModelChange)="form().categoryId = $event" />
 
-    <!-- TYPE -->
     <label>Type</label>
     <select [ngModel]="type()" (ngModelChange)="type.set($event)">
         <option value="ARTICLE">Article</option>
@@ -24,14 +19,12 @@
         <option value="PDF">PDF</option>
     </select>
 
-    <!-- ARTICLE -->
     @if (type() === 'ARTICLE') {
     <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" />
 
     <textarea placeholder="Contenu" [ngModel]="form().content" (ngModelChange)="form().content = $event"></textarea>
     }
 
-    <!-- VIDEO -->
     @if (type() === 'VIDEO') {
     <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" />
 
@@ -44,7 +37,6 @@
     }
     }
 
-    <!-- PDF -->
     @if (type() === 'PDF') {
     <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" />
 

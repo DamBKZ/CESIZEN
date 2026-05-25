@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { routes } from '../app.routes';
+import { APP_ROUTES } from '../app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 // Interceptors
@@ -13,7 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
 
     // Routing principal
-    provideRouter(routes),
+    provideRouter(APP_ROUTES),
 
     // HttpClient + interceptors
     provideHttpClient(

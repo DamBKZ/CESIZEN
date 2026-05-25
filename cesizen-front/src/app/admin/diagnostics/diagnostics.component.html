@@ -1,47 +1,40 @@
-<h1 class="title">Diagnostics réalisés</h1>
+<h1 class="title">Gestion des diagnostics</h1>
 
 <table mat-table [dataSource]="diagnostics" class="mat-elevation-z2">
 
-    <!-- Utilisateur -->
     <ng-container matColumnDef="user">
         <th mat-header-cell *matHeaderCellDef>Utilisateur</th>
-        <td mat-cell *matCellDef="let d">
-            {{ d.user?.firstname }} {{ d.user?.lastname }}
-        </td>
+        <td mat-cell *matCellDef="let d">{{ d.userEmail }}</td>
     </ng-container>
 
-    <!-- Score -->
     <ng-container matColumnDef="score">
         <th mat-header-cell *matHeaderCellDef>Score</th>
         <td mat-cell *matCellDef="let d">{{ d.score }}</td>
     </ng-container>
 
-    <!-- Risk -->
     <ng-container matColumnDef="risk">
         <th mat-header-cell *matHeaderCellDef>Risque</th>
         <td mat-cell *matCellDef="let d">
-            <span [class.low]="d.riskLevel === 'LOW'" [class.medium]="d.riskLevel === 'MEDIUM'"
-                [class.high]="d.riskLevel === 'HIGH'">
+            <span class="risk" [class.low]="d.riskLevel === 'Faible'" [class.medium]="d.riskLevel === 'Moyen'"
+                [class.high]="d.riskLevel === 'Élevé'">
                 {{ d.riskLevel }}
             </span>
         </td>
     </ng-container>
 
-    <!-- Date -->
     <ng-container matColumnDef="date">
         <th mat-header-cell *matHeaderCellDef>Date</th>
-        <td mat-cell *matCellDef="let d">{{ d.createdAt | date:'dd/MM/yyyy' }}</td>
+        <td mat-cell *matCellDef="let d">
+            {{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        </td>
     </ng-container>
 
-    <!-- Actions -->
     <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let d">
-
             <button mat-icon-button color="warn" (click)="delete(d.id)">
                 <mat-icon>delete</mat-icon>
             </button>
-
         </td>
     </ng-container>
 

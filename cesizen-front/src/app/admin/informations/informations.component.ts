@@ -32,8 +32,9 @@ export class InformationsComponent implements OnInit {
   }
 
   loadInformations(): void {
-    this.adminService.getAllInformations().subscribe(data => {
-      this.informations = data;
+    this.adminService.getAllInformations().subscribe({
+      next: data => this.informations = data,
+      error: err => console.error('Erreur chargement informations', err)
     });
   }
 
