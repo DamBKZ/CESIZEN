@@ -16,7 +16,7 @@
             Informations
         </a>
 
-        @if (role() === 'ADMIN') {
+        @if (role()?.roleName === 'ADMIN') {
         <a routerLink="/admin" routerLinkActive="active">
             Administration
         </a>

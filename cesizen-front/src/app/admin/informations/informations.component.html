@@ -2,31 +2,35 @@
 
 <table mat-table [dataSource]="informations" class="mat-elevation-z2">
 
-    <!-- Titre -->
     <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef>Titre</th>
         <td mat-cell *matCellDef="let i">{{ i.title }}</td>
     </ng-container>
 
-    <!-- Type -->
     <ng-container matColumnDef="type">
         <th mat-header-cell *matHeaderCellDef>Type</th>
-        <td mat-cell *matCellDef="let i">{{ i.type }}</td>
+        <td mat-cell *matCellDef="let i">
+            <span class="badge type" [class.article]="i.type === 'ARTICLE'" [class.video]="i.type === 'VIDEO'"
+                [class.pdf]="i.type === 'PDF'">
+                {{ i.type }}
+            </span>
+        </td>
     </ng-container>
 
-    <!-- Catégorie -->
     <ng-container matColumnDef="category">
         <th mat-header-cell *matHeaderCellDef>Catégorie</th>
-        <td mat-cell *matCellDef="let i">{{ i.category?.name }}</td>
+        <td mat-cell *matCellDef="let i">
+            <span class="badge category">{{ i.categoryName }}</span>
+        </td>
     </ng-container>
 
-    <!-- Date -->
     <ng-container matColumnDef="createdAt">
-        <th mat-header-cell *matHeaderCellDef>Date</th>
-        <td mat-cell *matCellDef="let i">{{ i.createdAt | date:'dd/MM/yyyy' }}</td>
+        <th mat-header-cell *matHeaderCellDef>Créé le</th>
+        <td mat-cell *matCellDef="let i">
+            {{ i.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        </td>
     </ng-container>
 
-    <!-- Actions -->
     <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let i">

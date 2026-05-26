@@ -6,14 +6,24 @@
 
 table {
   width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.active {
+.status {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status.active {
+  background: #c8e6c9;
   color: #2e7d32;
-  font-weight: 600;
 }
 
-.inactive {
+.status.inactive {
+  background: #ffcdd2;
   color: #c62828;
-  font-weight: 600;
 }

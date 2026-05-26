@@ -6,19 +6,29 @@
 
 table {
   width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.low {
+.risk {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.risk.low {
+  background: #c8e6c9;
   color: #2e7d32;
-  font-weight: 600;
 }
 
-.medium {
+.risk.medium {
+  background: #fff9c4;
   color: #f9a825;
-  font-weight: 600;
 }
 
-.high {
+.risk.high {
+  background: #ffcdd2;
   color: #c62828;
-  font-weight: 600;
 }

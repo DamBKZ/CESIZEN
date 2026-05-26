@@ -30,8 +30,9 @@ export class DiagnosticsComponent implements OnInit {
   }
 
   loadDiagnostics(): void {
-    this.adminService.getAllDiagnostics().subscribe(data => {
-      this.diagnostics = data;
+    this.adminService.getAllDiagnostics().subscribe({
+      next: data => this.diagnostics = data,
+      error: err => console.error('Erreur chargement diagnostics', err)
     });
   }
 

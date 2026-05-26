@@ -30,8 +30,9 @@ export class LogsComponent implements OnInit {
   }
 
   loadLogs(): void {
-    this.adminService.getAllLogs().subscribe(data => {
-      this.logs = data;
+    this.adminService.getAllLogs().subscribe({
+      next: data => this.logs = data,
+      error: err => console.error('Erreur chargement logs', err)
     });
   }
 

@@ -2,25 +2,20 @@
 
 <table mat-table [dataSource]="logs" class="mat-elevation-z2">
 
-    <!-- Utilisateur -->
     <ng-container matColumnDef="user">
         <th mat-header-cell *matHeaderCellDef>Utilisateur</th>
         <td mat-cell *matCellDef="let l">
-            @if (l.user) {
-            {{ l.user.pseudo }}
-            } @else {
-            <span>Système</span>
-            }
+            <span class="badge user" [class.system]="!l.user">
+                {{ l.user ? (l.user.firstname + ' ' + l.user.lastname) : 'Système' }}
+            </span>
         </td>
     </ng-container>
 
-    <!-- Contenu -->
     <ng-container matColumnDef="content">
         <th mat-header-cell *matHeaderCellDef>Contenu</th>
         <td mat-cell *matCellDef="let l">{{ l.content }}</td>
     </ng-container>
 
-    <!-- Date -->
     <ng-container matColumnDef="date">
         <th mat-header-cell *matHeaderCellDef>Date</th>
         <td mat-cell *matCellDef="let l">
@@ -28,7 +23,6 @@
         </td>
     </ng-container>
 
-    <!-- Actions -->
     <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let l">

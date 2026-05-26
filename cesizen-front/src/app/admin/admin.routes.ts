@@ -28,10 +28,10 @@ export const ADMIN_ROUTES: Routes = [
           import('./diagnostics/diagnostics.component').then(m => m.DiagnosticsComponent)
       },
       {
-  path: 'logs',
-  loadComponent: () =>
-    import('./logs/logs.component').then(m => m.LogsComponent)
-},
+        path: 'logs',
+        loadComponent: () =>
+          import('./logs/logs.component').then(m => m.LogsComponent)
+      },
       {
         path: '',
         redirectTo: 'dashboard',
