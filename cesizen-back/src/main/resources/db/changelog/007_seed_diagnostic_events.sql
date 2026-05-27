@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset damien:005_insert_diagnostic_events
+-- changeset damien:007_seed_diagnostic_events
 
 INSERT INTO diagnosticEvent (eventID, eventLabel, eventLCU) VALUES
 (UUID(), 'Décès du conjoint', 100),
