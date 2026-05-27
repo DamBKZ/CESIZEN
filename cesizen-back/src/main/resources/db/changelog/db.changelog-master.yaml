@@ -3,16 +3,19 @@ databaseChangeLog:
       file: db/changelog/001_init_schema.sql
 
   - include:
-      file: db/changelog/002_create_role_table_and_update_app_user.sql
+      file: db/changelog/002_relations.sql
 
   - include:
-      file: db/changelog/003_update_schema.sql
+      file: db/changelog/003_diagnostic.sql
 
   - include:
-      file: db/changelog/004_update_diagnostic_schema.sql
+      file: db/changelog/004_auth.sql
 
   - include:
-      file: db/changelog/005_insert_diagnostic_events.sql
+      file: db/changelog/005_information_content.sql
 
   - include:
-      file: db/changelog/006_update_information_schema.sql
+      file: db/changelog/006_seed_roles.sql
+
+  - include:
+      file: db/changelog/007_seed_diagnostic_events.sql

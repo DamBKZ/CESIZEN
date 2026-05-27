@@ -3,22 +3,18 @@ package com.cesizen.cesizen_back.mapper;
 import com.cesizen.cesizen_back.dto.user.CategoryRequest;
 import com.cesizen.cesizen_back.dto.user.CategoryResponse;
 import com.cesizen.cesizen_back.entity.Category;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
-@Component
-public class categoryMapper {
+@Mapper(componentModel = "spring")
+public interface CategoryMapper {
 
-    public CategoryResponse toResponse(Category c) {
-        return CategoryResponse.builder()
-                .categoryId(c.getCategoryId())
-                .name(c.getName())
-                .description(c.getDescription())
-                .createdAt(c.getCreatedAt().toString())
-                .build();
-    }
+    // Convertit un DTO → entité
+    Category toEntity(CategoryRequest request);
 
-    public void updateEntity(Category c, CategoryRequest req) {
-        c.setName(req.getName());
-        c.setDescription(req.getDescription());
-    }
+    // Convertit une entité → DTO
+    CategoryResponse toResponse(Category category);
+
+    // Met à jour une entité existante
+    void updateEntity(@MappingTarget Category category, CategoryRequest request);
 }
