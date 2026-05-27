@@ -1,13 +1,18 @@
 databaseChangeLog:
   - include:
       file: db/changelog/001_init_schema.sql
+
   - include:
       file: db/changelog/002_create_role_table_and_update_app_user.sql
+
   - include:
       file: db/changelog/003_update_schema.sql
+
   - include:
       file: db/changelog/004_update_diagnostic_schema.sql
+
   - include:
       file: db/changelog/005_insert_diagnostic_events.sql
+
   - include:
       file: db/changelog/006_update_information_schema.sql
