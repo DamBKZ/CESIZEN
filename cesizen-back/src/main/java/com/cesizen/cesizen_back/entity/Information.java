@@ -17,7 +17,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "informationType")
 public abstract class Information {
 
     @Id
@@ -50,5 +49,19 @@ public abstract class Information {
     @Column(name = "informationSlug", nullable = false, unique = true, length = 200)
     private String slug;
 
-    public abstract InformationType getType();
+    @Enumerated(EnumType.STRING)
+    @Column(name = "informationType", nullable = false)
+    private InformationType type;
+
+    public Information(String title,
+                       String author,
+                       String slug,
+                       List<String> tags,
+                       Category category) {
+        this.title = title;
+        this.author = author;
+        this.slug = slug;
+        this.tags = tags;
+        this.category = category;
+    }
 }

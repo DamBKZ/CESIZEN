@@ -1,9 +1,11 @@
 package com.cesizen.cesizen_back.entity;
 
-import java.util.List;
-
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @DiscriminatorValue("ARTICLE")
@@ -15,15 +17,14 @@ public class InformationArticle extends Information {
     @Column(name = "informationContent", columnDefinition = "TEXT")
     private String content;
 
-    @Override
-    public InformationType getType() {
-        return InformationType.ARTICLE;
-    }
-
-    public InformationArticle(String title, String author, String slug, List<String> tags,
-                              Category category, String content) {
-        super(null, title, category, null, author, tags, slug);
+    public InformationArticle(String title,
+                              String author,
+                              String slug,
+                              List<String> tags,
+                              Category category,
+                              String content) {
+        super(title, author, slug, tags, category);
         this.content = content;
+        this.setType(InformationType.ARTICLE);
     }
 }
-

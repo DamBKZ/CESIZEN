@@ -10,8 +10,8 @@ CREATE TABLE refreshToken (
     refreshTokenEndDate TIMESTAMP NOT NULL,
     PRIMARY KEY (refreshTokenID),
     UNIQUE KEY uq_refreshToken_value (refreshTokenValue),
-    FOREIGN KEY (userID) REFERENCES user(userID) ON DELETE CASCADE
-);
+    FOREIGN KEY (userID) REFERENCES users(userID) ON DELETE CASCADE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE resetPasswordToken (
     resetPasswordTokenID CHAR(36) NOT NULL DEFAULT (UUID()),
@@ -22,5 +22,5 @@ CREATE TABLE resetPasswordToken (
     used BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (resetPasswordTokenID),
     UNIQUE KEY uq_resetPasswordToken_value (resetPasswordTokenValue),
-    FOREIGN KEY (userID) REFERENCES user(userID) ON DELETE CASCADE
-);
+    FOREIGN KEY (userID) REFERENCES users(userID) ON DELETE CASCADE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

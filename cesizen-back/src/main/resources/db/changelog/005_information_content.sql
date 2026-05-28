@@ -7,7 +7,7 @@ CREATE TABLE informationVideo (
     infoVideoURL VARCHAR(255) NOT NULL,
     PRIMARY KEY (infoID),
     FOREIGN KEY (infoID) REFERENCES information(infoID) ON DELETE CASCADE
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE informationPdf (
     infoID CHAR(36) NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE informationPdf (
     infoPdfURL VARCHAR(255) NOT NULL,
     PRIMARY KEY (infoID),
     FOREIGN KEY (infoID) REFERENCES information(infoID) ON DELETE CASCADE
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE informationArticle (
     infoID CHAR(36) NOT NULL,
@@ -23,10 +23,10 @@ CREATE TABLE informationArticle (
     infoArticleContent TEXT NOT NULL,
     PRIMARY KEY (infoID),
     FOREIGN KEY (infoID) REFERENCES information(infoID) ON DELETE CASCADE
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE information_tags (
     informationID CHAR(36) NOT NULL,
     tag VARCHAR(50) NOT NULL,
     FOREIGN KEY (informationID) REFERENCES information(infoID) ON DELETE CASCADE
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

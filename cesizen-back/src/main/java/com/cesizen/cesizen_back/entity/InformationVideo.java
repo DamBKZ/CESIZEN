@@ -1,9 +1,11 @@
 package com.cesizen.cesizen_back.entity;
 
-import java.util.List;
-
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @DiscriminatorValue("VIDEO")
@@ -12,18 +14,17 @@ import lombok.*;
 @NoArgsConstructor
 public class InformationVideo extends Information {
 
-    @Column(name = "informationVideoUrl", length = 500)
+    @Column(name = "informationVideoURL", nullable = false, length = 255)
     private String videoUrl;
 
-    @Override
-    public InformationType getType() {
-        return InformationType.VIDEO;
-    }
-
-    public InformationVideo(String title, String author, String slug, List<String> tags,
-                            Category category, String videoUrl) {
-        super(null, title, category, null, author, tags, slug);
+    public InformationVideo(String title,
+                            String author,
+                            String slug,
+                            List<String> tags,
+                            Category category,
+                            String videoUrl) {
+        super(title, author, slug, tags, category);
         this.videoUrl = videoUrl;
+        this.setType(InformationType.VIDEO);
     }
 }
-

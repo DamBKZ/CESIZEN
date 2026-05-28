@@ -1,9 +1,11 @@
 package com.cesizen.cesizen_back.entity;
 
-import java.util.List;
-
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @DiscriminatorValue("PDF")
@@ -12,18 +14,17 @@ import lombok.*;
 @NoArgsConstructor
 public class InformationPdf extends Information {
 
-    @Column(name = "informationPdfUrl", length = 500)
+    @Column(name = "informationPdfURL", nullable = false, length = 255)
     private String pdfUrl;
 
-    @Override
-    public InformationType getType() {
-        return InformationType.PDF;
-    }
-
-    public InformationPdf(String title, String author, String slug, List<String> tags,
-                          Category category, String pdfUrl) {
-        super(null, title, category, null, author, tags, slug);
+    public InformationPdf(String title,
+                          String author,
+                          String slug,
+                          List<String> tags,
+                          Category category,
+                          String pdfUrl) {
+        super(title, author, slug, tags, category);
         this.pdfUrl = pdfUrl;
+        this.setType(InformationType.PDF);
     }
 }
-

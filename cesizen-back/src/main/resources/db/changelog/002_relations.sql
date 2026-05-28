@@ -2,11 +2,11 @@
 -- changeset damien:002_relations
 
 -- user role
-ALTER TABLE user
+ALTER TABLE users
 ADD COLUMN roleID INT NOT NULL;
 
-ALTER TABLE user
-ADD CONSTRAINT fk_user_role
+ALTER TABLE users
+ADD CONSTRAINT fk_users_role
 FOREIGN KEY (roleID)
 REFERENCES role(roleID)
 ON DELETE RESTRICT
