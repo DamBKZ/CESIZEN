@@ -15,7 +15,7 @@ public class RegisterRequest {
     private String email;
 
     @NotBlank(message = "Le mot de passe est obligatoire.")
-    @Size(min = 12, message = "Le mot de passe doit contenir au moins 12 caractères.")
+    @Size(min = 10, message = "Le mot de passe doit contenir au moins 10 caractères.")
     private String password;
 
     @NotBlank(message = "Le pseudo est obligatoire.")

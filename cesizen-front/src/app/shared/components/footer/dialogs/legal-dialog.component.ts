@@ -1,16 +1,24 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-legal-dialog',
   standalone: true,
   templateUrl: './legal-dialog.component.html',
   styleUrls: ['./legal-dialog.component.scss'],
-  imports: [MatDialogContent, MatDialogActions]
+  imports: [MatDialogContent, MatDialogActions, MatButtonModule]
 })
 export class LegalDialogComponent {
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { type: string }) {}
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: { type: string },
+    private readonly dialogRef: MatDialogRef<LegalDialogComponent>
+  ) {}
+
+  close(): void {
+    this.dialogRef.close();
+  }
 
   get title() {
     switch (this.data.type) {

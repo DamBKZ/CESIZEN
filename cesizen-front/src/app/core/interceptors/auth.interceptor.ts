@@ -1,14 +1,15 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { UserStore } from '../stores/user.store';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('access_token');
+  const userStore = inject(UserStore);
+  const token = userStore.token();
 
-  // Si pas de token → on laisse passer la requête telle quelle
   if (!token) {
     return next(req);
   }
 
-  // Clone de la requête avec le header Authorization
   const authReq = req.clone({
     setHeaders: {
       Authorization: `Bearer ${token}`

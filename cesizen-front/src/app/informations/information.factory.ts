@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { getInformationCategoryLabel } from './information.categories';
 
 @Injectable({ providedIn: 'root' })
 export class InformationFactory {
@@ -6,11 +7,12 @@ export class InformationFactory {
   create(type: string, data: any) {
     const base = {
       type,
-      title: data.title,
-      author: data.author,
-      slug: data.slug,
+      title: data.title?.trim(),
+      author: data.author?.trim(),
+      slug: data.slug?.trim(),
       tags: data.tags ?? [],
-      categoryId: data.categoryId
+      categoryId: data.categoryId?.trim(),
+      categoryName: getInformationCategoryLabel(data.categoryId?.trim())
     };
 
     switch (type) {

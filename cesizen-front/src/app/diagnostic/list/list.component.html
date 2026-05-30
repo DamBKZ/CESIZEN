@@ -1,23 +1,27 @@
 <div class="list-container">
 
-    <h1>Événements de vie</h1>
-    <p class="subtitle">Sélectionnez les événements qui vous concernent.</p>
+    <p class="eyebrow">Questionnaire de stress</p>
+    <h1>Évaluez votre niveau de stress en quelques clics</h1>
+    <p class="subtitle">Le questionnaire reprend les événements de vie déjà définis côté diagnostic. Cochez ce qui vous
+        correspond pour obtenir votre score total.</p>
 
-    @if (events().length === 0) {
-    <p class="loading">Chargement...</p>
-    }
+    <div class="hero-card">
+        <div>
+            <p class="hero-label">Format</p>
+            <strong>Questions à cocher</strong>
+        </div>
+        <div>
+            <p class="hero-label">Résultat</p>
+            <strong>Score total + niveau de risque</strong>
+        </div>
+        <div>
+            <p class="hero-label">Source</p>
+            <strong>Diagnostic events</strong>
+        </div>
+    </div>
 
-    <ul class="event-list">
-        @for (event of events(); track event.id) {
-        <li class="event-item" [ngClass]="{ selected: selected().has(event.id) }" (click)="toggleEvent(event.id)">
-            <span>{{ event.label }}</span>
-            <span class="score">+{{ event.score }}</span>
-        </li>
-        }
-    </ul>
-
-    <button class="btn-primary" (click)="startDiagnostic()">
-        Commencer le diagnostic
+    <button class="btn-primary" type="button" (click)="startDiagnostic()">
+        Commencer le questionnaire
     </button>
 
 </div>

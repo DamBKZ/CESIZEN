@@ -27,10 +27,6 @@ public class RoleServiceImpl implements RoleService {
         return findByName(RoleName.ADMIN);
     }
 
-    // -------------------------------------------------------------------------
-    // PRIVÉ
-    // -------------------------------------------------------------------------
-
     private Role findByName(RoleName roleName) {
         return roleRepository.findByRoleName(roleName.name())
                 .orElseThrow(() -> new IllegalStateException(

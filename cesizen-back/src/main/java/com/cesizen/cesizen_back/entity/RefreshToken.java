@@ -45,14 +45,6 @@ public class RefreshToken {
     @Column(nullable = false)
     @Builder.Default
     private boolean revoked = false;
-
-    // -------------------------------------------------------------------------
-    // HELPERS
-    // -------------------------------------------------------------------------
-
-    /**
-     * Indique si le token est encore utilisable (non révoqué et non expiré).
-     */
     public boolean isValid() {
         return !revoked && refreshTokenEndDate.isAfter(LocalDateTime.now());
     }

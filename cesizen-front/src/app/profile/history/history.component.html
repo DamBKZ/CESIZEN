@@ -1,5 +1,9 @@
 <h1>Historique de mes diagnostics</h1>
 
+<button class="back-btn" type="button" (click)="backToProfile()">
+    Revenir à mon profil
+</button>
+
 @if (history.length === 0) {
 <div>
     Aucun diagnostic pour le moment.

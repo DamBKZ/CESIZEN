@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { InformationService } from '../information.service';
 import { FormsModule } from '@angular/forms';
 import { UiStore } from '../../core/stores/ui.store';
+import { INFORMATION_CATEGORIES } from '../information.categories';
 
 @Component({
   selector: 'app-information-edit',
@@ -17,7 +18,9 @@ export class EditComponent {
   private readonly router = inject(Router);
   private readonly ui = inject(UiStore);
 
-  id = Number(this.route.snapshot.paramMap.get('id'));
+  categories = INFORMATION_CATEGORIES;
+
+  slug = this.route.snapshot.paramMap.get('slug') ?? '';
 
   type = signal<'ARTICLE' | 'VIDEO' | 'PDF'>('ARTICLE');
 
@@ -33,8 +36,9 @@ export class EditComponent {
   });
 
   constructor() {
-    this.service.getById(this.id).subscribe({
+    this.service.getById(this.slug).subscribe({
       next: (res: any) => {
+        if (!res) return;
         this.type.set(res.type);
         this.form.set({
           author: res.author,
@@ -66,13 +70,45 @@ export class EditComponent {
     return url;
   }
 
+  goBack(): void {
+    this.router.navigate(['/information/list']);
+  }
+
+  isFormValid(): boolean {
+    const current = this.form();
+    const tags = (current.tags ?? []).map((tag: string) => tag.trim()).filter(Boolean);
+
+    if (!current.author?.trim() || !current.slug?.trim() || !current.categoryId?.trim() || tags.length === 0) {
+      return false;
+    }
+
+    if (!current.title?.trim()) {
+      return false;
+    }
+
+    if (this.type() === 'ARTICLE') {
+      return Boolean(current.content?.trim());
+    }
+
+    if (this.type() === 'VIDEO') {
+      return Boolean(current.videoUrl?.trim());
+    }
+
+    return Boolean(current.pdfUrl?.trim());
+  }
+
   submit() {
+    if (!this.isFormValid()) {
+      this.ui.showSnackbar('Tous les champs sont obligatoires', 'error');
+      return;
+    }
+
     this.ui.setLoading(true);
 
-    this.service.update(this.id, this.form()).subscribe({
+    this.service.update(this.slug, this.form()).subscribe({
       next: () => {
         this.ui.showSnackbar('Information mise à jour', 'success');
-        this.router.navigate(['/information/list']);
+        this.router.navigate(['/informations/list']);
       },
       error: () => this.ui.showSnackbar('Erreur lors de la mise à jour', 'error'),
       complete: () => this.ui.setLoading(false)

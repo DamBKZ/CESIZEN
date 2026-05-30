@@ -1,13 +1,16 @@
 @if (info()) {
 <div class="details-container">
 
+    <button class="back-btn" type="button" (click)="goBack()">
+        Revenir à la liste des informations
+    </button>
+
     <h1>{{ info().title }}</h1>
 
     <p class="meta">
         <strong>Auteur :</strong> {{ info().author }} <br>
-        <strong>Slug :</strong> {{ info().slug }} <br>
         <strong>Catégorie :</strong> {{ info().categoryName }} <br>
-        <strong>Créé le :</strong> {{ info().createdAt }}
+        <strong>Créé le :</strong> {{ info().createdAt | date:'dd-MM-yyyy' }}
     </p>
 
     <div class="tags">
@@ -24,7 +27,7 @@
 
     @if (info().type === 'VIDEO') {
     <div class="video-wrapper">
-        <iframe [src]="getEmbedUrl(info().videoUrl)" frameborder="0" allowfullscreen></iframe>
+        <iframe [src]="getEmbedUrl(info().videoUrl)" [title]="info().title" frameborder="0" allowfullscreen></iframe>
     </div>
     }
 

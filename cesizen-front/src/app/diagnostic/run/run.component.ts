@@ -1,65 +1,100 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { DiagnosticService } from '../diagnostic.service';
 import { UiStore } from '../../core/stores/ui.store';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-run',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './run.component.html',
   styleUrls: ['./run.component.scss']
 })
-export class RunComponent {
+export class RunComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly diagnosticService = inject(DiagnosticService);
   private readonly ui = inject(UiStore);
 
-  selectedEvents = signal<any[]>([]);
+  events = signal<any[]>([]);
+  selectedEvents = signal<Set<string>>(new Set());
   totalScore = signal(0);
+  riskLevel = signal<'Faible' | 'Modéré' | 'Élevé'>('Faible');
+  loadingEvents = signal(true);
 
-  constructor() {
-    const state = history.state;
-
-    if (!state || !state.selectedEvents) {
-      this.ui.showSnackbar('Aucun événement sélectionné', 'info');
-      this.router.navigate(['/diagnostic/list']);
-      return;
-    }
-
-    this.loadSelectedEvents(state.selectedEvents);
+  ngOnInit(): void {
+    this.loadEvents();
   }
 
-  loadSelectedEvents(ids: number[]): void {
+  normalizeId(eventId: string | number): string {
+    return String(eventId);
+  }
+
+  loadEvents(): void {
     this.ui.setLoading(true);
 
     this.diagnosticService.getEvents().subscribe({
       next: (events: any) => {
-        const filtered = events.filter((e: any) => ids.includes(e.id));
-        this.selectedEvents.set(filtered);
+        this.events.set(events);
+        this.loadingEvents.set(false);
         this.computeScore();
       },
       error: () => {
-        this.ui.showSnackbar('Erreur lors du chargement', 'error');
+        this.loadingEvents.set(false);
+        this.ui.showSnackbar('Erreur lors du chargement du questionnaire', 'error');
       },
       complete: () => this.ui.setLoading(false)
     });
   }
 
+  toggleEvent(eventId: string | number): void {
+    const normalizedId = String(eventId);
+    const nextSelection = new Set(this.selectedEvents());
+
+    if (nextSelection.has(normalizedId)) {
+      nextSelection.delete(normalizedId);
+    } else {
+      nextSelection.add(normalizedId);
+    }
+
+    this.selectedEvents.set(nextSelection);
+    this.computeScore();
+  }
+
   computeScore(): void {
-    const score = this.selectedEvents().reduce((sum, e) => sum + e.score, 0);
+    const selectedIds = this.selectedEvents();
+    const score = this.events()
+      .filter((event: any) => selectedIds.has(this.normalizeId(event.eventId)))
+      .reduce((sum: number, event: any) => sum + Number(event.lcu ?? 0), 0);
+
     this.totalScore.set(score);
+    this.riskLevel.set(this.computeRiskLevel(score));
+  }
+
+  computeRiskLevel(score: number): 'Faible' | 'Modéré' | 'Élevé' {
+    if (score < 150) {
+      return 'Faible';
+    }
+
+    if (score < 300) {
+      return 'Modéré';
+    }
+
+    return 'Élevé';
+  }
+
+  canSubmit(): boolean {
+    return this.selectedEvents().size > 0;
   }
 
   submit(): void {
-    const payload = {
-      events: this.selectedEvents().map(e => e.id),
-      score: this.totalScore()
-    };
-
-    this.diagnosticService.submitDiagnostic(payload);
+    if (!this.canSubmit()) {
+      this.ui.showSnackbar('Sélectionnez au moins un événement pour valider le diagnostic', 'error');
+      return;
+    }
 
     this.router.navigate(['/diagnostic/result'], {
-      state: { score: this.totalScore() }
+      state: { score: this.totalScore(), riskLevel: this.riskLevel() }
     });
   }
 }

@@ -8,11 +8,33 @@
         <p class="value">{{ score() }}</p>
     </div>
 
+    <div class="risk-box" [class.risk-box--low]="riskBoxClass() === 'risk-box--low'"
+        [class.risk-box--medium]="riskBoxClass() === 'risk-box--medium'"
+        [class.risk-box--high]="riskBoxClass() === 'risk-box--high'">
+        <p class="label">Niveau de risque :</p>
+        <p class="value">{{ riskEmoji() }} {{ riskLevel() }}</p>
+    </div>
+
     <p class="interpretation">
         {{ interpretation() }}
     </p>
 
-    <button class="btn-primary" (click)="restart()">
+    @if (adviceItems().length > 0) {
+    <div class="advice-card">
+        <h2>Conseils</h2>
+        <ul>
+            @for (advice of adviceItems(); track advice) {
+            <li>{{ advice }}</li>
+            }
+        </ul>
+        @if (riskLevel() === 'Élevé') {
+        <p class="urgent-note"><strong>En cas de stress élevé, il est conseillé de voir son médecin traitant ou un
+                centre médico-psychologique.</strong></p>
+        }
+    </div>
+    }
+
+    <button class="btn-primary" type="button" (click)="restart()">
         Refaire un diagnostic
     </button>
     } @else {

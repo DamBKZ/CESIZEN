@@ -1,33 +1,63 @@
 <div class="list-container">
 
-    <h1>Liste des informations</h1>
-
-    @for (item of items(); track item.informationId) {
-
-    <div class="info-card" (click)="open(item.informationId)">
-
-        <div class="header">
-            <h2>{{ item.title }}</h2>
-            <span class="type">{{ item.type }}</span>
+    <div class="page-head">
+        <div>
+            <h1>Liste des informations</h1>
+            <p class="subtitle">Des contenus sur le stress et le bien-être pour vous accompagner.</p>
         </div>
 
-        <p class="meta">
-            <strong>Auteur :</strong> {{ item.author }} <br>
-            <strong>Slug :</strong> {{ item.slug }} <br>
-            <strong>Catégorie :</strong> {{ item.categoryName }}
-        </p>
-
-        <div class="tags">
-            @for (t of item.tags; track t) {
-            <span class="tag">{{ t }}</span>
-            }
-        </div>
-
-        <button class="edit-btn" (click)="edit(item.informationId); $event.stopPropagation()">
-            Modifier
+        <button class="add-btn" (click)="addInformation()">
+            Ajouter une information
         </button>
-
     </div>
 
+    <div class="search-bar">
+        <input placeholder="Rechercher par titre, auteur, catégorie ou mot-clé..." [ngModel]="keyword()"
+            (ngModelChange)="keyword.set($event)" />
+
+        @if (keyword()) {
+        <button class="reset-btn" type="button" (click)="clearSearch()">
+            Effacer
+        </button>
+        }
+    </div>
+
+    <div class="infos-grid">
+        @for (item of filteredItems(); track item.informationId) {
+
+        <div class="info-card" (click)="open(item.slug)" [class.info-card--article]="item.type === 'ARTICLE'"
+            [class.info-card--video]="item.type === 'VIDEO'" [class.info-card--pdf]="item.type === 'PDF'">
+
+            <div class="header">
+                <h2>{{ item.title }}</h2>
+                <span class="type">{{ item.type }}</span>
+            </div>
+
+            @if (canDelete(item)) {
+            <button class="delete-cross" type="button" title="Supprimer" (click)="delete(item, $event)">✕</button>
+            }
+
+            <p class="meta">
+                <strong>Auteur :</strong> {{ item.author }} <br>
+                <strong>Catégorie :</strong> {{ item.categoryName }}
+            </p>
+
+            <div class="tags">
+                @for (t of item.tags; track t) {
+                <span class="tag">{{ t }}</span>
+                }
+            </div>
+
+            <button class="edit-btn" (click)="edit(item.slug); $event.stopPropagation()">
+                Modifier
+            </button>
+
+        </div>
+
+        }
+    </div>
+
+    @if (filteredItems().length === 0) {
+    <p class="empty-state">Aucune information ne correspond à votre recherche.</p>
     }
 </div>

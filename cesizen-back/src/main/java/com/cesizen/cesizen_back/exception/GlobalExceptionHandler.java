@@ -16,10 +16,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // -------------------------------------------------------------------------
-    // EXCEPTIONS MÉTIER PERSONNALISÉES
-    // -------------------------------------------------------------------------
-
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Map<String, String>> handleBadRequest(BadRequestException e) {
         log.warn("Erreur métier (400) : {}", e.getMessage());
@@ -31,10 +27,6 @@ public class GlobalExceptionHandler {
         log.warn("Ressource introuvable (404) : {}", e.getMessage());
         return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
     }
-
-    // -------------------------------------------------------------------------
-    // EXCEPTIONS MÉTIER GÉNÉRIQUES
-    // -------------------------------------------------------------------------
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException e) {
@@ -48,10 +40,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
     }
 
-    // -------------------------------------------------------------------------
-    // ERREURS DE VALIDATION (@Valid)
-    // -------------------------------------------------------------------------
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getFieldErrors().stream()
@@ -61,10 +49,6 @@ public class GlobalExceptionHandler {
         log.warn("Erreur de validation (400) : {}", message);
         return ResponseEntity.badRequest().body(Map.of("error", message));
     }
-
-    // -------------------------------------------------------------------------
-    // ERREUR GÉNÉRIQUE
-    // -------------------------------------------------------------------------
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGeneric(Exception e) {

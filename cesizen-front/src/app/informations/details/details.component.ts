@@ -1,23 +1,26 @@
+import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { InformationService } from '../information.service';
 
 @Component({
   selector: 'app-information-details',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './details.component.html',
   styleUrls: ['./details.component.scss']
 })
 export class DetailsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly service = inject(InformationService);
+  private readonly router = inject(Router);
 
   info = signal<any | null>(null);
 
   constructor() {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
 
-    this.service.getById(id).subscribe({
+    this.service.getById(slug).subscribe({
       next: (res: any) => this.info.set(res)
     });
   }
@@ -36,5 +39,9 @@ export class DetailsComponent {
     }
 
     return url;
+  }
+
+  goBack(): void {
+    this.router.navigate(['/information/list']);
   }
 }

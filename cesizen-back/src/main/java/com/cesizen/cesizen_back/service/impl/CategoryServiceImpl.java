@@ -21,10 +21,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository repo;
     private final CategoryMapper mapper;
-
-    // ------------------------------------------------------------
-    // CREATE
-    // ------------------------------------------------------------
     @Override
     public CategoryResponse create(CategoryRequest req) {
 
@@ -43,10 +39,6 @@ public class CategoryServiceImpl implements CategoryService {
         Category saved = repo.save(c);
         return mapper.toResponse(saved);
     }
-
-    // ------------------------------------------------------------
-    // UPDATE
-    // ------------------------------------------------------------
     @Override
     public CategoryResponse update(UUID id, CategoryRequest req) {
 
@@ -69,10 +61,6 @@ public class CategoryServiceImpl implements CategoryService {
 
         return mapper.toResponse(c);
     }
-
-    // ------------------------------------------------------------
-    // DELETE
-    // ------------------------------------------------------------
     @Override
     public void delete(UUID id) {
 
@@ -81,10 +69,6 @@ public class CategoryServiceImpl implements CategoryService {
 
         repo.delete(c);
     }
-
-    // ------------------------------------------------------------
-    // FIND BY ID
-    // ------------------------------------------------------------
     @Override
     public CategoryResponse findById(UUID id) {
 
@@ -93,10 +77,6 @@ public class CategoryServiceImpl implements CategoryService {
 
         return mapper.toResponse(c);
     }
-
-    // ------------------------------------------------------------
-    // FIND ALL
-    // ------------------------------------------------------------
     @Override
     public List<CategoryResponse> findAll() {
         return repo.findAll()

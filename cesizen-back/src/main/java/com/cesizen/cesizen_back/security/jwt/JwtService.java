@@ -5,6 +5,9 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,10 +27,6 @@ public class JwtService {
     @Value("${jwt.expiration-ms:3600000}")
     private long expirationMs;
 
-    // -------------------------------------------------------------------------
-    // EXTRACTION
-    // -------------------------------------------------------------------------
-
     public String extractUserId(String token) {
         return extractClaim(token, claims -> claims.get("userId", String.class));
     }
@@ -40,10 +39,6 @@ public class JwtService {
         return resolver.apply(extractAllClaims(token));
     }
 
-    // -------------------------------------------------------------------------
-    // GÉNÉRATION
-    // -------------------------------------------------------------------------
-
     public String generateToken(String userId, String roleName) {
         return Jwts.builder()
                 .claims(Map.of(
@@ -55,10 +50,6 @@ public class JwtService {
                 .signWith(getSignInKey())
                 .compact();
     }
-
-    // -------------------------------------------------------------------------
-    // VALIDATION
-    // -------------------------------------------------------------------------
 
     public boolean isTokenValid(String token) {
         try {
@@ -73,10 +64,6 @@ public class JwtService {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // PRIVÉ
-    // -------------------------------------------------------------------------
-
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSignInKey())
@@ -86,6 +73,22 @@ public class JwtService {
     }
 
     private SecretKey getSignInKey() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+        byte[] keyBytes;
+        try {
+            keyBytes = Decoders.BASE64.decode(secretKey);
+        } catch (Exception e) {
+            keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        }
+
+        if (keyBytes.length < 32) {
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                keyBytes = md.digest(secretKey.getBytes(StandardCharsets.UTF_8));
+            } catch (NoSuchAlgorithmException ex) {
+                keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+            }
+        }
+
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }

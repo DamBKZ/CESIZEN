@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,11 +24,16 @@ export class ChangePasswordComponent {
   private fb = inject(FormBuilder);
   private profileService = inject(ProfileService);
   private ui = inject(UiStore);
+  private router = inject(Router);
 
   form = this.fb.group({
-    oldPassword: ['', Validators.required],
-    newPassword: ['', Validators.required]
+    currentPassword: ['', Validators.required],
+    newPassword: ['', [Validators.required, Validators.minLength(10)]]
   });
+
+  backToProfile(): void {
+    this.router.navigate(['/profile']);
+  }
 
   save() {
     if (this.form.invalid) return;

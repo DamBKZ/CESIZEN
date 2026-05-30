@@ -1,7 +1,23 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 import { LayoutComponent } from './shared/components/layout/layout.component';
 
 export const APP_ROUTES: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'login'
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./auth/login/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./auth/register/register.component').then(m => m.RegisterComponent)
+  },
   {
     path: '',
     component: LayoutComponent,
@@ -14,24 +30,34 @@ export const APP_ROUTES: Routes = [
 
       {
         path: 'profile',
+        canActivate: [authGuard],
         loadChildren: () =>
           import('./profile/profile.routes').then(m => m.PROFILE_ROUTES)
       },
 
       {
         path: 'diagnostic',
+        canActivate: [authGuard],
         loadChildren: () =>
           import('./diagnostic/diagnostic.routes').then(m => m.DIAGNOSTIC_ROUTES)
       },
 
       {
         path: 'informations',
+        canActivate: [authGuard],
+        loadChildren: () =>
+          import('./informations/information.routes').then(m => m.INFORMATION_ROUTES)
+      },
+      {
+        path: 'information',
+        canActivate: [authGuard],
         loadChildren: () =>
           import('./informations/information.routes').then(m => m.INFORMATION_ROUTES)
       },
 
       {
         path: 'logs',
+        canActivate: [authGuard],
         loadChildren: () =>
           import('./logs/logs.routes').then(m => m.LOGS_ROUTES)
       },

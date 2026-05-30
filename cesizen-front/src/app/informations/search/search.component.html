@@ -19,7 +19,7 @@
 
     @for (item of results(); track item.informationId) {
 
-    <div class="result-card" (click)="open(item.informationId)">
+    <div class="result-card" (click)="open(item.slug)">
 
         <div class="header">
             <h2>{{ item.title }}</h2>
@@ -38,7 +38,7 @@
             }
         </div>
 
-        <button class="edit-btn" (click)="edit(item.informationId); $event.stopPropagation()">
+        <button class="edit-btn" (click)="edit(item.slug); $event.stopPropagation()">
             Modifier
         </button>
 

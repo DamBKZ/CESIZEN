@@ -21,10 +21,6 @@ public class UserServiceImpl implements UserService {
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
 
-    // -------------------------------------------------------------------------
-    // INSCRIPTION
-    // -------------------------------------------------------------------------
-
     @Override
     @Transactional
     public User register(String email, String password, String pseudo) {
@@ -48,10 +44,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    // -------------------------------------------------------------------------
-    // CONNEXION
-    // -------------------------------------------------------------------------
-
     @Override
     @Transactional(readOnly = true)
     public User login(String email, String rawPassword) {
@@ -67,12 +59,10 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Identifiants invalides.");
         }
 
+        user.getRole().getRoleName();
+
         return user;
     }
-
-    // -------------------------------------------------------------------------
-    // RECHERCHE
-    // -------------------------------------------------------------------------
 
     @Override
     @Transactional(readOnly = true)
@@ -93,10 +83,6 @@ public class UserServiceImpl implements UserService {
     public List<User> findAll() {
         return userRepository.findAll();
     }
-
-    // -------------------------------------------------------------------------
-    // MISE À JOUR PROFIL
-    // -------------------------------------------------------------------------
 
     @Override
     @Transactional
@@ -119,10 +105,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    // -------------------------------------------------------------------------
-    // CHANGEMENT DE MOT DE PASSE
-    // -------------------------------------------------------------------------
-
     @Override
     @Transactional
     public void changePassword(String userId, String currentPassword, String newPassword) {
@@ -141,10 +123,6 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
-
-    // -------------------------------------------------------------------------
-    // ADMIN — ACTIVATION / DÉSACTIVATION / SUPPRESSION
-    // -------------------------------------------------------------------------
 
     @Override
     @Transactional
@@ -184,8 +162,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-public void deleteUser(String userId) {
-    userRepository.deleteById(userId);
-}
+    public void deleteUser(String userId) {
+        userRepository.deleteById(userId);
+    }
 
 }

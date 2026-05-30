@@ -1,5 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ProfileService } from '../../core/services/profile.service';
 import { UserStore } from '../../core/stores/user.store';
 
@@ -10,20 +11,36 @@ import { UserStore } from '../../core/stores/user.store';
   templateUrl: './history.component.html',
   styleUrls: ['./history.component.scss']
 })
-export class HistoryComponent {
+export class HistoryComponent implements OnInit {
 
   private profileService = inject(ProfileService);
   private userStore = inject(UserStore);
+  private router = inject(Router);
 
   history: any[] = [];
 
-ngOnInit() {
-  const user = this.userStore.user();
-  if (!user) return;
+  backToProfile(): void {
+    this.router.navigate(['/profile']);
+  }
 
-  this.profileService.getHistory(user.userId).subscribe((data) => {
-    this.history = data;
-  });
-}
+  ngOnInit(): void {
+    const cachedUser = this.userStore.user();
+
+    if (cachedUser) {
+      this.profileService.getHistory(cachedUser.userId).subscribe((data) => {
+        this.history = data;
+      });
+      return;
+    }
+
+    this.profileService.getCurrentUser().subscribe({
+      next: (user: any) => {
+        this.userStore.setUser(user);
+        this.profileService.getHistory(user.userId).subscribe((data) => {
+          this.history = data;
+        });
+      }
+    });
+  }
 
 }

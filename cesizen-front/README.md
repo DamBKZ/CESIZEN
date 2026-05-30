@@ -1,59 +1,82 @@
-# CesizenFront
+# CESIZEN Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.5.
+Frontend Angular 21 de l'application CESIZEN.
 
-## Development server
+## Stack
 
-To start a local development server, run:
+- Angular 21
+- Angular Material
+- RxJS
+- Cypress pour les tests e2e
 
-```bash
-ng serve
-```
+## Pré-requis
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Node.js 20+ recommandé
+- npm 11+
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Lancer en local
 
 ```bash
-ng generate --help
+cd cesizen-front
+npm install
+npm start
 ```
 
-## Building
+L’application est ensuite disponible sur `http://localhost:4200/`.
 
-To build the project run:
+## Build
 
 ```bash
-ng build
+cd cesizen-front
+npm run build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Tests unitaires
 
 ```bash
-ng test
+cd cesizen-front
+npm test
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+## Tests e2e
 
 ```bash
-ng e2e
+cd cesizen-front
+npm run cypress:open
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+ou :
 
-## Additional Resources
+```bash
+cd cesizen-front
+npm run cypress:run
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Configuration API
+
+En développement, le frontend passe par le proxy configuré pour joindre le backend.
+
+- Authentification : access token en mémoire
+- Refresh token : cookie HttpOnly
+- Protection CSRF : cookie `XSRF-TOKEN` + en-tête `X-XSRF-TOKEN`
+
+## Scripts utiles
+
+- `npm start` : serveur de dev
+- `npm run build` : build de production
+- `npm test` : tests unitaires
+- `npm run cypress:open` : interface Cypress
+- `npm run cypress:run` : exécution headless Cypress
+
+## Structure rapide
+
+- `src/app/auth` : login, register, reset password
+- `src/app/profile` : profil utilisateur et mot de passe
+- `src/app/admin` : administration
+- `src/app/shared` : composants et services réutilisables
+
+## Bonnes pratiques
+
+- Ne pas stocker de tokens sensibles en `localStorage`.
+- Garder les secrets hors du dépôt.
+- Vérifier les cookies et l’API backend avant un déploiement public.

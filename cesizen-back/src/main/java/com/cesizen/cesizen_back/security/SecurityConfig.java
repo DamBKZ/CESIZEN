@@ -48,7 +48,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/api/users/register").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/users/me").authenticated()
                 .anyRequest().authenticated()
@@ -70,27 +70,20 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // -------------------------------------------------------------------------
-    // CORS
-    // -------------------------------------------------------------------------
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of("http://localhost:4200"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
+        config.setExposedHeaders(List.of("Set-Cookie", "XSRF-TOKEN"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
-
-    // -------------------------------------------------------------------------
-    // BEANS
-    // -------------------------------------------------------------------------
 
     @Bean
     public PasswordEncoder passwordEncoder() {

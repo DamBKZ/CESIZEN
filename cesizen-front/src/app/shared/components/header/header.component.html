@@ -1,12 +1,16 @@
 <header class="header">
     <div class="left">
+        <img class="app-logo" src="/Logo.png" alt="Logo CESIZEN" />
         <span class="app-title">CESIZEN</span>
     </div>
 
     @if (isAuthenticated()) {
     <div class="right">
         <span class="user">{{ user()?.pseudo }}</span>
-        <button class="logout-btn" (click)="logout()">Déconnexion</button>
+        <button class="logout-btn" type="button" (click)="logout()" [disabled]="isLoggingOut">
+            <span *ngIf="!isLoggingOut">Déconnexion</span>
+            <span *ngIf="isLoggingOut">Déconnexion…</span>
+        </button>
     </div>
     }
 </header>

@@ -3,6 +3,25 @@ h1 {
   font-size: 26px;
   font-weight: 700;
   margin: 20px 0;
+  color: #1e3d66;
+}
+
+.back-btn {
+  display: block;
+  margin: 0 auto 16px;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: rgba(46, 109, 178, 0.1);
+  color: #1e4d86;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+
+  &:hover {
+    background: rgba(46, 109, 178, 0.18);
+    transform: translateY(-1px);
+  }
 }
 
 div {
@@ -16,14 +35,14 @@ ul {
   padding: 0;
   margin: 0 auto;
   max-width: 600px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
 
 li {
-  background: var(--md-sys-color-surface-container);
-  border: 1px solid var(--md-sys-color-outline-variant);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(46, 109, 178, 0.16);
   border-radius: 14px;
   padding: 16px;
   box-shadow: var(--md-sys-elevation-level1);
@@ -49,7 +68,6 @@ li {
   }
 }
 
-/* 💻 Améliorations tablette / desktop */
 @media (min-width: 600px) {
   h1 {
     font-size: 30px;
@@ -58,5 +76,11 @@ li {
   li {
     padding: 20px;
     font-size: 15px;
+  }
+}
+
+@media (max-width: 720px) {
+  ul {
+    grid-template-columns: 1fr;
   }
 }

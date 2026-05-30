@@ -19,6 +19,9 @@ public class UserResponse {
     @JsonProperty("pseudo")
     private String pseudo;
 
+    @JsonProperty("role")
+    private RoleResponse role;
+
     @JsonProperty("createdAt")
     private String userCreatedAt;
 }

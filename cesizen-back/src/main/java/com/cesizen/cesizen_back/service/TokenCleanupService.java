@@ -17,11 +17,6 @@ public class TokenCleanupService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final ResetPasswordTokenRepository resetPasswordTokenRepository;
-
-    /**
-     * Nettoyage automatique des tokens expirés, révoqués et consommés.
-     * Exécuté tous les jours à 3h du matin.
-     */
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     public void cleanTokens() {

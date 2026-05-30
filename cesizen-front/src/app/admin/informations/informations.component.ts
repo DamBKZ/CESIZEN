@@ -4,6 +4,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AdminService } from '../admin.service';
+import { ConfirmService } from '../../shared/services/confirm.service';
+import { UiStore } from '../../core/stores/ui.store';
 import { Router } from '@angular/router';
 import { AdminInformation } from '../models/information-admin.model';
 
@@ -22,7 +24,9 @@ import { AdminInformation } from '../models/information-admin.model';
 export class InformationsComponent implements OnInit {
 
   private adminService = inject(AdminService);
+  private confirmService = inject(ConfirmService);
   private router = inject(Router);
+  private ui = inject(UiStore);
 
   displayedColumns = ['title', 'type', 'category', 'createdAt', 'actions'];
   informations: AdminInformation[] = [];
@@ -38,8 +42,17 @@ export class InformationsComponent implements OnInit {
     });
   }
 
-  delete(id: string): void {
-    this.adminService.deleteInformation(id).subscribe(() => this.loadInformations());
+  async delete(id: string): Promise<void> {
+    const ok = await this.confirmService.confirm('Confirmer la suppression de cette information ?');
+    if (!ok) { return; }
+
+    this.adminService.deleteInformation(id).subscribe({
+      next: () => {
+        this.ui.showSnackbar('Information supprimée', 'success');
+        this.loadInformations();
+      },
+      error: () => this.ui.showSnackbar('Erreur lors de la suppression', 'error')
+    });
   }
 
   edit(id: string): void {

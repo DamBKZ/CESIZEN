@@ -16,45 +16,35 @@ export interface User {
   providedIn: 'root'
 })
 export class UserStore {
-
-  // --- Token ---
-  private readonly _token = signal<string | null>(localStorage.getItem('access_token'));
+  private readonly _token = signal<string | null>(null);
   readonly token = this._token.asReadonly();
 
-  // --- User ---
   private readonly _user = signal<User | null>(null);
   readonly user = this._user.asReadonly();
 
-  // --- Authenticated ---
   readonly isAuthenticated = computed(() => !!this._token());
 
-  // --- Role ---
   readonly role = computed(() => this._user()?.role ?? null);
 
-  // --- Login ---
-  login(token: string, user: User): void {
-    localStorage.setItem('access_token', token);
+  login(token: string, user?: User | null): void {
     this._token.set(token);
-    this._user.set(user);
+
+    if (user !== undefined) {
+      this._user.set(user);
+    }
   }
 
-  // --- Logout ---
   logout(): void {
-    localStorage.removeItem('access_token');
     this._token.set(null);
     this._user.set(null);
   }
 
-  // --- Set user (après /me) ---
   setUser(user: User): void {
     this._user.set(user);
   }
 
-clear() {
-  this._user.set(null);
-  this._token.set(null);
-  localStorage.removeItem('access_token');
-}
-
-
+  clear(): void {
+    this._user.set(null);
+    this._token.set(null);
+  }
 }

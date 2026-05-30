@@ -20,10 +20,6 @@ public class EmailServiceImpl implements EmailService {
 
     @Value("${spring.mail.username}")
     private String fromAddress;
-
-    // -------------------------------------------------------------------------
-    // RESET PASSWORD
-    // -------------------------------------------------------------------------
     @Override
     public void sendResetPasswordEmail(String to, String token) {
         String subject = "Réinitialisation de votre mot de passe CESIZen";
@@ -39,10 +35,6 @@ public class EmailServiceImpl implements EmailService {
         sendEmail(to, subject, content);
         log.info("Email de réinitialisation envoyé à {}", to);
     }
-
-    // -------------------------------------------------------------------------
-    // DIAGNOSTIC RESULT
-    // -------------------------------------------------------------------------
     @Override
     public void sendDiagnosticResultEmail(String to, int score, String riskLevel, String date) {
         String subject = "Résultats de votre diagnostic CESIZen";
@@ -59,10 +51,6 @@ public class EmailServiceImpl implements EmailService {
         sendEmail(to, subject, content);
         log.info("Email de diagnostic envoyé à {}", to);
     }
-
-    // -------------------------------------------------------------------------
-    // ACCOUNT DELETION CONFIRMATION
-    // -------------------------------------------------------------------------
     @Override
     public void sendAccountDeletionEmail(String email, String pseudo) {
         String subject = "Confirmation de suppression de votre compte";
@@ -80,10 +68,6 @@ public class EmailServiceImpl implements EmailService {
         sendEmail(email, subject, content);
         log.info("Email de suppression de compte envoyé à {}", email);
     }
-
-    // -------------------------------------------------------------------------
-    // MÉTHODE INTERNE GÉNÉRIQUE
-    // -------------------------------------------------------------------------
     private void sendEmail(String to, String subject, String content) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();

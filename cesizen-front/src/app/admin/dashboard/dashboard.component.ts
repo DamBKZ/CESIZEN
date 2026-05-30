@@ -2,8 +2,10 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { AdminService } from '../admin.service';
 import { AdminStats } from '../models/stats-admin.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,7 +13,8 @@ import { AdminStats } from '../models/stats-admin.model';
   imports: [
     CommonModule,
     MatCardModule,
-    MatIconModule
+    MatIconModule,
+    MatButtonModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -19,6 +22,7 @@ import { AdminStats } from '../models/stats-admin.model';
 export class DashboardComponent implements OnInit {
 
   private adminService = inject(AdminService);
+  private router = inject(Router);
 
   stats = [
     { key: 'users', icon: 'group', label: 'Utilisateurs', value: 0 },
@@ -34,5 +38,13 @@ export class DashboardComponent implements OnInit {
         value: data[s.key as keyof AdminStats]
       }));
     });
+  }
+
+  goToUsers(): void {
+    this.router.navigate(['/admin/users']);
+  }
+
+  goToInformations(): void {
+    this.router.navigate(['/admin/informations']);
   }
 }

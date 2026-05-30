@@ -13,7 +13,7 @@ import java.util.List;
 
 @Entity
 @Table(
-    name = "user",
+    name = "users",
     uniqueConstraints = {
         @UniqueConstraint(name = "uq_user_email", columnNames = "email"),
         @UniqueConstraint(name = "uq_user_pseudo", columnNames = "pseudo")
@@ -28,6 +28,7 @@ public class User implements UserDetails {
 
     @Id
     @UuidGenerator
+    @GeneratedValue
     @Column(name = "userID", columnDefinition = "CHAR(36)", updatable = false, nullable = false)
     private String userId;
 
@@ -54,10 +55,6 @@ public class User implements UserDetails {
         foreignKey = @ForeignKey(name = "fk_user_role")
     )
     private Role role;
-
-    // -------------------------------------------------------------------------
-    // UserDetails (Spring Security)
-    // -------------------------------------------------------------------------
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

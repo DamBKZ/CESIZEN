@@ -1,27 +1,35 @@
 <div class="run-container">
 
-    <h1>Votre diagnostic</h1>
-    <p class="subtitle">Voici les événements que vous avez sélectionnés.</p>
+    <p class="eyebrow">Questionnaire</p>
+    <h1>Cocher les événements qui correspondent à votre situation durant les 24 derniers mois</h1>
+    <p class="subtitle">Chaque item reprend un événement de vie avec son score LCU. Le total se calcule en direct.</p>
 
-    @if (selectedEvents().length === 0) {
-    <p>Aucun événement sélectionné.</p>
+    @if (loadingEvents()) {
+    <p class="loading">Chargement du questionnaire...</p>
     }
 
-    <ul class="event-list">
-        @for (event of selectedEvents(); track event.id) {
-        <li class="event-item">
-            <span>{{ event.label }}</span>
-            <span class="score">+{{ event.score }}</span>
-        </li>
+    <p class="questionnaire-help" id="questionnaire-help">
+        Sélectionnez au moins un événement pour activer la validation du diagnostic.
+    </p>
+
+    <fieldset class="questionnaire" aria-describedby="questionnaire-help">
+        <legend class="sr-only">Événements du questionnaire</legend>
+
+        @for (event of events(); track event.eventId) {
+        <label class="event-item" [class.selected]="selectedEvents().has(normalizeId(event.eventId))">
+            <input type="checkbox" [checked]="selectedEvents().has(normalizeId(event.eventId))"
+                (change)="toggleEvent(event.eventId)" />
+            <span class="event-text">
+                <span class="event-label">{{ event.label }}</span>
+                <span class="event-meta">Score LCU {{ event.lcu }}</span>
+            </span>
+            <span class="score">+{{ event.lcu }}</span>
+        </label>
         }
-    </ul>
+    </fieldset>
 
-    <div class="total">
-        Score total : <strong>{{ totalScore() }}</strong>
-    </div>
-
-    <button class="btn-primary" (click)="submit()">
-        Enregistrer le diagnostic
+    <button class="btn-primary" type="button" (click)="submit()" [disabled]="!canSubmit()">
+        Voir le résultat
     </button>
 
 </div>

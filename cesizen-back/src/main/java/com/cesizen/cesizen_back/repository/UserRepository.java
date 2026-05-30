@@ -9,19 +9,14 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     Optional<User> findByEmail(String email);
 
+    @org.springframework.data.jpa.repository.Query("select u from User u join fetch u.role where u.userId = :userId")
+    Optional<User> findByUserIdWithRole(String userId);
+
     Optional<User> findByPseudo(String pseudo);
 
     boolean existsByEmail(String email);
 
     boolean existsByPseudo(String pseudo);
-
-    /**
-     * Vérifie si un email est déjà utilisé par un autre utilisateur.
-     */
     boolean existsByEmailAndUserIdNot(String email, String userId);
-
-    /**
-     * Vérifie si un pseudo est déjà utilisé par un autre utilisateur.
-     */
     boolean existsByPseudoAndUserIdNot(String pseudo, String userId);
 }

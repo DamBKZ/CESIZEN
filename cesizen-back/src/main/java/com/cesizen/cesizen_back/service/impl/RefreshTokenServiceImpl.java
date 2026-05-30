@@ -22,15 +22,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Value("${jwt.refresh-expiration-days:7}")
     private int refreshExpirationDays;
 
-    // -------------------------------------------------------------------------
-    // CRÉATION
-    // -------------------------------------------------------------------------
-
     @Override
     @Transactional
     public RefreshToken create(User user) {
-
-        // Révoque tous les tokens existants de l'utilisateur avant d'en créer un nouveau
         refreshTokenRepository.deleteByUser_UserId(user.getUserId());
 
         RefreshToken token = RefreshToken.builder()
@@ -43,10 +37,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return refreshTokenRepository.save(token);
     }
 
-    // -------------------------------------------------------------------------
-    // VALIDATION
-    // -------------------------------------------------------------------------
-
     @Override
     @Transactional(readOnly = true)
     public RefreshToken validate(String value) {
@@ -58,12 +48,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             throw new IllegalStateException("Refresh token expiré ou révoqué.");
         }
 
+        token.getUser().getUserId();
+        token.getUser().getRole().getRoleName();
+
         return token;
     }
-
-    // -------------------------------------------------------------------------
-    // RÉVOCATION
-    // -------------------------------------------------------------------------
 
     @Override
     @Transactional
@@ -75,10 +64,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         token.setRevoked(true);
         refreshTokenRepository.save(token);
     }
-
-    // -------------------------------------------------------------------------
-    // SUPPRESSION
-    // -------------------------------------------------------------------------
 
     @Override
     @Transactional

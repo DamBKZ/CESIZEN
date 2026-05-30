@@ -18,6 +18,10 @@ export class ResultComponent {
 
   score = signal<number | null>(null);
   interpretation = signal<string>('');
+  riskLevel = signal<'Faible' | 'Modéré' | 'Élevé' | ''>('');
+  riskEmoji = signal<string>('');
+  riskBoxClass = signal<'risk-box--low' | 'risk-box--medium' | 'risk-box--high' | ''>('');
+  adviceItems = signal<string[]>([]);
 
   constructor() {
     const state = history.state;
@@ -35,7 +39,7 @@ export class ResultComponent {
 
     if (!user) {
       this.ui.showSnackbar('Utilisateur non connecté', 'error');
-      this.router.navigate(['/auth/login']);
+      this.router.navigate(['/login']);
       return;
     }
 
@@ -58,11 +62,36 @@ export class ResultComponent {
 
   computeInterpretation(score: number): void {
     if (score < 150) {
-      this.interpretation.set("Risque faible : stress maîtrisé.");
+      this.riskLevel.set('Faible');
+      this.riskEmoji.set('🙂');
+      this.riskBoxClass.set('risk-box--low');
+      this.interpretation.set('Niveau faible : stress léger.');
+      this.adviceItems.set([
+        'Respiration courte: 2 minutes de respiration lente (4-6).',
+        'Micro-pauses: 3 pauses de 1 minute dans la journée.',
+        'Organisation simple: noter 3 priorités maximum.'
+      ]);
     } else if (score < 300) {
-      this.interpretation.set("Risque modéré : attention à votre équilibre.");
+      this.riskLevel.set('Modéré');
+      this.riskEmoji.set('😐');
+      this.riskBoxClass.set('risk-box--medium');
+      this.interpretation.set('Niveau modéré : stress notable.');
+      this.adviceItems.set([
+        "Routines anti-stress: 10 minutes par jour d'activité apaisante.",
+        'Réduction de charge: identifier 1 tâche à déléguer ou reporter.',
+        'Sommeil régulier: heure de coucher fixe et moins d’écrans.'
+      ]);
     } else {
-      this.interpretation.set("Risque élevé : surcharge de stress probable.");
+      this.riskLevel.set('Élevé');
+      this.riskEmoji.set('😟');
+      this.riskBoxClass.set('risk-box--high');
+      this.interpretation.set('Niveau élevé : stress intense.');
+      this.adviceItems.set([
+        'Priorisation stricte: réduire au minimum les obligations non essentielles.',
+        'Techniques d’ancrage: respiration profonde, cohérence cardiaque, ancrage 5-4-3-2-1.',
+        'Soutien social: parler à un proche, collègue ou personne de confiance.',
+        'Pause obligatoire: s’accorder un vrai temps de récupération.'
+      ]);
     }
   }
 

@@ -18,10 +18,6 @@ public interface UserService {
 
     void changePassword(String userId, String currentPassword, String newPassword);
 
-    // -------------------------------------------------------------------------
-    // ADMIN
-    // -------------------------------------------------------------------------
-
     List<User> findAll();
 
     void deactivate(String userId);

@@ -1,5 +1,13 @@
 <h1>Mon Profil</h1>
 
+<p class="profile-intro">
+    L'encart pseudo et email vous permet de modifier votre pseudo et/ou votre adresse email.
+</p>
+
+<button class="back-btn" type="button" (click)="backToInformations()">
+    Revenir à la liste des informations
+</button>
+
 <form [formGroup]="form" (ngSubmit)="save()">
 
     <mat-form-field appearance="outline">
@@ -18,14 +26,14 @@
 
 </form>
 
-<button mat-button color="accent" routerLink="change-password">
+<button mat-button color="accent" type="button" (click)="openChangePassword()">
     Modifier mon mot de passe
 </button>
 
-<button mat-button color="accent" routerLink="history">
+<button mat-button color="accent" type="button" (click)="openHistory()">
     Voir l'historique de mes diagnostics
 </button>
 
-<button mat-button color="warn" (click)="deleteAccount()">
+<button mat-button color="warn" type="button" (click)="deleteAccount()">
     Supprimer mon compte
 </button>

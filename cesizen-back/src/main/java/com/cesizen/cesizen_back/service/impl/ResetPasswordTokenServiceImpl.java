@@ -28,10 +28,6 @@ public class ResetPasswordTokenServiceImpl implements ResetPasswordTokenService 
     @Value("${reset-password.expiration-minutes:30}")
     private int expirationMinutes;
 
-    // -------------------------------------------------------------------------
-    // CRÉATION
-    // -------------------------------------------------------------------------
-
     @Override
     @Transactional
     public ResetPasswordToken create(User user) {
@@ -55,10 +51,6 @@ public class ResetPasswordTokenServiceImpl implements ResetPasswordTokenService 
         emailService.sendResetPasswordEmail(user.getEmail(), token.getResetPasswordTokenValue());
     }
 
-    // -------------------------------------------------------------------------
-    // VALIDATION
-    // -------------------------------------------------------------------------
-
     @Override
     @Transactional(readOnly = true)
     public ResetPasswordToken validate(String value) {
@@ -73,10 +65,6 @@ public class ResetPasswordTokenServiceImpl implements ResetPasswordTokenService 
 
         return token;
     }
-
-    // -------------------------------------------------------------------------
-    // RESET
-    // -------------------------------------------------------------------------
 
     @Override
     @Transactional

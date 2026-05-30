@@ -9,12 +9,9 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
 
-    // Convertit un DTO → entité
     Category toEntity(CategoryRequest request);
 
-    // Convertit une entité → DTO
     CategoryResponse toResponse(Category category);
 
-    // Met à jour une entité existante
     void updateEntity(@MappingTarget Category category, CategoryRequest request);
 }

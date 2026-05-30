@@ -19,10 +19,6 @@ public class AdminUserController {
 
     private final UserService userService;
 
-    // -------------------------------------------------------------------------
-    // LISTE DES UTILISATEURS
-    // -------------------------------------------------------------------------
-
     @GetMapping
     public ResponseEntity<List<AdminUserResponse>> findAll() {
         List<AdminUserResponse> users = userService.findAll()
@@ -33,19 +29,11 @@ public class AdminUserController {
         return ResponseEntity.ok(users);
     }
 
-    // -------------------------------------------------------------------------
-    // DÉTAIL D'UN UTILISATEUR
-    // -------------------------------------------------------------------------
-
     @GetMapping("/{id}")
     public ResponseEntity<AdminUserResponse> findById(@PathVariable String id) {
         User user = userService.findById(id);
         return ResponseEntity.ok(toAdminResponse(user));
     }
-
-    // -------------------------------------------------------------------------
-    // DÉSACTIVATION
-    // -------------------------------------------------------------------------
 
     @PutMapping("/{id}/deactivate")
     public ResponseEntity<Map<String, String>> deactivate(@PathVariable String id) {
@@ -53,29 +41,17 @@ public class AdminUserController {
         return ResponseEntity.ok(Map.of("message", "Compte désactivé."));
     }
 
-    // -------------------------------------------------------------------------
-    // ACTIVATION
-    // -------------------------------------------------------------------------
-
     @PutMapping("/{id}/activate")
     public ResponseEntity<Map<String, String>> activate(@PathVariable String id) {
         userService.activate(id);
         return ResponseEntity.ok(Map.of("message", "Compte activé."));
     }
 
-    // -------------------------------------------------------------------------
-    // SUPPRESSION
-    // -------------------------------------------------------------------------
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> delete(@PathVariable String id) {
         userService.delete(id);
         return ResponseEntity.ok(Map.of("message", "Compte supprimé."));
     }
-
-    // -------------------------------------------------------------------------
-    // HELPER PRIVÉ
-    // -------------------------------------------------------------------------
 
     private AdminUserResponse toAdminResponse(User user) {
         return AdminUserResponse.builder()

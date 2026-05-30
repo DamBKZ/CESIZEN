@@ -2,6 +2,11 @@ import { Routes } from '@angular/router';
 
 export const DIAGNOSTIC_ROUTES: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'list'
+  },
+  {
     path: 'list',
     loadComponent: () =>
       import('./list/list.component').then(m => m.ListComponent)

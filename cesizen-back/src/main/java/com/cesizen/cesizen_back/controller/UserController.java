@@ -2,6 +2,7 @@ package com.cesizen.cesizen_back.controller;
 
 import com.cesizen.cesizen_back.dto.user.ChangePasswordRequest;
 import com.cesizen.cesizen_back.dto.user.RegisterRequest;
+import com.cesizen.cesizen_back.dto.user.RoleResponse;
 import com.cesizen.cesizen_back.dto.user.UpdateUserRequest;
 import com.cesizen.cesizen_back.dto.user.UserResponse;
 import com.cesizen.cesizen_back.entity.User;
@@ -14,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 
 import java.util.Map;
 
@@ -26,12 +25,6 @@ public class UserController {
 
     private final UserService userService;
     private final EmailService emailService;
-    private final PasswordEncoder passwordEncoder;
-    
-
-    // -------------------------------------------------------------------------
-    // REGISTER
-    // -------------------------------------------------------------------------
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(
@@ -46,19 +39,11 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(user));
     }
 
-    // -------------------------------------------------------------------------
-    // GET PROFIL
-    // -------------------------------------------------------------------------
-
     @GetMapping("/me")
     public ResponseEntity<UserResponse> me(Authentication authentication) {
         User user = extractUser(authentication);
         return ResponseEntity.ok(toResponse(user));
     }
-
-    // -------------------------------------------------------------------------
-    // UPDATE PROFIL
-    // -------------------------------------------------------------------------
 
     @PutMapping("/me")
     public ResponseEntity<UserResponse> updateMe(
@@ -76,10 +61,6 @@ public class UserController {
         return ResponseEntity.ok(toResponse(user));
     }
 
-    // -------------------------------------------------------------------------
-    // CHANGEMENT DE MOT DE PASSE
-    // -------------------------------------------------------------------------
-
     @PutMapping("/me/password")
     public ResponseEntity<Map<String, String>> changePassword(
             Authentication authentication,
@@ -96,30 +77,16 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "Mot de passe mis à jour."));
     }
 
-@DeleteMapping("/me")
-public ResponseEntity<?> deleteMyAccount(
-        @AuthenticationPrincipal User user,
-        @RequestBody Map<String, String> body) {
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deleteMyAccount(
+            @AuthenticationPrincipal User user) {
 
-    String password = body.get("password");
+        userService.deleteUser(user.getUserId());
 
-    if (!passwordEncoder.matches(password, user.getPassword())) {
-        return ResponseEntity.status(403).body(Map.of("error", "Mot de passe incorrect"));
+        emailService.sendAccountDeletionEmail(user.getEmail(), user.getPseudo());
+
+        return ResponseEntity.noContent().build();
     }
-
-    userService.deleteUser(user.getUserId());
-
-    emailService.sendAccountDeletionEmail(user.getEmail(), user.getPseudo());
-
-    return ResponseEntity.noContent().build();
-}
-
-
-
-
-    // -------------------------------------------------------------------------
-    // HELPERS PRIVÉS
-    // -------------------------------------------------------------------------
 
     private User extractUser(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof User user)) {
@@ -133,6 +100,10 @@ public ResponseEntity<?> deleteMyAccount(
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .pseudo(user.getPseudo())
+                .role(RoleResponse.builder()
+                        .roleId(user.getRole().getRoleId())
+                        .roleName(user.getRole().getRoleName())
+                        .build())
                 .userCreatedAt(user.getUserCreatedAt().toString())
                 .build();
     }

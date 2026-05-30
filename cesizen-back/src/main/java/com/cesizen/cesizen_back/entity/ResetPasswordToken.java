@@ -45,14 +45,6 @@ public class ResetPasswordToken {
     @Column(nullable = false)
     @Builder.Default
     private boolean used = false;
-
-    // -------------------------------------------------------------------------
-    // HELPERS
-    // -------------------------------------------------------------------------
-
-    /**
-     * Indique si le token est encore utilisable (non consommé et non expiré).
-     */
     public boolean isValid() {
         return !used && resetPasswordTokenEndDate.isAfter(LocalDateTime.now());
     }

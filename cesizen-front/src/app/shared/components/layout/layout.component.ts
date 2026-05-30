@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { LoaderComponent } from '../loader/loader.component';
 import { SnackbarComponent } from '../snackbar/snackbar.component';
-import { HeaderComponent } from "../header/header.component";
 import { SidebarComponent } from "../sidebar/sidebar.component";
 import { FooterComponent } from "../footer/footer.component";
 
@@ -11,9 +9,7 @@ import { FooterComponent } from "../footer/footer.component";
   standalone: true,
   imports: [
     RouterOutlet,
-    LoaderComponent,
     SnackbarComponent,
-    HeaderComponent,
     SidebarComponent,
     FooterComponent
 ],

@@ -14,17 +14,9 @@ public interface ResetPasswordTokenRepository extends JpaRepository<ResetPasswor
     Optional<ResetPasswordToken> findByResetPasswordTokenValue(String value);
 
     void deleteByUser_UserId(String userId);
-
-    /**
-     * Supprime tous les tokens expirés — à appeler via un job de nettoyage planifié (@Scheduled).
-     */
     @Modifying
     @Query("DELETE FROM ResetPasswordToken rt WHERE rt.resetPasswordTokenEndDate < :now")
     void deleteAllExpired(@Param("now") LocalDateTime now);
-
-    /**
-     * Supprime tous les tokens déjà consommés — utile après une réinitialisation de mot de passe.
-     */
     @Modifying
     @Query("DELETE FROM ResetPasswordToken rt WHERE rt.used = true")
     void deleteAllUsed();

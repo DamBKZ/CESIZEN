@@ -1,6 +1,11 @@
 import { Routes } from '@angular/router';
 
 export const INFORMATION_ROUTES: Routes = [
+    {
+      path: '',
+      pathMatch: 'full',
+      redirectTo: 'list'
+    },
   {
     path: 'list',
     loadComponent: () =>
@@ -12,12 +17,12 @@ export const INFORMATION_ROUTES: Routes = [
       import('./create/create.component').then(m => m.CreateComponent)
   },
   {
-    path: 'details/:id',
+    path: 'details/:slug',
     loadComponent: () =>
       import('./details/details.component').then(m => m.DetailsComponent)
   },
 {
-  path: 'edit/:id',
+  path: 'edit/:slug',
   loadComponent: () =>
     import('./edit/edit.component').then(m => m.EditComponent)
 }

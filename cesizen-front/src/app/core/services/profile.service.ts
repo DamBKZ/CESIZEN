@@ -5,6 +5,10 @@ import { HttpClient } from '@angular/common/http';
 export class ProfileService {
   private http = inject(HttpClient);
 
+  getCurrentUser() {
+    return this.http.get('/api/users/me');
+  }
+
   updateProfile(data: any) {
     return this.http.put('/api/users/me', data);
   }
@@ -14,12 +18,12 @@ export class ProfileService {
   }
 
   getHistory(userId: string) {
-  return this.http.get<any[]>(`/api/diagnostic/history/${userId}`);
-}
+    return this.http.get<any[]>(`/api/diagnostic/history/${userId}`);
+  }
 
-deleteAccount(userId: string) {
-  return this.http.delete(`/api/users/${userId}`);
-}
+  deleteAccount() {
+    return this.http.delete('/api/users/me');
+  }
 
 
 }

@@ -1,0 +1,19 @@
+h2[mat-dialog-title] {
+  margin-bottom: 8px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+mat-dialog-content {
+  display: grid;
+  gap: 16px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+mat-dialog-actions {
+  padding-top: 16px;
+  gap: 8px;
+}

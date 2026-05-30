@@ -8,10 +8,6 @@ public enum RoleName {
     USER,
     ADMIN;
 
-    // -------------------------------------------------------------------------
-    // HELPER
-    // -------------------------------------------------------------------------
-
     public static Optional<RoleName> fromString(String value) {
         return Arrays.stream(values())
                 .filter(r -> r.name().equalsIgnoreCase(value))

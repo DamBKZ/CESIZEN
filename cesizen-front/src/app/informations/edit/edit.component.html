@@ -1,16 +1,17 @@
 <div class="edit-container">
 
+    <button class="back-btn" type="button" (click)="goBack()">
+        Revenir à la liste des informations
+    </button>
+
     <h1>Modifier une information</h1>
 
-    <input placeholder="Auteur" [ngModel]="form().author" (ngModelChange)="form().author = $event" />
+    <input placeholder="Auteur" [ngModel]="form().author" (ngModelChange)="form().author = $event" required />
 
-    <input placeholder="Slug" [ngModel]="form().slug" (ngModelChange)="form().slug = $event" />
+    <input placeholder="Slug" [ngModel]="form().slug" (ngModelChange)="form().slug = $event" required />
 
     <input placeholder="Tags (séparés par des virgules)" [ngModel]="form().tags?.join(', ')"
-        (ngModelChange)="form().tags = $event.split(',').map(t => t.trim())" />
-
-    <input placeholder="ID de la catégorie" [ngModel]="form().categoryId"
-        (ngModelChange)="form().categoryId = $event" />
+        (ngModelChange)="form().tags = $event.split(',').map(t => t.trim()).filter(tag => !!tag)" required />
 
     <label>Type</label>
     <select [ngModel]="type()" (ngModelChange)="type.set($event)">
@@ -19,16 +20,26 @@
         <option value="PDF">PDF</option>
     </select>
 
-    @if (type() === 'ARTICLE') {
-    <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" />
+    <label>Catégorie</label>
+    <select [ngModel]="form().categoryId" (ngModelChange)="form().categoryId = $event" required>
+        <option value="" disabled>Sélectionnez une catégorie</option>
+        @for (category of categories; track category.id) {
+        <option [value]="category.id">{{ category.label }}</option>
+        }
+    </select>
 
-    <textarea placeholder="Contenu" [ngModel]="form().content" (ngModelChange)="form().content = $event"></textarea>
+    @if (type() === 'ARTICLE') {
+    <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" required />
+
+    <textarea placeholder="Contenu" [ngModel]="form().content" (ngModelChange)="form().content = $event"
+        required></textarea>
     }
 
     @if (type() === 'VIDEO') {
-    <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" />
+    <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" required />
 
-    <input placeholder="URL de la vidéo" [ngModel]="form().videoUrl" (ngModelChange)="form().videoUrl = $event" />
+    <input placeholder="URL de la vidéo" [ngModel]="form().videoUrl" (ngModelChange)="form().videoUrl = $event"
+        required />
 
     @if (form().videoUrl) {
     <div class="video-preview">
@@ -38,9 +49,9 @@
     }
 
     @if (type() === 'PDF') {
-    <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" />
+    <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" required />
 
-    <input placeholder="URL du PDF" [ngModel]="form().pdfUrl" (ngModelChange)="form().pdfUrl = $event" />
+    <input placeholder="URL du PDF" [ngModel]="form().pdfUrl" (ngModelChange)="form().pdfUrl = $event" required />
 
     @if (form().pdfUrl) {
     <a [href]="form().pdfUrl" target="_blank">
@@ -49,7 +60,7 @@
     }
     }
 
-    <button class="btn-primary" (click)="submit()">
+    <button class="btn-primary" [disabled]="!isFormValid()" (click)="submit()">
         Enregistrer les modifications
     </button>
 

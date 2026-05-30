@@ -32,11 +32,11 @@ export class SearchComponent {
     });
   }
 
-  open(id: string) {
-    this.router.navigate(['/information/details', id]);
+  open(slug: string) {
+    this.router.navigate(['/information/details', slug]);
   }
 
-  edit(id: string) {
-    this.router.navigate(['/information/edit', id]);
+  edit(slug: string) {
+    this.router.navigate(['/information/edit', slug]);
   }
 }
