@@ -74,14 +74,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public User findById(String userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
+        return userRepository.findByUserIdWithRole(userId)
+            .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<User> findAll() {
-        return userRepository.findAll();
+        return userRepository.findAllWithRole();
     }
 
     @Override

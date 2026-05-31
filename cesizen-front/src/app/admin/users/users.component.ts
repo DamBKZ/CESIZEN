@@ -26,7 +26,8 @@ export class UsersComponent implements OnInit {
   private confirmService = inject(ConfirmService);
   private ui = inject(UiStore);
 
-  displayedColumns = ['email', 'firstname', 'lastname', 'role', 'active', 'actions'];
+  // Colonnes attendues par le template : email, pseudo, role, active, actions
+  displayedColumns = ['email', 'pseudo', 'role', 'active', 'actions'];
   users: AdminUser[] = [];
 
   ngOnInit(): void {

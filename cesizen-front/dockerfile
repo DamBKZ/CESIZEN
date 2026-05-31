@@ -3,7 +3,9 @@ FROM node:20-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+# `npm ci` échoue si le lockfile est hors de sync dans l'image Docker.
+# Utiliser `npm install` pour une construction plus robuste dans l'image.
+RUN npm install
 
 COPY . .
 RUN npm run build

@@ -12,6 +12,9 @@ public interface UserRepository extends JpaRepository<User, String> {
     @org.springframework.data.jpa.repository.Query("select u from User u join fetch u.role where u.userId = :userId")
     Optional<User> findByUserIdWithRole(String userId);
 
+    @org.springframework.data.jpa.repository.Query("select u from User u join fetch u.role")
+    java.util.List<User> findAllWithRole();
+
     Optional<User> findByPseudo(String pseudo);
 
     boolean existsByEmail(String email);

@@ -23,11 +23,16 @@ FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-# Utilisateur non-root pour limiter les risques en cas de compromission
-RUN addgroup --system cesizen && adduser --system --ingroup cesizen cesizen
-USER cesizen
-
+# Copier l'artefact en tant que root puis créer/utiliser l'utilisateur non-root
+# pour exécuter l'application (permets de chown le jar proprement)
 COPY --from=build /app/target/*.jar app.jar
+
+# Créer un utilisateur système et donner la propriété du jar
+RUN addgroup --system cesizen \
+ && adduser --system --ingroup cesizen cesizen \
+ && chown cesizen:cesizen app.jar
+
+USER cesizen
 
 EXPOSE 8080
 

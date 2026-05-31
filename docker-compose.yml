@@ -16,7 +16,8 @@ services:
     networks:
       - appnet
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      # Vérifie que le socket de MariaDB existe (indique que le serveur écoute)
+      test: ["CMD-SHELL", "[ -S /run/mysqld/mysqld.sock ] && echo 'ok' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5

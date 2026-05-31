@@ -30,17 +30,13 @@
         <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let u">
 
-            @if (!u.active) {
-            <button mat-icon-button color="primary" (click)="activate(u.userId)">
+            <button *ngIf="!u.active" mat-icon-button color="primary" (click)="activate(u.userId)">
                 <mat-icon>check_circle</mat-icon>
             </button>
-            }
 
-            @if (u.active) {
-            <button mat-icon-button color="warn" (click)="deactivate(u.userId)">
+            <button *ngIf="u.active" mat-icon-button color="warn" (click)="deactivate(u.userId)">
                 <mat-icon>block</mat-icon>
             </button>
-            }
 
             <button mat-icon-button color="warn" (click)="delete(u.userId)">
                 <mat-icon>delete</mat-icon>
