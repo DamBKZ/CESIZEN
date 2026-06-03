@@ -4,7 +4,6 @@
   "cli": {
     "packageManager": "npm",
     "schematicCollections": [
-      "@cypress/schematic",
       "@schematics/angular"
     ]
   },
@@ -97,51 +96,6 @@
             }
           },
           "defaultConfiguration": "development"
-        },
-        "cypress-run": {
-          "builder": "@cypress/schematic:cypress",
-          "options": {
-            "devServerTarget": "cesizen-front:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "cesizen-front:serve:production"
-            }
-          }
-        },
-        "cypress-open": {
-          "builder": "@cypress/schematic:cypress",
-          "options": {
-            "watch": true,
-            "headless": false
-          }
-        },
-        "ct": {
-          "builder": "@cypress/schematic:cypress",
-          "options": {
-            "devServerTarget": "cesizen-front:serve",
-            "watch": true,
-            "headless": false,
-            "testingType": "component"
-          },
-          "configurations": {
-            "development": {
-              "devServerTarget": "cesizen-front:serve:development"
-            }
-          }
-        },
-        "e2e": {
-          "builder": "@cypress/schematic:cypress",
-          "options": {
-            "devServerTarget": "cesizen-front:serve",
-            "watch": true,
-            "headless": false
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "cesizen-front:serve:production"
-            }
-          }
         }
       }
     }

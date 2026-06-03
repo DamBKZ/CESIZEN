@@ -1,10 +1,11 @@
 import { Component, AfterViewInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { CookieConsentComponent } from './shared/components/cookie-consent/cookie-consent.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, CookieConsentComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

@@ -7,7 +7,6 @@ Frontend Angular 21 de l'application CESIZEN.
 - Angular 21
 - Angular Material
 - RxJS
-- Cypress pour les tests e2e
 
 ## Pré-requis
 
@@ -38,20 +37,6 @@ cd cesizen-front
 npm test
 ```
 
-## Tests e2e
-
-```bash
-cd cesizen-front
-npm run cypress:open
-```
-
-ou :
-
-```bash
-cd cesizen-front
-npm run cypress:run
-```
-
 ## Configuration API
 
 En développement, le frontend passe par le proxy configuré pour joindre le backend.
@@ -65,8 +50,6 @@ En développement, le frontend passe par le proxy configuré pour joindre le bac
 - `npm start` : serveur de dev
 - `npm run build` : build de production
 - `npm test` : tests unitaires
-- `npm run cypress:open` : interface Cypress
-- `npm run cypress:run` : exécution headless Cypress
 
 ## Structure rapide
 

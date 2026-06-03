@@ -9,9 +9,7 @@
       "vitest/globals"
     ]
   },
-  "exclude": [
-    "cypress.config.ts"
-  ],
+  "exclude": [],
   "include": [
     "src/**/*.d.ts",
     "src/**/*.spec.ts"
