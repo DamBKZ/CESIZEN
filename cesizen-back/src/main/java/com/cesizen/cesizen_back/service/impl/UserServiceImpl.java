@@ -4,6 +4,7 @@ import com.cesizen.cesizen_back.entity.User;
 import com.cesizen.cesizen_back.service.RoleService;
 import com.cesizen.cesizen_back.service.UserService;
 import com.cesizen.cesizen_back.repository.UserRepository;
+import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +21,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
+
+    @Override
+@Transactional(readOnly = true)
+public Optional<User> findOptionalByEmail(String email) {
+    return userRepository.findByEmail(email);
+}
+
 
     @Override
     @Transactional
@@ -159,11 +167,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
 
         userRepository.delete(user);
-    }
-
-    @Override
-    public void deleteUser(String userId) {
-        userRepository.deleteById(userId);
     }
 
 }

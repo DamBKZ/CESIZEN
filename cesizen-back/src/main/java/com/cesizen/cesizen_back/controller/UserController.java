@@ -1,4 +1,5 @@
 package com.cesizen.cesizen_back.controller;
+import lombok.extern.slf4j.Slf4j;
 
 import com.cesizen.cesizen_back.dto.user.ChangePasswordRequest;
 import com.cesizen.cesizen_back.dto.user.RegisterRequest;
@@ -7,6 +8,7 @@ import com.cesizen.cesizen_back.dto.user.UpdateUserRequest;
 import com.cesizen.cesizen_back.dto.user.UserResponse;
 import com.cesizen.cesizen_back.entity.User;
 import com.cesizen.cesizen_back.service.EmailService;
+import com.cesizen.cesizen_back.service.RefreshTokenService;
 import com.cesizen.cesizen_back.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +21,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
+@Slf4j
+
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final EmailService emailService;
+    private final RefreshTokenService refreshTokenService;
+
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(
@@ -77,16 +83,25 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "Mot de passe mis à jour."));
     }
 
-    @DeleteMapping("/me")
-    public ResponseEntity<?> deleteMyAccount(
-            @AuthenticationPrincipal User user) {
+@DeleteMapping("/me")
+public ResponseEntity<Void> deleteMyAccount(@AuthenticationPrincipal User user) {
 
-        userService.deleteUser(user.getUserId());
+    String userId = user.getUserId();
+    String email = user.getEmail();
+    String pseudo = user.getPseudo();
 
-        emailService.sendAccountDeletionEmail(user.getEmail(), user.getPseudo());
+    refreshTokenService.deleteByUserId(userId);
+    userService.delete(userId);
 
-        return ResponseEntity.noContent().build();
+    try {
+        emailService.sendAccountDeletionEmail(email, pseudo);
+    } catch (Exception e) {
+        log.warn("Compte supprimé mais email de confirmation non envoyé à {} : {}", email, e.getMessage());
     }
+
+    return ResponseEntity.noContent().build();
+}
+
 
     private User extractUser(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof User user)) {

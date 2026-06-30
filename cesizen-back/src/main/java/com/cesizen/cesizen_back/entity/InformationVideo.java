@@ -1,6 +1,8 @@
 package com.cesizen.cesizen_back.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 public class InformationVideo extends Information {
 
-    @Column(name = "informationVideoURL", nullable = false, length = 255)
+    @Column(name = "informationVideoURL", length = 255)
     private String videoUrl;
 
     public InformationVideo(String title,

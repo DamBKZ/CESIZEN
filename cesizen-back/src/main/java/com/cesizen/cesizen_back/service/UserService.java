@@ -10,7 +10,9 @@ public interface UserService {
 
     User login(String email, String rawPassword);
 
-    User findByEmail(String email);
+User findByEmail(String email);
+
+java.util.Optional<User> findOptionalByEmail(String email);
 
     User findById(String userId);
 
@@ -25,7 +27,5 @@ public interface UserService {
     void activate(String userId);
 
     void delete(String userId);
-
-    void deleteUser(String userId);
 
 }

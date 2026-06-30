@@ -17,9 +17,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "informationKind", discriminatorType = DiscriminatorType.STRING)
 public abstract class Information {
 
     @Id
+    @GeneratedValue
     @UuidGenerator
     @Column(name = "informationID", columnDefinition = "CHAR(36)", updatable = false, nullable = false)
     private UUID informationId;
@@ -30,6 +32,13 @@ public abstract class Information {
     @ManyToOne(optional = false)
     @JoinColumn(name = "categoryID", nullable = false)
     private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "userID",
+            foreignKey = @ForeignKey(name = "fk_information_user")
+    )
+    private User owner;
 
     @CreationTimestamp
     @Column(name = "informationCreatedAt", nullable = false, updatable = false)
@@ -50,7 +59,7 @@ public abstract class Information {
     private String slug;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "informationType", nullable = false)
+    @Column(name = "informationType", nullable = false, length = 20)
     private InformationType type;
 
     public Information(String title,
@@ -61,7 +70,7 @@ public abstract class Information {
         this.title = title;
         this.author = author;
         this.slug = slug;
-        this.tags = tags;
+        this.tags = tags != null ? tags : new ArrayList<>();
         this.category = category;
     }
 }

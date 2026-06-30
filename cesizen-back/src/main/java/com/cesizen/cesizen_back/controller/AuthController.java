@@ -7,6 +7,7 @@ import com.cesizen.cesizen_back.security.jwt.JwtService;
 import com.cesizen.cesizen_back.service.UserService;
 import com.cesizen.cesizen_back.service.RefreshTokenService;
 import com.cesizen.cesizen_back.service.ResetPasswordTokenService;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
 import jakarta.validation.Valid;
@@ -20,10 +21,12 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
+
 
     private final UserService userService;
     private final JwtService jwtService;
@@ -107,25 +110,27 @@ public class AuthController {
             if (refreshToken != null) {
                 refreshTokenService.revoke(refreshToken);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+} catch (Exception e) {
+    log.warn("Impossible de révoquer le refresh token lors du logout : {}", e.getMessage());
+}
 
-                ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
-                        .httpOnly(true)
-                        .secure(false)
-                        .path("/")
-                        .maxAge(0)
-                        .sameSite("Lax")
-                        .build();
 
-                ResponseCookie deleteXsrf = ResponseCookie.from("XSRF-TOKEN", "")
-                        .httpOnly(false)
-                        .secure(false)
-                        .path("/")
-                        .maxAge(0)
-                        .sameSite("Lax")
-                        .build();
+ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
+        .httpOnly(true)
+        .secure(secureCookies)
+        .path("/")
+        .maxAge(0)
+        .sameSite(secureCookies ? "None" : "Lax")
+        .build();
+
+ResponseCookie deleteXsrf = ResponseCookie.from("XSRF-TOKEN", "")
+        .httpOnly(false)
+        .secure(secureCookies)
+        .path("/")
+        .maxAge(0)
+        .sameSite(secureCookies ? "None" : "Lax")
+        .build();
+
 
                 return ResponseEntity.ok()
                         .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
@@ -133,18 +138,18 @@ public class AuthController {
                         .body(Map.of("message", "Déconnexion réussie."));
     }
 
-    @PostMapping("/reset-password/request")
-    public ResponseEntity<Map<String, String>> requestReset(
-            @Valid @RequestBody RequestResetPasswordRequest request) {
+@PostMapping("/reset-password/request")
+public ResponseEntity<Map<String, String>> requestReset(
+        @Valid @RequestBody RequestResetPasswordRequest request) {
 
-        var user = userService.findByEmail(request.getEmail());
+    userService.findOptionalByEmail(request.getEmail())
+            .ifPresent(resetPasswordTokenService::createAndSendByEmail);
 
-        resetPasswordTokenService.createAndSendByEmail(user);
+    return ResponseEntity.ok(Map.of(
+            "message", "Si un compte existe avec cet email, un email de réinitialisation a été envoyé."
+    ));
+}
 
-        return ResponseEntity.ok(Map.of(
-                "message", "Un email de réinitialisation a été envoyé."
-        ));
-    }
 
     @PostMapping("/reset-password/confirm")
     public ResponseEntity<Map<String, String>> confirmReset(

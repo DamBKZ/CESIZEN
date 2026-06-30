@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import com.cesizen.cesizen_back.dto.user.AdviceRequest;
 import com.cesizen.cesizen_back.dto.user.AdviceResponse;
 import com.cesizen.cesizen_back.service.AdviceService;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -30,15 +31,20 @@ public class AdminAdviceController {
         return service.findById(id);
     }
 
-    @PostMapping
-    public AdviceResponse create(@RequestBody AdviceRequest request) {
-        return service.create(request);
-    }
+@PostMapping
+public AdviceResponse create(@Valid @RequestBody AdviceRequest request) {
+    return service.create(request);
+}
 
-    @PutMapping("/{id}")
-    public AdviceResponse update(@PathVariable String id, @RequestBody AdviceRequest request) {
-        return service.update(id, request);
-    }
+
+@PutMapping("/{id}")
+public AdviceResponse update(
+        @PathVariable String id,
+        @Valid @RequestBody AdviceRequest request
+) {
+    return service.update(id, request);
+}
+
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable String id) {

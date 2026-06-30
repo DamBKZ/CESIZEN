@@ -1,20 +1,35 @@
 package com.cesizen.cesizen_back.exception;
 
 import lombok.extern.slf4j.Slf4j;
-
-import org.apache.coyote.BadRequestException;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AccessDeniedException.class)
+public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException e) {
+    log.warn("Accès refusé (403) : {}", e.getMessage());
+    return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
+}
+
+@ExceptionHandler(HttpMessageNotReadableException.class)
+public ResponseEntity<Map<String, String>> handleUnreadableJson(HttpMessageNotReadableException e) {
+    log.warn("Requête JSON invalide (400) : {}", e.getMessage());
+    return ResponseEntity.badRequest().body(Map.of(
+            "error", "Requête JSON invalide ou valeur non reconnue."
+    ));
+}
+
+
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Map<String, String>> handleBadRequest(BadRequestException e) {
@@ -42,10 +57,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException e) {
-        String message = e.getBindingResult().getFieldErrors().stream()
+        String message = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
                 .map(FieldError::getDefaultMessage)
                 .findFirst()
                 .orElse("Erreur de validation.");
+
         log.warn("Erreur de validation (400) : {}", message);
         return ResponseEntity.badRequest().body(Map.of("error", message));
     }
@@ -53,6 +71,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGeneric(Exception e) {
         log.error("Erreur inattendue (500) : {}", e.getMessage(), e);
-        return ResponseEntity.internalServerError().body(Map.of("error", "Une erreur interne est survenue."));
+        return ResponseEntity
+                .internalServerError()
+                .body(Map.of("error", "Une erreur interne est survenue."));
     }
 }

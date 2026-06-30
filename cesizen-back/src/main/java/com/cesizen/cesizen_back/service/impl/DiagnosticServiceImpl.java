@@ -6,6 +6,7 @@ import com.cesizen.cesizen_back.dto.user.DiagnosticResponse;
 import com.cesizen.cesizen_back.entity.DiagnosticAnswer;
 import com.cesizen.cesizen_back.entity.DiagnosticEvent;
 import com.cesizen.cesizen_back.entity.DiagnosticSurvey;
+import com.cesizen.cesizen_back.entity.User;
 import com.cesizen.cesizen_back.event.DiagnosticCompletedEvent;
 import com.cesizen.cesizen_back.repository.DiagnosticEventRepository;
 import com.cesizen.cesizen_back.repository.DiagnosticSurveyRepository;
@@ -15,9 +16,11 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +30,19 @@ public class DiagnosticServiceImpl implements DiagnosticService {
     private final DiagnosticSurveyRepository surveyRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-
-
     @Override
-    public DiagnosticResponse submit(DiagnosticSubmitRequest request) {
+    @Transactional
+    public DiagnosticResponse submit(DiagnosticSubmitRequest request, User currentUser) {
+
+        if (currentUser == null) {
+            throw new IllegalStateException("Utilisateur non authentifié.");
+        }
+
+        Map<String, Boolean> submittedAnswers = request.getAnswers();
+
+        if (submittedAnswers == null) {
+            throw new IllegalArgumentException("Les réponses du diagnostic sont obligatoires.");
+        }
 
         List<DiagnosticEvent> events = eventRepository.findAll();
 
@@ -38,14 +50,14 @@ public class DiagnosticServiceImpl implements DiagnosticService {
         List<DiagnosticAnswer> answers = new ArrayList<>();
 
         DiagnosticSurvey survey = DiagnosticSurvey.builder()
-                .userId(request.getUserId())
+                .userId(currentUser.getUserId())
                 .score(0)
                 .riskLevel("UNKNOWN")
                 .build();
 
         for (DiagnosticEvent event : events) {
 
-            boolean checked = request.getAnswers().getOrDefault(event.getEventId(), false);
+            boolean checked = submittedAnswers.getOrDefault(event.getEventId(), false);
 
             if (checked) {
                 score += event.getLcu();
@@ -68,7 +80,6 @@ public class DiagnosticServiceImpl implements DiagnosticService {
 
         eventPublisher.publishEvent(new DiagnosticCompletedEvent(this, survey));
 
-
         return DiagnosticResponse.builder()
                 .surveyId(survey.getSurveyId())
                 .score(survey.getScore())
@@ -78,9 +89,14 @@ public class DiagnosticServiceImpl implements DiagnosticService {
     }
 
     @Override
-    public List<DiagnosticHistoryResponse> history(String userId) {
+    @Transactional(readOnly = true)
+    public List<DiagnosticHistoryResponse> history(User currentUser) {
 
-        return surveyRepository.findByUserIdOrderByCreatedAtDesc(userId)
+        if (currentUser == null) {
+            throw new IllegalStateException("Utilisateur non authentifié.");
+        }
+
+        return surveyRepository.findByUserIdOrderByCreatedAtDesc(currentUser.getUserId())
                 .stream()
                 .map(survey -> DiagnosticHistoryResponse.builder()
                         .surveyId(survey.getSurveyId())

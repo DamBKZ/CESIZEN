@@ -5,25 +5,18 @@ import com.cesizen.cesizen_back.service.LogService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/logs")
+@RequestMapping("/api/admin/logs")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class LogController {
 
     private final LogService logService;
-
-    @PostMapping
-    public ResponseEntity<Log> createLog(
-            @RequestParam(required = false) String userId,
-            @RequestParam String content
-    ) {
-        Log log = logService.createLog(userId, content);
-        return ResponseEntity.ok(log);
-    }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Log>> getLogsForUser(@PathVariable String userId) {

@@ -6,7 +6,7 @@ import com.cesizen.cesizen_back.entity.*;
 import org.springframework.stereotype.Component;
 
 @Component
-public class informationMapper {
+public class InformationMapper {
 
     public InformationResponse toResponse(Information info) {
         return InformationResponse.builder()
@@ -16,6 +16,8 @@ public class informationMapper {
                 .author(info.getAuthor())
                 .slug(info.getSlug())
                 .tags(info.getTags())
+                .ownerId(info.getOwner() != null ? info.getOwner().getUserId() : null)
+                .ownerPseudo(info.getOwner() != null ? info.getOwner().getPseudo() : null)
                 .categoryId(info.getCategory().getCategoryId())
                 .categoryName(info.getCategory().getName())
                 .createdAt(info.getCreatedAt().toString())
@@ -27,13 +29,25 @@ public class informationMapper {
 
     public void updateEntity(Information info, InformationRequest req, Category category) {
         info.setTitle(req.getTitle());
-        info.setAuthor(req.getAuthor());
+
+        if (req.getAuthor() != null && !req.getAuthor().isBlank()) {
+            info.setAuthor(req.getAuthor());
+        }
+
         info.setSlug(req.getSlug());
-        info.setTags(req.getTags());
+        info.setTags(req.getTags() != null ? req.getTags() : java.util.List.of());
         info.setCategory(category);
 
-        if (info instanceof InformationArticle a) a.setContent(req.getContent());
-        if (info instanceof InformationVideo v) v.setVideoUrl(req.getVideoUrl());
-        if (info instanceof InformationPdf p) p.setPdfUrl(req.getPdfUrl());
+        if (info instanceof InformationArticle a) {
+            a.setContent(req.getContent());
+        }
+
+        if (info instanceof InformationVideo v) {
+            v.setVideoUrl(req.getVideoUrl());
+        }
+
+        if (info instanceof InformationPdf p) {
+            p.setPdfUrl(req.getPdfUrl());
+        }
     }
 }

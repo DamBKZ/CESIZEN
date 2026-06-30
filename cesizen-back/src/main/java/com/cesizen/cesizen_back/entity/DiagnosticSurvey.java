@@ -18,6 +18,7 @@ import java.util.List;
 public class DiagnosticSurvey {
 
     @Id
+    @GeneratedValue
     @UuidGenerator
     @Column(name = "surveyID", columnDefinition = "CHAR(36)", nullable = false, updatable = false)
     private String surveyId;

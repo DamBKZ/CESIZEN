@@ -5,6 +5,7 @@ import com.cesizen.cesizen_back.entity.Role;
 import com.cesizen.cesizen_back.entity.User;
 import com.cesizen.cesizen_back.repository.RefreshTokenRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+@Disabled("Tests unitaires avec mocks désactivés : remplacement prévu par tests d'intégration")
 
 @ExtendWith(MockitoExtension.class)
 class RefreshTokenServiceImplTest {

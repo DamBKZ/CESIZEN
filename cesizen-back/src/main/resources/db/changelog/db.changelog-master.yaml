@@ -21,13 +21,10 @@ databaseChangeLog:
       file: db/changelog/007_seed_diagnostic_events.sql
 
   - include:
-      file: db/changelog/008_seed_admin_user.sql
-
-  - include:
-      file: db/changelog/009_seed_test_users.sql
-
-  - include:
-      file: db/changelog/010_update_damien_password.sql
-
-  - include:
       file: db/changelog/011_create_logs_table.sql
+
+  - include:
+      file: db/changelog/012_information_owner.sql
+
+  - include:
+      file: db/changelog/013_fix_diagnostic_schema.sql

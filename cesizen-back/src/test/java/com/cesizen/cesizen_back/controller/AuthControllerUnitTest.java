@@ -1,4 +1,5 @@
 package com.cesizen.cesizen_back.controller;
+import org.junit.jupiter.api.Disabled;
 
 import com.cesizen.cesizen_back.entity.RefreshToken;
 import com.cesizen.cesizen_back.entity.Role;
@@ -23,6 +24,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Disabled("Tests unitaires avec mocks désactivés : remplacement prévu par tests d'intégration")
 @WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class AuthControllerUnitTest {

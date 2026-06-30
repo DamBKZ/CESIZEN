@@ -2,12 +2,14 @@ package com.cesizen.cesizen_back.controller;
 
 import com.cesizen.cesizen_back.dto.user.InformationRequest;
 import com.cesizen.cesizen_back.dto.user.InformationResponse;
+import com.cesizen.cesizen_back.entity.User;
 import com.cesizen.cesizen_back.service.InformationService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -35,12 +37,27 @@ public class InformationController {
     }
 
     @PostMapping
-    public InformationResponse create(@Valid @RequestBody InformationRequest request) {
-        return service.create(request);
+    public InformationResponse create(
+            @AuthenticationPrincipal User currentUser,
+            @Valid @RequestBody InformationRequest request
+    ) {
+        return service.create(request, currentUser);
     }
 
     @PutMapping("/{id}")
-    public InformationResponse update(@PathVariable UUID id, @Valid @RequestBody InformationRequest request) {
-        return service.update(id, request);
+    public InformationResponse update(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable UUID id,
+            @Valid @RequestBody InformationRequest request
+    ) {
+        return service.update(id, request, currentUser);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable UUID id
+    ) {
+        service.delete(id, currentUser);
     }
 }

@@ -14,6 +14,7 @@ import org.hibernate.annotations.UuidGenerator;
 public class DiagnosticEvent {
 
     @Id
+    @GeneratedValue
     @UuidGenerator
     @Column(name = "eventID", columnDefinition = "CHAR(36)", nullable = false, updatable = false)
     private String eventId;

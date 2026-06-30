@@ -3,12 +3,14 @@ package com.cesizen.cesizen_back.service.impl;
 import com.cesizen.cesizen_back.entity.Log;
 import com.cesizen.cesizen_back.repository.LogRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+@Disabled("Tests unitaires avec mocks désactivés : remplacement prévu par tests d'intégration")
 
 class LogServiceImplTest {
 

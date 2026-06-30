@@ -3,6 +3,7 @@ package com.cesizen.cesizen_back.controller;
 import com.cesizen.cesizen_back.dto.user.InformationRequest;
 import com.cesizen.cesizen_back.dto.user.InformationResponse;
 import com.cesizen.cesizen_back.entity.InformationType;
+import com.cesizen.cesizen_back.entity.User;
 import com.cesizen.cesizen_back.service.InformationService;
 
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -53,22 +55,28 @@ public class AdminInformationController {
     }
 
     @PostMapping
-    public ResponseEntity<InformationResponse> create(@Valid @RequestBody InformationRequest request) {
-        return ResponseEntity.status(201).body(service.create(request));
+    public ResponseEntity<InformationResponse> create(
+            @AuthenticationPrincipal User currentUser,
+            @Valid @RequestBody InformationRequest request
+    ) {
+        return ResponseEntity.status(201).body(service.create(request, currentUser));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<InformationResponse> update(
+            @AuthenticationPrincipal User currentUser,
             @PathVariable UUID id,
             @Valid @RequestBody InformationRequest request
     ) {
-        return ResponseEntity.ok(service.update(id, request));
+        return ResponseEntity.ok(service.update(id, request, currentUser));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> delete(@PathVariable UUID id) {
-        service.delete(id);
+    public ResponseEntity<Map<String, String>> delete(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable UUID id
+    ) {
+        service.delete(id, currentUser);
         return ResponseEntity.ok(Map.of("message", "Information supprimée."));
     }
 }
-

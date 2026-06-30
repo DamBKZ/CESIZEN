@@ -15,6 +15,9 @@ public class InformationResponse {
     private String title;
     private String type;
     private String author;
+    private String ownerId;
+    private String ownerPseudo;
+
     private String slug;
     private List<String> tags;
 

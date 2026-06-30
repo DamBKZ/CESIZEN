@@ -2,6 +2,7 @@ package com.cesizen.cesizen_back.security;
 
 import com.cesizen.cesizen_back.security.jwt.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,6 +30,9 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    @Value("${app.frontend-url:http://localhost:4200}")
+    private String frontendUrl;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -46,11 +50,45 @@ public class SecurityConfig {
                 )
             )
             .authorizeHttpRequests(auth -> auth
+                // Preflight CORS
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // Auth public
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+
+                // Swagger en dev si activé
+                .requestMatchers(
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"
+                ).permitAll()
+
+                // Lecture publique
+                .requestMatchers(HttpMethod.GET, "/api/category/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/information/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/diagnostic/events").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/advice/**").permitAll()
+
+                // Admin
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                // User profile
+                .requestMatchers("/api/users/me/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/users/me").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/users/me").authenticated()
+
+                // Information write actions for authenticated users
+                .requestMatchers(HttpMethod.POST, "/api/information").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/information/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/information/**").authenticated()
+
+                // Diagnostic user actions
+                .requestMatchers(HttpMethod.POST, "/api/diagnostic/submit").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/diagnostic/history/me").authenticated()
+
+                // Everything else
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex
@@ -74,7 +112,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:4200"));
+        config.setAllowedOrigins(List.of(frontendUrl));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
         config.setExposedHeaders(List.of("Set-Cookie", "XSRF-TOKEN"));
