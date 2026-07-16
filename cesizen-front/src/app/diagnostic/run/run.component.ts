@@ -1,8 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { DiagnosticService } from '../diagnostic.service';
 import { UiStore } from '../../core/stores/ui.store';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-run',
@@ -19,7 +19,7 @@ export class RunComponent implements OnInit {
   events = signal<any[]>([]);
   selectedEvents = signal<Set<string>>(new Set());
   totalScore = signal(0);
-  riskLevel = signal<'Faible' | 'Modéré' | 'Élevé'>('Faible');
+  riskLevel = signal<'LOW' | 'MEDIUM' | 'HIGH'>('LOW');
   loadingEvents = signal(true);
 
   ngOnInit(): void {
@@ -71,16 +71,16 @@ export class RunComponent implements OnInit {
     this.riskLevel.set(this.computeRiskLevel(score));
   }
 
-  computeRiskLevel(score: number): 'Faible' | 'Modéré' | 'Élevé' {
+  computeRiskLevel(score: number): 'LOW' | 'MEDIUM' | 'HIGH' {
     if (score < 150) {
-      return 'Faible';
+      return 'LOW';
     }
 
     if (score < 300) {
-      return 'Modéré';
+      return 'MEDIUM';
     }
 
-    return 'Élevé';
+    return 'HIGH';
   }
 
   canSubmit(): boolean {
@@ -93,8 +93,32 @@ export class RunComponent implements OnInit {
       return;
     }
 
-    this.router.navigate(['/diagnostic/result'], {
-      state: { score: this.totalScore(), riskLevel: this.riskLevel() }
+    const selectedIds = this.selectedEvents();
+
+    const answers = this.events().reduce((acc: Record<string, boolean>, event: any) => {
+      acc[this.normalizeId(event.eventId)] = selectedIds.has(this.normalizeId(event.eventId));
+      return acc;
+    }, {});
+
+    this.ui.setLoading(true);
+
+    this.diagnosticService.submitDiagnostic({ answers }).subscribe({
+      next: (res: any) => {
+        this.ui.showSnackbar('Diagnostic enregistré', 'success');
+
+        this.router.navigate(['/diagnostic/result'], {
+          state: {
+            score: res.score,
+            riskLevel: res.riskLevel,
+            createdAt: res.createdAt,
+            surveyId: res.surveyId
+          }
+        });
+      },
+      error: () => {
+        this.ui.showSnackbar('Erreur lors de la soumission', 'error');
+      },
+      complete: () => this.ui.setLoading(false)
     });
   }
 }

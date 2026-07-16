@@ -1,20 +1,3 @@
-<h1>Mes logs</h1>
+<h1>Logs</h1>
 
-@if (logs.length === 0) {
-<div>
-    Aucun log pour le moment.
-</div>
-}
-
-@if (logs.length > 0) {
-<ul>
-    @for (log of logs; track log) {
-    <li>
-        <strong>{{ log.createdAt | date:'dd/MM/yyyy HH:mm' }}</strong>
-        <br>
-        {{ log.content }}
-        <hr>
-    </li>
-    }
-</ul>
-}
+<p>Les logs sont disponibles dans le back-office administrateur.</p>

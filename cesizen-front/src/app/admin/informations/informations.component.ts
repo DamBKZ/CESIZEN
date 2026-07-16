@@ -22,11 +22,10 @@ import { AdminInformation } from '../models/information-admin.model';
   styleUrls: ['./informations.component.scss']
 })
 export class InformationsComponent implements OnInit {
-
-  private adminService = inject(AdminService);
-  private confirmService = inject(ConfirmService);
-  private router = inject(Router);
-  private ui = inject(UiStore);
+  private readonly adminService = inject(AdminService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly router = inject(Router);
+  private readonly ui = inject(UiStore);
 
   displayedColumns = ['title', 'type', 'category', 'createdAt', 'actions'];
   informations: AdminInformation[] = [];
@@ -38,13 +37,16 @@ export class InformationsComponent implements OnInit {
   loadInformations(): void {
     this.adminService.getAllInformations().subscribe({
       next: data => this.informations = data,
-      error: err => console.error('Erreur chargement informations', err)
+      error: () => this.ui.showSnackbar('Erreur chargement informations', 'error')
     });
   }
 
   async delete(id: string): Promise<void> {
     const ok = await this.confirmService.confirm('Confirmer la suppression de cette information ?');
-    if (!ok) { return; }
+
+    if (!ok) {
+      return;
+    }
 
     this.adminService.deleteInformation(id).subscribe({
       next: () => {
@@ -55,7 +57,7 @@ export class InformationsComponent implements OnInit {
     });
   }
 
-  edit(id: string): void {
-    this.router.navigate(['/informations/edit', id]);
+  edit(slug: string): void {
+    this.router.navigate(['/informations/edit', slug]);
   }
 }

@@ -1,28 +1,25 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { AdminService } from '../admin.service';
 import { AdminLog } from '../models/log-admin.model';
+import { UiStore } from '../../core/stores/ui.store';
 
 @Component({
   selector: 'app-admin-logs',
   standalone: true,
   imports: [
     CommonModule,
-    MatTableModule,
-    MatButtonModule,
-    MatIconModule
+    MatTableModule
   ],
   templateUrl: './logs.component.html',
   styleUrls: ['./logs.component.scss']
 })
 export class LogsComponent implements OnInit {
+  private readonly adminService = inject(AdminService);
+  private readonly ui = inject(UiStore);
 
-  private adminService = inject(AdminService);
-
-  displayedColumns = ['user', 'content', 'date', 'actions'];
+  displayedColumns = ['user', 'content', 'date'];
   logs: AdminLog[] = [];
 
   ngOnInit(): void {
@@ -32,11 +29,7 @@ export class LogsComponent implements OnInit {
   loadLogs(): void {
     this.adminService.getAllLogs().subscribe({
       next: data => this.logs = data,
-      error: err => console.error('Erreur chargement logs', err)
+      error: () => this.ui.showSnackbar('Erreur chargement logs', 'error')
     });
-  }
-
-  delete(id: string): void {
-    this.adminService.deleteLog(id).subscribe(() => this.loadLogs());
   }
 }

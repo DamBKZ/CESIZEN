@@ -1,107 +1,59 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { INFORMATION_MOCKS, InformationMock } from './information.mock';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export type InformationType = 'ARTICLE' | 'VIDEO' | 'PDF';
+
+export interface Information {
+  informationId: string;
+  title: string;
+  type: InformationType;
+  author: string;
+  slug: string;
+  categoryId: string;
+  categoryName: string;
+  tags: string[];
+  createdAt: string;
+  ownerId?: string;
+  ownerPseudo?: string;
+  content?: string;
+  videoUrl?: string;
+  pdfUrl?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class InformationService {
   private readonly http = inject(HttpClient);
-  private informations: InformationMock[] = [...INFORMATION_MOCKS];
 
-  getAll(): Observable<InformationMock[]> {
-    return of([...this.informations]);
+  getAll(): Observable<Information[]> {
+    return this.http.get<Information[]>('/api/information');
   }
 
-  search(params: { keyword?: string }): Observable<InformationMock[]> {
-    const keyword = (params.keyword ?? '').trim().toLowerCase();
+  search(params: { keyword?: string }): Observable<Information[]> {
+    let httpParams = new HttpParams();
 
-    if (!keyword) {
-      return of([]);
+    if (params.keyword?.trim()) {
+      httpParams = httpParams.set('keyword', params.keyword.trim());
     }
 
-    const results = this.informations.filter((information) => {
-      const haystack = [
-        information.title,
-        information.author,
-        information.slug,
-        information.categoryName,
-        information.content,
-        ...(information.tags ?? [])
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-
-      return haystack.includes(keyword);
+    return this.http.get<Information[]>('/api/information/search', {
+      params: httpParams
     });
-
-    return of(results);
-}
-
-  getById(identifier: string | number): Observable<InformationMock | null> {
-    const normalized = String(identifier);
-    return of(
-      this.informations.find(
-        (information) => information.informationId === normalized || information.slug === normalized
-      ) ?? null
-    );
   }
 
-  update(identifier: string | number, payload: any): Observable<InformationMock> {
-    const normalized = String(identifier);
-    const index = this.informations.findIndex(
-      (information) => information.informationId === normalized || information.slug === normalized
-    );
-
-    if (index === -1) {
-      throw new Error('Information introuvable');
-    }
-
-    const current = this.informations[index];
-    const updated: InformationMock = {
-      ...current,
-      ...payload,
-      informationId: current.informationId,
-      createdAt: current.createdAt,
-      tags: payload.tags ?? current.tags,
-      categoryName: payload.categoryName ?? current.categoryName
-    };
-
-    this.informations = this.informations.map((information) =>
-      information.informationId === current.informationId ? updated : information
-    );
-
-    return of(updated);
+  getById(identifier: string | number): Observable<Information> {
+    return this.http.get<Information>(`/api/information/${identifier}`);
   }
 
-  create(payload: any): Observable<InformationMock> {
-    const created: InformationMock = {
-      informationId: `info-${Date.now()}`,
-      title: payload.title,
-      type: payload.type,
-      author: payload.author,
-      slug: payload.slug,
-      categoryId: payload.categoryId,
-      categoryName: payload.categoryName ?? 'Catégorie',
-      tags: payload.tags ?? [],
-      createdAt: new Date().toISOString(),
-      content: payload.content,
-      videoUrl: payload.videoUrl,
-      pdfUrl: payload.pdfUrl
-    };
+  create(payload: any): Observable<Information> {
+    return this.http.post<Information>('/api/information', payload);
+  }
 
-    this.informations = [created, ...this.informations];
-
-    return of(created);
+  update(identifier: string | number, payload: any): Observable<Information> {
+    return this.http.put<Information>(`/api/information/${identifier}`, payload);
   }
 
   delete(identifier: string | number): Observable<void> {
-    const normalized = String(identifier);
-    this.informations = this.informations.filter(
-      (information) => information.informationId !== normalized && information.slug !== normalized
-    );
-
-    return of(void 0);
+    return this.http.delete<void>(`/api/information/${identifier}`);
   }
-
 }

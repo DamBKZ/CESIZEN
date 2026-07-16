@@ -25,47 +25,40 @@ export class SidebarComponent implements OnInit {
   isAuthenticated = computed(() => this.userStore.isAuthenticated());
   role = computed(() => this.userStore.role());
 
+  isLoggingOut = false;
+
   ngOnInit(): void {
     if (!this.userStore.isAuthenticated() || this.userStore.user()) {
       return;
     }
 
     this.profileService.getCurrentUser().subscribe({
-      next: (user: any) => this.userStore.setUser(user)
+      next: (user: any) => this.userStore.setUser(user),
+      error: () => this.userStore.clear()
     });
   }
-  isLoggingOut = false;
 
   logout(): void {
-    if (this.isLoggingOut) { return; }
-    this.isLoggingOut = true;
-    console.log('Sidebar logout clicked');
-    function readCookie(name: string): string | null {
-      const match = document.cookie.match(new RegExp('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)'));
-      return match ? decodeURIComponent(match[2]) : null;
+    if (this.isLoggingOut) {
+      return;
     }
 
-    const xsrf = readCookie('XSRF-TOKEN');
-    const options: any = { withCredentials: true };
-    if (xsrf) { options.headers = { 'X-XSRF-TOKEN': xsrf }; }
-    const toast = this.toast;
+    this.isLoggingOut = true;
+
     const url = this.api.url('/auth/logout');
 
-    this.http.post(url, {}, options).subscribe({
+    this.http.post(url, {}, { withCredentials: true }).subscribe({
       next: () => {
         this.isLoggingOut = false;
         this.userStore.logout();
-        toast.success('Déconnexion réussie');
+        this.toast.success('Déconnexion réussie');
         this.router.navigate(['/login'], { replaceUrl: true });
-        history.replaceState({}, '', '/login');
       },
-      error: (err) => {
+      error: () => {
         this.isLoggingOut = false;
-        console.warn('Server logout failed', err);
         this.userStore.logout();
-        toast.error('Échec de la déconnexion');
+        this.toast.error('Déconnexion locale effectuée');
         this.router.navigate(['/login'], { replaceUrl: true });
-        history.replaceState({}, '', '/login');
       }
     });
   }

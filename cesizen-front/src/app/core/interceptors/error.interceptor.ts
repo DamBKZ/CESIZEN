@@ -1,12 +1,16 @@
-import { HttpInterceptorFn, HttpErrorResponse, HttpBackend, HttpClient } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { throwError, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 import { UserStore } from '../stores/user.store';
 import { ToastService } from '../../shared/services/toast.service';
-import { NotificationService } from '../../shared/services/notification.service';
 import { ApiService } from '../services/api.service';
+
+function readCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
@@ -15,44 +19,61 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const http = new HttpClient(backend);
   const api = inject(ApiService);
   const toast = inject(ToastService);
-  const notify = inject(NotificationService);
-
-  function readCookie(name: string): string | null {
-    const match = document.cookie.match(new RegExp('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)'));
-    return match ? decodeURIComponent(match[2]) : null;
-  }
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
+      const isAuthRequest = req.url.includes('/auth/login')
+        || req.url.includes('/auth/refresh')
+        || req.url.includes('/auth/logout')
+        || req.url.includes('/auth/reset-password');
 
+      if (error.status === 401 && !isAuthRequest) {
         const xsrf = readCookie('XSRF-TOKEN');
+
         const options: any = { withCredentials: true };
+
         if (xsrf) {
           options.headers = { 'X-XSRF-TOKEN': xsrf };
         }
 
         const refreshUrl = api.url('/auth/refresh');
+
         return http.post(refreshUrl, {}, options).pipe(
           switchMap((res: any) => {
             const newToken = res?.accessToken;
+
             if (!newToken) {
               userStore.clear();
               toast.error('Session expirée, reconnectez-vous');
-              notify.jobError('Refresh token invalide — reconnectez-vous');
               router.navigate(['/login']);
               return throwError(() => error);
             }
 
             userStore.login(newToken);
 
-            const retryReq = req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } });
+            let retryReq = req.clone({
+              withCredentials: true,
+              setHeaders: {
+                Authorization: `Bearer ${newToken}`
+              }
+            });
+
+            const retryXsrf = readCookie('XSRF-TOKEN');
+            const isMutatingRequest = !['GET', 'HEAD', 'OPTIONS'].includes(req.method.toUpperCase());
+
+            if (isMutatingRequest && retryXsrf) {
+              retryReq = retryReq.clone({
+                setHeaders: {
+                  'X-XSRF-TOKEN': retryXsrf
+                }
+              });
+            }
+
             return next(retryReq);
           }),
           catchError((err) => {
             userStore.clear();
             toast.error('Session expirée, reconnectez-vous');
-            notify.jobError('Refresh token invalide — reconnectez-vous');
             router.navigate(['/login']);
             return throwError(() => err);
           })
@@ -60,15 +81,11 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       if (error.status === 403) {
-        router.navigate(['/forbidden']);
-      }
-
-      if (error.status === 404) {
-        console.warn('Ressource introuvable :', req.url);
+        toast.error('Accès refusé');
+        router.navigate(['/login']);
       }
 
       if (error.status >= 500) {
-        console.error('Erreur serveur :', error);
         toast.error('Erreur serveur, réessayez plus tard');
       }
 

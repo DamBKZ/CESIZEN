@@ -6,12 +6,12 @@
 
     <h1>Créer une information</h1>
 
-    <input placeholder="Auteur" [ngModel]="form().author" (ngModelChange)="form().author = $event" required />
+    <input placeholder="Auteur" [ngModel]="form().author" (ngModelChange)="form().author = $event" />
 
-    <input placeholder="Slug (unique)" [ngModel]="form().slug" (ngModelChange)="form().slug = $event" required />
+    <input placeholder="Slug unique" [ngModel]="form().slug" (ngModelChange)="form().slug = $event" required />
 
-    <input placeholder="Tags (séparés par des virgules)" [ngModel]="form().tags"
-        (ngModelChange)="form().tags = $event.split(',').map(t => t.trim()).filter(tag => !!tag)" required />
+    <input placeholder="Tags séparés par des virgules" [ngModel]="form().tags?.join(', ')"
+        (ngModelChange)="form().tags = $event.split(',').map(t => t.trim()).filter(tag => !!tag)" />
 
     <label>Type</label>
     <select [ngModel]="type()" (ngModelChange)="type.set($event)">
@@ -28,29 +28,19 @@
         }
     </select>
 
-    @if (type() === 'ARTICLE') {
     <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" required />
 
-    <textarea placeholder="Contenu" [ngModel]="form().content" (ngModelChange)="form().content = $event"
-        required></textarea>
+    @if (type() === 'ARTICLE') {
+    <textarea placeholder="Contenu" [ngModel]="form().content" (ngModelChange)="form().content = $event" required>
+    </textarea>
     }
 
     @if (type() === 'VIDEO') {
-    <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" required />
-
-    <input placeholder="URL de la vidéo (YouTube, MP4...)" [ngModel]="form().videoUrl"
-        (ngModelChange)="form().videoUrl = $event" required />
-
-    @if (form().videoUrl) {
-    <div class="video-preview">
-        <iframe width="560" height="315" [src]="getEmbedUrl(form().videoUrl)" frameborder="0" allowfullscreen></iframe>
-    </div>
-    }
+    <input placeholder="URL de la vidéo" [ngModel]="form().videoUrl" (ngModelChange)="form().videoUrl = $event"
+        required />
     }
 
     @if (type() === 'PDF') {
-    <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="form().title = $event" required />
-
     <input placeholder="URL du PDF" [ngModel]="form().pdfUrl" (ngModelChange)="form().pdfUrl = $event" required />
 
     @if (form().pdfUrl) {
@@ -60,7 +50,7 @@
     }
     }
 
-    <button class="btn-primary" [disabled]="!isFormValid()" (click)="submit()">
+    <button class="btn-primary" type="button" [disabled]="!isFormValid()" (click)="submit()">
         Créer
     </button>
 

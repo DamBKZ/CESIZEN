@@ -6,6 +6,7 @@ import com.cesizen.cesizen_back.service.LogService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class LogServiceImpl implements LogService {
     private final LogRepository logRepository;
 
     @Override
+    @Transactional
     public Log createLog(String userId, String content) {
         Log log = Log.builder()
                 .userId(userId)
@@ -26,11 +28,13 @@ public class LogServiceImpl implements LogService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Log> getLogsForUser(String userId) {
         return logRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Log> getAllLogs() {
         return logRepository.findAll();
     }

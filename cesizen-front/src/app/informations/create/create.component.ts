@@ -35,34 +35,31 @@ export class CreateComponent {
   });
 
   getEmbedUrl(url: string): string {
-    if (!url) return '';
+    if (!url) {
+      return '';
+    }
 
     if (url.includes('youtube.com/watch')) {
-      const id = url.split('v=')[1];
-      return `https://www.youtube.com/embed/${id}`;
+      const id = url.split('v=')[1]?.split('&')[0];
+      return id ? `https://www.youtube.com/embed/${id}` : url;
     }
 
     if (url.includes('youtu.be/')) {
-      const id = url.split('youtu.be/')[1];
-      return `https://www.youtube.com/embed/${id}`;
+      const id = url.split('youtu.be/')[1]?.split('?')[0];
+      return id ? `https://www.youtube.com/embed/${id}` : url;
     }
 
     return url;
   }
 
   goBack(): void {
-    this.router.navigate(['/information/list']);
+    this.router.navigate(['/informations/list']);
   }
 
   isFormValid(): boolean {
     const current = this.form();
-    const tags = (current.tags ?? []).map((tag: string) => tag.trim()).filter(Boolean);
 
-    if (!current.author?.trim() || !current.slug?.trim() || !current.categoryId?.trim() || tags.length === 0) {
-      return false;
-    }
-
-    if (!current.title?.trim()) {
+    if (!current.slug?.trim() || !current.categoryId?.trim() || !current.title?.trim()) {
       return false;
     }
 
@@ -77,9 +74,9 @@ export class CreateComponent {
     return Boolean(current.pdfUrl?.trim());
   }
 
-  submit() {
+  submit(): void {
     if (!this.isFormValid()) {
-      this.ui.showSnackbar('Tous les champs sont obligatoires', 'error');
+      this.ui.showSnackbar('Les champs obligatoires ne sont pas remplis', 'error');
       return;
     }
 

@@ -23,14 +23,13 @@ import { DeleteAccountDialogComponent } from './dialogs/delete-account-dialog.co
   styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent implements OnInit {
-
-  private fb = inject(FormBuilder);
-  private profileService = inject(ProfileService);
-  private userStore = inject(UserStore);
-  private ui = inject(UiStore);
-  private dialog = inject(MatDialog);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  private readonly fb = inject(FormBuilder);
+  private readonly profileService = inject(ProfileService);
+  private readonly userStore = inject(UserStore);
+  private readonly ui = inject(UiStore);
+  private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   user = this.userStore.user();
 
@@ -48,7 +47,7 @@ export class ProfileComponent implements OnInit {
   }
 
   backToInformations(): void {
-    this.router.navigate(['/information/list']);
+    this.router.navigate(['/informations/list']);
   }
 
   ngOnInit(): void {
@@ -80,18 +79,28 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  save() {
-    if (this.form.invalid) return;
+  save(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     this.profileService.updateProfile(this.form.value).subscribe({
-      next: () => this.ui.showSnackbar('Profil mis à jour', 'success'),
+      next: (updatedUser: any) => {
+        this.userStore.setUser(updatedUser);
+        this.user = updatedUser;
+        this.ui.showSnackbar('Profil mis à jour', 'success');
+      },
       error: () => this.ui.showSnackbar('Erreur lors de la mise à jour', 'error')
     });
   }
 
-  deleteAccount() {
+  deleteAccount(): void {
     const user = this.userStore.user();
-    if (!user) return;
+
+    if (!user) {
+      return;
+    }
 
     const dialogRef = this.dialog.open(DeleteAccountDialogComponent, {
       width: '420px',
@@ -107,10 +116,7 @@ export class ProfileComponent implements OnInit {
         next: () => {
           this.userStore.clear();
           this.ui.showSnackbar('Votre compte a bien été supprimé', 'success');
-
-          window.setTimeout(() => {
-            this.router.navigate(['/register']);
-          }, 3000);
+          this.router.navigate(['/register']);
         },
         error: () => {
           this.ui.showSnackbar('Erreur lors de la suppression du compte', 'error');
@@ -118,5 +124,4 @@ export class ProfileComponent implements OnInit {
       });
     });
   }
-
 }

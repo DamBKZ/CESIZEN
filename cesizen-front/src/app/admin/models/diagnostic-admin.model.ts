@@ -1,10 +1,9 @@
 export interface AdminDiagnostic {
-  id: string;
+  surveyId: string;
   score: number;
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
   createdAt: string;
-  user: {
-    firstname: string;
-    lastname: string;
-  } | null;
+  userId?: string;
+  userEmail?: string;
+  userPseudo?: string;
 }

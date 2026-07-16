@@ -1,8 +1,11 @@
 export interface AdminUser {
-  id: string;
+  userId: string;
   email: string;
-  firstname: string;
-  lastname: string;
-  role: 'USER' | 'ADMIN';
+  pseudo: string;
   active: boolean;
+  userCreatedAt?: string;
+  role: {
+    roleId: string;
+    roleName: 'USER' | 'ADMIN';
+  };
 }

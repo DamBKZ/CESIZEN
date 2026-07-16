@@ -4,7 +4,9 @@
 
     <ng-container matColumnDef="user">
         <th mat-header-cell *matHeaderCellDef>Utilisateur</th>
-        <td mat-cell *matCellDef="let d">{{ d.userEmail }}</td>
+        <td mat-cell *matCellDef="let d">
+            {{ d.userPseudo || d.userEmail || 'Utilisateur inconnu' }}
+        </td>
     </ng-container>
 
     <ng-container matColumnDef="score">
@@ -15,8 +17,8 @@
     <ng-container matColumnDef="risk">
         <th mat-header-cell *matHeaderCellDef>Risque</th>
         <td mat-cell *matCellDef="let d">
-            <span class="risk" [class.low]="d.riskLevel === 'Faible'" [class.medium]="d.riskLevel === 'Moyen'"
-                [class.high]="d.riskLevel === 'Élevé'">
+            <span class="risk" [class.low]="d.riskLevel === 'LOW'" [class.medium]="d.riskLevel === 'MEDIUM'"
+                [class.high]="d.riskLevel === 'HIGH'">
                 {{ d.riskLevel }}
             </span>
         </td>
@@ -32,7 +34,7 @@
     <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let d">
-            <button mat-icon-button color="warn" (click)="delete(d.id)">
+            <button mat-icon-button color="warn" (click)="delete(d.surveyId)">
                 <mat-icon>delete</mat-icon>
             </button>
         </td>

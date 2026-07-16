@@ -1,10 +1,12 @@
 export interface AdminInformation {
-  id: string;
+  informationId: string;
   title: string;
   type: 'ARTICLE' | 'VIDEO' | 'PDF';
+  author: string;
+  slug: string;
+  categoryId: string;
+  categoryName: string;
   createdAt: string;
-  category: {
-    id: string;
-    name: string;
-  };
+  ownerId?: string;
+  ownerPseudo?: string;
 }

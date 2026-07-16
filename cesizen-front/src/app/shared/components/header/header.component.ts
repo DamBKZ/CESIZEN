@@ -26,32 +26,26 @@ export class HeaderComponent {
   user = computed(() => this.userStore.user());
 
   logout(): void {
-    if (this.isLoggingOut) { return; }
-    this.isLoggingOut = true;
-    function readCookie(name: string): string | null {
-      const match = document.cookie.match(new RegExp('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)'));
-      return match ? decodeURIComponent(match[2]) : null;
+    if (this.isLoggingOut) {
+      return;
     }
 
-    const xsrf = readCookie('XSRF-TOKEN');
-    const options: any = { withCredentials: true };
-    if (xsrf) { options.headers = { 'X-XSRF-TOKEN': xsrf }; }
+    this.isLoggingOut = true;
 
     const url = this.api.url('/auth/logout');
-    this.http.post(url, {}, options).subscribe({
+
+    this.http.post(url, {}, { withCredentials: true }).subscribe({
       next: () => {
         this.isLoggingOut = false;
         this.userStore.logout();
         this.toast.success('Déconnexion réussie');
         this.router.navigate(['/login'], { replaceUrl: true });
-        history.replaceState({}, '', '/login');
       },
       error: () => {
         this.isLoggingOut = false;
         this.userStore.logout();
-        this.toast.error('Échec de la déconnexion');
+        this.toast.error('Déconnexion locale effectuée');
         this.router.navigate(['/login'], { replaceUrl: true });
-        history.replaceState({}, '', '/login');
       }
     });
   }

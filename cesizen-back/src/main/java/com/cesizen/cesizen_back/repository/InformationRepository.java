@@ -12,6 +12,9 @@ import java.util.UUID;
 
 public interface InformationRepository extends JpaRepository<Information, UUID> {
 
+       boolean existsByCategory_CategoryId(UUID categoryId);
+
+
     @Query("""
            SELECT i FROM Information i
            WHERE LOWER(i.title) LIKE LOWER(CONCAT('%', :keyword, '%'))

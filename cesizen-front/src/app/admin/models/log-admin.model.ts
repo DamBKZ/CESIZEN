@@ -1,9 +1,8 @@
 export interface AdminLog {
-  id: string;
+  logId: string;
   content: string;
   createdAt: string;
-  user: {
-    firstname: string;
-    lastname: string;
-  } | null;
+  userId?: string;
+  userEmail?: string;
+  userPseudo?: string;
 }

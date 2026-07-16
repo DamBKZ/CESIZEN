@@ -35,11 +35,11 @@
         <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let i">
 
-            <button mat-icon-button color="primary" (click)="edit(i.id)">
+            <button mat-icon-button color="primary" (click)="edit(i.slug)">
                 <mat-icon>edit</mat-icon>
             </button>
 
-            <button mat-icon-button color="warn" (click)="delete(i.id)">
+            <button mat-icon-button color="warn" (click)="delete(i.informationId)">
                 <mat-icon>delete</mat-icon>
             </button>
 

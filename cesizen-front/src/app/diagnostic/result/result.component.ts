@@ -1,8 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { DiagnosticService } from '../diagnostic.service';
-import { UserStore } from '../../core/stores/user.store';
 import { UiStore } from '../../core/stores/ui.store';
+
+type ApiRiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 
 @Component({
   selector: 'app-result',
@@ -13,7 +14,6 @@ import { UiStore } from '../../core/stores/ui.store';
 export class ResultComponent {
   private readonly router = inject(Router);
   private readonly diagnosticService = inject(DiagnosticService);
-  private readonly userStore = inject(UserStore);
   private readonly ui = inject(UiStore);
 
   score = signal<number | null>(null);
@@ -28,29 +28,21 @@ export class ResultComponent {
 
     if (state && state.score !== undefined) {
       this.score.set(state.score);
-      this.computeInterpretation(state.score);
+      this.computeInterpretation(state.score, state.riskLevel);
     } else {
       this.loadLatestHistory();
     }
   }
 
   loadLatestHistory(): void {
-    const user = this.userStore.user();
-
-    if (!user) {
-      this.ui.showSnackbar('Utilisateur non connecté', 'error');
-      this.router.navigate(['/login']);
-      return;
-    }
-
     this.ui.setLoading(true);
 
-    this.diagnosticService.getHistory(user.userId).subscribe({
-      next: (res: any) => {
+    this.diagnosticService.getHistory().subscribe({
+      next: (res: any[]) => {
         if (res && res.length > 0) {
           const last = res[0];
           this.score.set(last.score);
-          this.computeInterpretation(last.score);
+          this.computeInterpretation(last.score, last.riskLevel);
         }
       },
       error: () => {
@@ -60,8 +52,10 @@ export class ResultComponent {
     });
   }
 
-  computeInterpretation(score: number): void {
-    if (score < 150) {
+  computeInterpretation(score: number, apiRiskLevel?: ApiRiskLevel): void {
+    const level = apiRiskLevel ?? this.computeApiRiskLevel(score);
+
+    if (level === 'LOW') {
       this.riskLevel.set('Faible');
       this.riskEmoji.set('🙂');
       this.riskBoxClass.set('risk-box--low');
@@ -71,7 +65,10 @@ export class ResultComponent {
         'Micro-pauses: 3 pauses de 1 minute dans la journée.',
         'Organisation simple: noter 3 priorités maximum.'
       ]);
-    } else if (score < 300) {
+      return;
+    }
+
+    if (level === 'MEDIUM') {
       this.riskLevel.set('Modéré');
       this.riskEmoji.set('😐');
       this.riskBoxClass.set('risk-box--medium');
@@ -81,18 +78,31 @@ export class ResultComponent {
         'Réduction de charge: identifier 1 tâche à déléguer ou reporter.',
         'Sommeil régulier: heure de coucher fixe et moins d’écrans.'
       ]);
-    } else {
-      this.riskLevel.set('Élevé');
-      this.riskEmoji.set('😟');
-      this.riskBoxClass.set('risk-box--high');
-      this.interpretation.set('Niveau élevé : stress intense.');
-      this.adviceItems.set([
-        'Priorisation stricte: réduire au minimum les obligations non essentielles.',
-        'Techniques d’ancrage: respiration profonde, cohérence cardiaque, ancrage 5-4-3-2-1.',
-        'Soutien social: parler à un proche, collègue ou personne de confiance.',
-        'Pause obligatoire: s’accorder un vrai temps de récupération.'
-      ]);
+      return;
     }
+
+    this.riskLevel.set('Élevé');
+    this.riskEmoji.set('😟');
+    this.riskBoxClass.set('risk-box--high');
+    this.interpretation.set('Niveau élevé : stress intense.');
+    this.adviceItems.set([
+      'Priorisation stricte: réduire au minimum les obligations non essentielles.',
+      'Techniques d’ancrage: respiration profonde, cohérence cardiaque, ancrage 5-4-3-2-1.',
+      'Soutien social: parler à un proche, collègue ou personne de confiance.',
+      'Pause obligatoire: s’accorder un vrai temps de récupération.'
+    ]);
+  }
+
+  computeApiRiskLevel(score: number): ApiRiskLevel {
+    if (score < 150) {
+      return 'LOW';
+    }
+
+    if (score < 300) {
+      return 'MEDIUM';
+    }
+
+    return 'HIGH';
   }
 
   restart(): void {

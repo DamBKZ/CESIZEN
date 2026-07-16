@@ -108,20 +108,33 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
+@Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(frontendUrl));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
-        config.setExposedHeaders(List.of("Set-Cookie", "XSRF-TOKEN"));
-        config.setAllowCredentials(true);
+    config.setAllowedOrigins(List.of(
+            frontendUrl,
+            "http://localhost:4200",
+            "http://127.0.0.1:4200"
+    ));
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    config.setAllowedHeaders(List.of(
+            "Authorization",
+            "Content-Type",
+            "X-XSRF-TOKEN",
+            "X-Requested-With",
+            "Accept",
+            "Origin"
+    ));
+    config.setExposedHeaders(List.of("Set-Cookie", "XSRF-TOKEN"));
+    config.setAllowCredentials(true);
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
+    return source;
+}
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
