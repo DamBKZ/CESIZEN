@@ -28,6 +28,3 @@ databaseChangeLog:
 
   - include:
       file: db/changelog/013_fix_diagnostic_schema.sql
-
-  - include:
-      file: db/changelog/014_seed_diagnostic_surveys.sql
