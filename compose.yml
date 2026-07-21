@@ -25,6 +25,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+      start_period: 20s
 
   backend:
     build:
@@ -43,19 +44,27 @@ services:
       DB_URL: jdbc:mariadb://database:3306/cesizen
       DB_USERNAME: cesizen
       DB_PASSWORD: cesizen_local_password
-
       JWT_SECRET: local-development-secret-key-change-before-production-123456789
-
-      SERVER_PORT: 8080
-
+      SERVER_PORT: "8080"
       FRONTEND_URL: http://localhost:4200
       APP_COOKIES_SECURE: "false"
-
       MAIL_USERNAME: ""
       MAIL_PASSWORD: ""
 
     ports:
       - "8081:8080"
+
+    healthcheck:
+      test:
+        - CMD
+        - nc
+        - -z
+        - 127.0.0.1
+        - "8080"
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
 
   frontend:
     build:
@@ -67,7 +76,8 @@ services:
     restart: unless-stopped
 
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
     ports:
       - "4200:80"
