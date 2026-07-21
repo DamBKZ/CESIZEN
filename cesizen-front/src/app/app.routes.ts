@@ -7,7 +7,7 @@ export const APP_ROUTES: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'informations'
+    redirectTo: 'login'
   },
   {
     path: 'login',
@@ -59,11 +59,6 @@ export const APP_ROUTES: Routes = [
         canActivate: [adminGuard],
         loadChildren: () =>
           import('./admin/admin.routes').then(m => m.ADMIN_ROUTES)
-      },
-      {
-        path: '',
-        redirectTo: 'informations',
-        pathMatch: 'full'
       }
     ]
   },
