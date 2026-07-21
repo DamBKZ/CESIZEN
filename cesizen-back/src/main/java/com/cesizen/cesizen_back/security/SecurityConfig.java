@@ -21,7 +21,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Configuration
 @RequiredArgsConstructor
@@ -34,107 +36,212 @@ public class SecurityConfig {
     private String frontendUrl;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http
+    ) throws Exception {
 
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.deny())
-                .contentTypeOptions(ct -> {})
-                .referrerPolicy(rp ->
-                    rp.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)
+                .csrf(AbstractHttpConfigurer::disable)
+
+                .cors(cors ->
+                        cors.configurationSource(corsConfigurationSource())
                 )
-            )
-            .authorizeHttpRequests(auth -> auth
-                // Preflight CORS
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // Auth public
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
 
-                // Swagger en dev si activé
-                .requestMatchers(
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/swagger-ui.html"
-                ).permitAll()
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.deny())
+                        .contentTypeOptions(contentType -> {
+                        })
+                        .referrerPolicy(referrer ->
+                                referrer.policy(
+                                        ReferrerPolicyHeaderWriter
+                                                .ReferrerPolicy
+                                                .NO_REFERRER
+                                )
+                        )
+                )
 
-                // Lecture publique
-                .requestMatchers(HttpMethod.GET, "/api/category/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/information/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/diagnostic/events").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/advice/**").permitAll()
+                .authorizeHttpRequests(auth -> auth
+                        // Requêtes CORS preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**")
+                        .permitAll()
 
-                // Admin
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // Authentification publique
+                        .requestMatchers("/auth/**")
+                        .permitAll()
 
-                // User profile
-                .requestMatchers("/api/users/me/**").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/api/users/me").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/api/users/me").authenticated()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/users/register"
+                        )
+                        .permitAll()
 
-                // Information write actions for authenticated users
-                .requestMatchers(HttpMethod.POST, "/api/information").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/api/information/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/api/information/**").authenticated()
+                        // Documentation, si elle est activée en développement
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        )
+                        .permitAll()
 
-                // Diagnostic user actions
-                .requestMatchers(HttpMethod.POST, "/api/diagnostic/submit").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/diagnostic/history/me").authenticated()
+                        // Ressources accessibles publiquement en lecture
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/category/**"
+                        )
+                        .permitAll()
 
-                // Everything else
-                .anyRequest().authenticated()
-            )
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(401);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\": \"Non authentifié.\"}");
-                })
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    response.setStatus(403);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\": \"Accès refusé.\"}");
-                })
-            )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/information/**"
+                        )
+                        .permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/diagnostic/events"
+                        )
+                        .permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/advice/**"
+                        )
+                        .permitAll()
+
+                        // Administration
+                        .requestMatchers("/api/admin/**")
+                        .hasRole("ADMIN")
+
+                        // Profil utilisateur
+                        .requestMatchers(
+                                "/api/users/me",
+                                "/api/users/me/**"
+                        )
+                        .authenticated()
+
+                        // Création et gestion des informations
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/information"
+                        )
+                        .authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/information/**"
+                        )
+                        .authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/information/**"
+                        )
+                        .authenticated()
+
+                        // Diagnostic utilisateur
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/diagnostic/submit"
+                        )
+                        .authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/diagnostic/history/me"
+                        )
+                        .authenticated()
+
+                        // Toute autre route nécessite une authentification
+                        .anyRequest()
+                        .authenticated()
+                )
+
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(
+                                (request, response, exception) -> {
+                                    response.setStatus(401);
+                                    response.setContentType(
+                                            "application/json;charset=UTF-8"
+                                    );
+                                    response.getWriter().write(
+                                            "{\"error\":\"Non authentifié.\"}"
+                                    );
+                                }
+                        )
+
+                        .accessDeniedHandler(
+                                (request, response, exception) -> {
+                                    response.setStatus(403);
+                                    response.setContentType(
+                                            "application/json;charset=UTF-8"
+                                    );
+                                    response.getWriter().write(
+                                            "{\"error\":\"Accès refusé.\"}"
+                                    );
+                                }
+                        )
+                )
+
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }
 
-@Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration config = new CorsConfiguration();
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
 
-    config.setAllowedOrigins(List.of(
-            frontendUrl,
-            "http://localhost:4200",
-            "http://127.0.0.1:4200"
-    ));
+        /*
+         * LinkedHashSet évite les doublons lorsque frontendUrl vaut déjà
+         * http://localhost:4200.
+         */
+        Set<String> allowedOrigins = new LinkedHashSet<>();
 
-    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-    config.setAllowedHeaders(List.of(
-            "Authorization",
-            "Content-Type",
-            "X-XSRF-TOKEN",
-            "X-Requested-With",
-            "Accept",
-            "Origin"
-    ));
-    config.setExposedHeaders(List.of("Set-Cookie", "XSRF-TOKEN"));
-    config.setAllowCredentials(true);
+        if (frontendUrl != null && !frontendUrl.isBlank()) {
+            allowedOrigins.add(frontendUrl.trim());
+        }
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", config);
-    return source;
-}
+        allowedOrigins.add("http://localhost:4200");
+        allowedOrigins.add("http://127.0.0.1:4200");
 
+        config.setAllowedOrigins(List.copyOf(allowedOrigins));
+
+        config.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
+        ));
+
+        config.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "X-XSRF-TOKEN",
+                "X-Requested-With",
+                "Accept",
+                "Origin"
+        ));
+
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", config);
+
+        return source;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -142,7 +249,9 @@ public CorsConfigurationSource corsConfigurationSource() {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration configuration
+    ) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 }

@@ -1,18 +1,19 @@
 package com.cesizen.cesizen_back.service.impl;
 
 import com.cesizen.cesizen_back.entity.User;
+import com.cesizen.cesizen_back.exception.BadRequestException;
+import com.cesizen.cesizen_back.exception.NotFoundException;
+import com.cesizen.cesizen_back.repository.UserRepository;
 import com.cesizen.cesizen_back.service.RoleService;
 import com.cesizen.cesizen_back.service.UserService;
-import com.cesizen.cesizen_back.repository.UserRepository;
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,29 +24,43 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-@Transactional(readOnly = true)
-public Optional<User> findOptionalByEmail(String email) {
-    return userRepository.findByEmail(email);
-}
+    @Transactional(readOnly = true)
+    public Optional<User> findOptionalByEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return Optional.empty();
+        }
 
+        return userRepository.findByEmail(normalizeEmail(email));
+    }
 
     @Override
     @Transactional
-    public User register(String email, String password, String pseudo) {
+    public User register(
+            String email,
+            String password,
+            String pseudo
+    ) {
+        String normalizedEmail = normalizeEmail(email);
+        String normalizedPseudo = normalizePseudo(pseudo);
 
-        if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Un compte existe déjà avec cet email.");
+        validatePassword(password);
+
+        if (userRepository.existsByEmail(normalizedEmail)) {
+            throw new BadRequestException(
+                    "Un compte existe déjà avec cet email."
+            );
         }
 
-        if (userRepository.existsByPseudo(pseudo)) {
-            throw new IllegalArgumentException("Ce pseudo est déjà utilisé.");
+        if (userRepository.existsByPseudo(normalizedPseudo)) {
+            throw new BadRequestException(
+                    "Ce pseudo est déjà utilisé."
+            );
         }
 
         User user = User.builder()
-                .email(email)
+                .email(normalizedEmail)
                 .password(passwordEncoder.encode(password))
-                .pseudo(pseudo)
-                .userCreatedAt(LocalDateTime.now())
+                .pseudo(normalizedPseudo)
                 .role(roleService.getDefaultRole())
                 .build();
 
@@ -54,20 +69,34 @@ public Optional<User> findOptionalByEmail(String email) {
 
     @Override
     @Transactional(readOnly = true)
-    public User login(String email, String rawPassword) {
+    public User login(
+            String email,
+            String rawPassword
+    ) {
+        String normalizedEmail = normalizeEmail(email);
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Identifiants invalides."));
+        if (rawPassword == null || rawPassword.isBlank()) {
+            throw new BadRequestException("Identifiants invalides.");
+        }
+
+        User user = userRepository
+                .findByEmailWithRole(normalizedEmail)
+                .orElseThrow(() ->
+                        new BadRequestException("Identifiants invalides.")
+                );
 
         if (!user.isEnabled()) {
-            throw new IllegalStateException("Ce compte est désactivé.");
+            throw new IllegalStateException(
+                    "Ce compte est désactivé."
+            );
         }
 
-        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new IllegalArgumentException("Identifiants invalides.");
+        if (!passwordEncoder.matches(
+                rawPassword,
+                user.getPassword()
+        )) {
+            throw new BadRequestException("Identifiants invalides.");
         }
-
-        user.getRole().getRoleName();
 
         return user;
     }
@@ -75,15 +104,23 @@ public Optional<User> findOptionalByEmail(String email) {
     @Override
     @Transactional(readOnly = true)
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
+        return userRepository
+                .findByEmailWithRole(normalizeEmail(email))
+                .orElseThrow(() ->
+                        new NotFoundException("Utilisateur introuvable.")
+                );
     }
 
     @Override
     @Transactional(readOnly = true)
     public User findById(String userId) {
-        return userRepository.findByUserIdWithRole(userId)
-            .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
+        validateUserId(userId);
+
+        return userRepository
+                .findByUserIdWithRole(userId)
+                .orElseThrow(() ->
+                        new NotFoundException("Utilisateur introuvable.")
+                );
     }
 
     @Override
@@ -94,79 +131,182 @@ public Optional<User> findOptionalByEmail(String email) {
 
     @Override
     @Transactional
-    public User updateUserProfile(String userId, String newEmail, String newPseudo) {
+    public User updateUserProfile(
+            String userId,
+            String newEmail,
+            String newPseudo
+    ) {
+        validateUserId(userId);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
+        String normalizedEmail = normalizeEmail(newEmail);
+        String normalizedPseudo = normalizePseudo(newPseudo);
 
-        if (!user.getEmail().equals(newEmail) && userRepository.existsByEmailAndUserIdNot(newEmail, userId)) {
-            throw new IllegalArgumentException("Un compte existe déjà avec cet email.");
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() ->
+                        new NotFoundException("Utilisateur introuvable.")
+                );
+
+        boolean emailChanged =
+                !user.getEmail().equals(normalizedEmail);
+
+        if (
+                emailChanged
+                && userRepository.existsByEmailAndUserIdNot(
+                        normalizedEmail,
+                        userId
+                )
+        ) {
+            throw new BadRequestException(
+                    "Un compte existe déjà avec cet email."
+            );
         }
 
-        if (!user.getPseudo().equals(newPseudo) && userRepository.existsByPseudoAndUserIdNot(newPseudo, userId)) {
-            throw new IllegalArgumentException("Ce pseudo est déjà utilisé.");
+        boolean pseudoChanged =
+                !user.getPseudo().equals(normalizedPseudo);
+
+        if (
+                pseudoChanged
+                && userRepository.existsByPseudoAndUserIdNot(
+                        normalizedPseudo,
+                        userId
+                )
+        ) {
+            throw new BadRequestException(
+                    "Ce pseudo est déjà utilisé."
+            );
         }
 
-        user.setEmail(newEmail);
-        user.setPseudo(newPseudo);
+        user.setEmail(normalizedEmail);
+        user.setPseudo(normalizedPseudo);
 
         return userRepository.save(user);
     }
 
     @Override
     @Transactional
-    public void changePassword(String userId, String currentPassword, String newPassword) {
+    public void changePassword(
+            String userId,
+            String currentPassword,
+            String newPassword
+    ) {
+        validateUserId(userId);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
-
-        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-            throw new IllegalArgumentException("Le mot de passe actuel est incorrect.");
+        if (currentPassword == null || currentPassword.isBlank()) {
+            throw new BadRequestException(
+                    "Le mot de passe actuel est obligatoire."
+            );
         }
 
-        if (passwordEncoder.matches(newPassword, user.getPassword())) {
-            throw new IllegalArgumentException("Le nouveau mot de passe doit être différent de l'actuel.");
+        validatePassword(newPassword);
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() ->
+                        new NotFoundException("Utilisateur introuvable.")
+                );
+
+        if (!passwordEncoder.matches(
+                currentPassword,
+                user.getPassword()
+        )) {
+            throw new BadRequestException(
+                    "Le mot de passe actuel est incorrect."
+            );
+        }
+
+        if (passwordEncoder.matches(
+                newPassword,
+                user.getPassword()
+        )) {
+            throw new BadRequestException(
+                    "Le nouveau mot de passe doit être différent de l'actuel."
+            );
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
     }
 
     @Override
     @Transactional
     public void deactivate(String userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
+        User user = findManagedUser(userId);
 
         if (!user.isActive()) {
-            throw new IllegalStateException("Ce compte est déjà désactivé.");
+            throw new IllegalStateException(
+                    "Ce compte est déjà désactivé."
+            );
         }
 
         user.setActive(false);
-        userRepository.save(user);
     }
 
     @Override
     @Transactional
     public void activate(String userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
+        User user = findManagedUser(userId);
 
         if (user.isActive()) {
-            throw new IllegalStateException("Ce compte est déjà actif.");
+            throw new IllegalStateException(
+                    "Ce compte est déjà actif."
+            );
         }
 
         user.setActive(true);
-        userRepository.save(user);
     }
 
     @Override
     @Transactional
     public void delete(String userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable."));
-
+        User user = findManagedUser(userId);
         userRepository.delete(user);
     }
 
+    private User findManagedUser(String userId) {
+        validateUserId(userId);
+
+        return userRepository
+                .findById(userId)
+                .orElseThrow(() ->
+                        new NotFoundException("Utilisateur introuvable.")
+                );
+    }
+
+    private String normalizeEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new BadRequestException(
+                    "L'adresse email est obligatoire."
+            );
+        }
+
+        return email
+                .trim()
+                .toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizePseudo(String pseudo) {
+        if (pseudo == null || pseudo.isBlank()) {
+            throw new BadRequestException(
+                    "Le pseudo est obligatoire."
+            );
+        }
+
+        return pseudo.trim();
+    }
+
+    private void validatePassword(String password) {
+        if (password == null || password.isBlank()) {
+            throw new BadRequestException(
+                    "Le mot de passe est obligatoire."
+            );
+        }
+    }
+
+    private void validateUserId(String userId) {
+        if (userId == null || userId.isBlank()) {
+            throw new BadRequestException(
+                    "L'identifiant utilisateur est obligatoire."
+            );
+        }
+    }
 }

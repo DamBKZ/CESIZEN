@@ -42,7 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
         c.setName(req.getName().trim());
         c.setDescription(req.getDescription());
 
-        Category saved = repo.save(c);
+        Category saved = repo.saveAndFlush(c);
         return mapper.toResponse(saved);
     }
 
@@ -69,7 +69,7 @@ public class CategoryServiceImpl implements CategoryService {
         c.setName(newName);
         c.setDescription(req.getDescription());
 
-        Category saved = repo.save(c);
+        Category saved = repo.saveAndFlush(c);
 
         return mapper.toResponse(saved);
     }

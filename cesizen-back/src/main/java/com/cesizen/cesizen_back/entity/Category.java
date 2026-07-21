@@ -36,4 +36,11 @@ public class Category {
     @CreationTimestamp
     @Column(name = "categoryCreatedAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void initializeCreatedAt() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }

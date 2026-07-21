@@ -6,25 +6,43 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class JwtServiceTest {
 
-    private JwtService jwtService;
-
     private static final String SECRET =
-            "dGVzdHNlY3JldGtleWZvcnVuaXR0ZXN0c29ubHkxMjM0NTY3ODkwYWJjZGVmZ2hpams";
+            "test-secret-key-for-unit-tests-only-1234567890";
+
+    private JwtService jwtService;
 
     @BeforeEach
     void setUp() {
-        jwtService = new JwtService();
-        ReflectionTestUtils.setField(jwtService, "secretKey", SECRET);
-        ReflectionTestUtils.setField(jwtService, "expirationMs", 3600000L);
+        jwtService = createJwtService(3_600_000L);
     }
 
-    // =========================================================================
-    // GENERATE + EXTRACT
-    // =========================================================================
+    private JwtService createJwtService(long expirationMs) {
+        JwtService service = new JwtService();
+
+        ReflectionTestUtils.setField(
+                service,
+                "secret",
+                SECRET
+        );
+
+        ReflectionTestUtils.setField(
+                service,
+                "expirationMs",
+                expirationMs
+        );
+
+        /*
+         * @PostConstruct n'est pas exécuté, car le service est instancié
+         * directement sans contexte Spring.
+         */
+        service.initializeSigningKey();
+
+        return service;
+    }
 
     @Nested
     @DisplayName("generateToken() + extract*()")
@@ -33,23 +51,27 @@ class JwtServiceTest {
         @Test
         @DisplayName("Doit générer un token et en extraire le userId")
         void shouldExtractUserId() {
-            String token = jwtService.generateToken("user-123", "USER");
+            String token = jwtService.generateToken(
+                    "user-123",
+                    "USER"
+            );
 
-            assertThat(jwtService.extractUserId(token)).isEqualTo("user-123");
+            assertThat(jwtService.extractUserId(token))
+                    .isEqualTo("user-123");
         }
 
         @Test
         @DisplayName("Doit générer un token et en extraire le rôle")
         void shouldExtractRole() {
-            String token = jwtService.generateToken("user-123", "ADMIN");
+            String token = jwtService.generateToken(
+                    "user-123",
+                    "ADMIN"
+            );
 
-            assertThat(jwtService.extractRole(token)).isEqualTo("ADMIN");
+            assertThat(jwtService.extractRole(token))
+                    .isEqualTo("ADMIN");
         }
     }
-
-    // =========================================================================
-    // VALIDATION
-    // =========================================================================
 
     @Nested
     @DisplayName("isTokenValid()")
@@ -58,24 +80,45 @@ class JwtServiceTest {
         @Test
         @DisplayName("Doit retourner true pour un token valide")
         void shouldReturnTrueForValidToken() {
-            String token = jwtService.generateToken("user-123", "USER");
+            String token = jwtService.generateToken(
+                    "user-123",
+                    "USER"
+            );
 
-            assertThat(jwtService.isTokenValid(token)).isTrue();
+            assertThat(jwtService.isTokenValid(token))
+                    .isTrue();
         }
 
         @Test
         @DisplayName("Doit retourner false pour un token invalide")
         void shouldReturnFalseForInvalidToken() {
-            assertThat(jwtService.isTokenValid("token.invalide.ici")).isFalse();
+            assertThat(
+                    jwtService.isTokenValid("token.invalide.ici")
+            ).isFalse();
         }
 
         @Test
         @DisplayName("Doit retourner false pour un token expiré")
-        void shouldReturnFalseForExpiredToken() {
-            ReflectionTestUtils.setField(jwtService, "expirationMs", -1000L);
-            String expiredToken = jwtService.generateToken("user-123", "USER");
+        void shouldReturnFalseForExpiredToken()
+                throws InterruptedException {
 
-            assertThat(jwtService.isTokenValid(expiredToken)).isFalse();
+            JwtService shortLivedJwtService =
+                    createJwtService(1L);
+
+            String expiredToken =
+                    shortLivedJwtService.generateToken(
+                            "user-123",
+                            "USER"
+                    );
+
+            /*
+             * On attend que la durée de validité de 1 ms soit dépassée.
+             */
+            Thread.sleep(10L);
+
+            assertThat(
+                    shortLivedJwtService.isTokenValid(expiredToken)
+            ).isFalse();
         }
     }
 }

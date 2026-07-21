@@ -1,6 +1,7 @@
 package com.cesizen.cesizen_back.security.jwt;
 
 import com.cesizen.cesizen_back.repository.UserRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,9 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
+
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
@@ -30,59 +34,119 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (!hasBearerToken(authHeader)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(7);
+        /*
+         * Si un filtre précédent a déjà authentifié la requête,
+         * il n'est pas nécessaire de traiter de nouveau le JWT.
+         */
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String token = authHeader.substring(BEARER_PREFIX.length()).trim();
+
+        if (token.isEmpty()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         try {
             if (!jwtService.isTokenValid(token)) {
-                log.warn("Token JWT invalide ou expiré.");
-                filterChain.doFilter(request, response);
-                return;
-            }
+                log.debug(
+                        "JWT invalide ou expiré pour {} {}",
+                        request.getMethod(),
+                        request.getRequestURI()
+                );
 
-            if (SecurityContextHolder.getContext().getAuthentication() != null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
             String userId = jwtService.extractUserId(token);
 
-            var user = userRepository.findByUserIdWithRole(userId).orElse(null);
+            if (userId == null || userId.isBlank()) {
+                log.debug("JWT sans identifiant utilisateur.");
 
-            if (user == null) {
-                log.warn("Utilisateur introuvable pour userId={}", userId);
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            var authToken = new UsernamePasswordAuthenticationToken(
-                    user,
-                    null,
-                    user.getAuthorities()
+            var user = userRepository
+                    .findByUserIdWithRole(userId)
+                    .orElse(null);
+
+            if (user == null) {
+                log.warn(
+                        "Utilisateur JWT introuvable pour userId={}",
+                        userId
+                );
+
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            if (!user.isEnabled()) {
+                log.warn(
+                        "Tentative d'utilisation d'un JWT par le compte désactivé {}",
+                        userId
+                );
+
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            var authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            user,
+                            null,
+                            user.getAuthorities()
+                    );
+
+            authentication.setDetails(
+                    new WebAuthenticationDetailsSource()
+                            .buildDetails(request)
             );
 
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder
+                    .getContext()
+                    .setAuthentication(authentication);
 
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+        } catch (JwtException | IllegalArgumentException exception) {
+            log.debug(
+                    "JWT rejeté pour {} {} : {}",
+                    request.getMethod(),
+                    request.getRequestURI(),
+                    exception.getMessage()
+            );
 
-        } catch (Exception e) {
-            log.error("Erreur dans JwtAuthFilter : {}", e.getMessage());
+        } catch (Exception exception) {
+            log.error(
+                    "Erreur inattendue pendant l'authentification JWT.",
+                    exception
+            );
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean hasBearerToken(String authHeader) {
+        return authHeader != null
+                && authHeader.startsWith(BEARER_PREFIX);
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
 
-        return path.startsWith("/auth")
+        return path.equals("/auth")
+                || path.startsWith("/auth/")
                 || path.equals("/api/users/register");
     }
 }

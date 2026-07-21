@@ -27,8 +27,12 @@ public class DiagnosticController {
             @AuthenticationPrincipal User currentUser,
             @Valid @RequestBody DiagnosticSubmitRequest request
     ) {
-        return ResponseEntity.ok(diagnosticService.submit(request, currentUser));
+DiagnosticResponse response =
+        diagnosticService.submit(request, currentUser);
+
+        return ResponseEntity.status(201).body(response);
     }
+
 
     @GetMapping("/history/me")
     public ResponseEntity<List<DiagnosticHistoryResponse>> history(

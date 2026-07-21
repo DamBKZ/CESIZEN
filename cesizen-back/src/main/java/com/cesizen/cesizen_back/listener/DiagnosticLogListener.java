@@ -15,15 +15,38 @@ public class DiagnosticLogListener {
     private final LogService logService;
 
     @EventListener
-    public void onDiagnosticCompleted(DiagnosticCompletedEvent event) {
-
+    public void onDiagnosticCompleted(
+            DiagnosticCompletedEvent event
+    ) {
         var survey = event.getSurvey();
 
-        String content = "Diagnostic completed with score " + survey.getScore()
-                + " and risk level " + survey.getRiskLevel();
+        try {
+            String content =
+                    "Diagnostic terminé avec le score "
+                            + survey.getScore()
+                            + " et le niveau de risque "
+                            + survey.getRiskLevel();
 
-        logService.createLog(survey.getUserId(), content);
+            logService.createLog(
+                    survey.getUserId(),
+                    content
+            );
 
-        log.info("Log created for diagnostic {}", survey.getSurveyId());
+            log.info(
+                    "Log créé pour le diagnostic {}",
+                    survey.getSurveyId()
+            );
+
+        } catch (Exception exception) {
+            /*
+             * Une erreur de journalisation ne doit pas annuler
+             * l'enregistrement du diagnostic.
+             */
+            log.error(
+                    "Diagnostic {} enregistré, mais le log n'a pas pu être créé",
+                    survey.getSurveyId(),
+                    exception
+            );
+        }
     }
 }

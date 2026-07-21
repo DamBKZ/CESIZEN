@@ -13,11 +13,17 @@ import java.util.List;
 
 @Entity
 @Table(
-    name = "users",
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uq_user_email", columnNames = "email"),
-        @UniqueConstraint(name = "uq_user_pseudo", columnNames = "pseudo")
-    }
+        name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_user_email",
+                        columnNames = "email"
+                ),
+                @UniqueConstraint(
+                        name = "uq_user_pseudo",
+                        columnNames = "pseudo"
+                )
+        }
 )
 @Getter
 @Setter
@@ -27,38 +33,73 @@ import java.util.List;
 public class User implements UserDetails {
 
     @Id
-    @UuidGenerator
     @GeneratedValue
-    @Column(name = "userID", columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @UuidGenerator
+    @Column(
+            name = "userID",
+            columnDefinition = "CHAR(36)",
+            updatable = false,
+            nullable = false
+    )
     private String userId;
 
-    @Column(nullable = false, unique = true, length = 255)
+    @Column(
+            nullable = false,
+            unique = true,
+            length = 255
+    )
     private String email;
 
-    @Column(nullable = false, length = 255)
+    @Column(
+            nullable = false,
+            length = 255
+    )
     private String password;
 
-    @Column(nullable = false, unique = true, length = 30)
+    @Column(
+            nullable = false,
+            unique = true,
+            length = 30
+    )
     private String pseudo;
 
-    @Column(name = "userCreatedAt", nullable = false, updatable = false)
+    @Column(
+            name = "userCreatedAt",
+            nullable = false,
+            updatable = false
+    )
     private LocalDateTime userCreatedAt;
 
     @Column(nullable = false)
     @Builder.Default
     private boolean active = true;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
-        name = "roleID",
-        nullable = false,
-        foreignKey = @ForeignKey(name = "fk_user_role")
+            name = "roleID",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_user_role")
     )
     private Role role;
 
+    @PrePersist
+    protected void initializeDefaults() {
+        if (userCreatedAt == null) {
+            userCreatedAt = LocalDateTime.now();
+        }
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.getRoleName()));
+        if (role == null || role.getRoleName() == null) {
+            return List.of();
+        }
+
+        return List.of(
+                new SimpleGrantedAuthority(
+                        "ROLE_" + role.getRoleName()
+                )
+        );
     }
 
     @Override
@@ -74,6 +115,11 @@ public class User implements UserDetails {
     @Override
     public boolean isAccountNonLocked() {
         return active;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
     @Override

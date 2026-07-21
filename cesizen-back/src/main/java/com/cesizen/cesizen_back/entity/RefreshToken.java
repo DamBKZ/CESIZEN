@@ -45,7 +45,11 @@ public class RefreshToken {
     @Column(nullable = false)
     @Builder.Default
     private boolean revoked = false;
-    public boolean isValid() {
-        return !revoked && refreshTokenEndDate.isAfter(LocalDateTime.now());
-    }
+
+public boolean isValid() {
+    return !revoked
+            && refreshTokenEndDate != null
+            && refreshTokenEndDate.isAfter(LocalDateTime.now());
+}
+
 }

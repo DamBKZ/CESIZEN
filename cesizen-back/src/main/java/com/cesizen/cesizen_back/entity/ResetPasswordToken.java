@@ -45,7 +45,11 @@ public class ResetPasswordToken {
     @Column(nullable = false)
     @Builder.Default
     private boolean used = false;
-    public boolean isValid() {
-        return !used && resetPasswordTokenEndDate.isAfter(LocalDateTime.now());
-    }
+
+public boolean isValid() {
+    return !used
+            && resetPasswordTokenEndDate != null
+            && resetPasswordTokenEndDate.isAfter(LocalDateTime.now());
+}
+
 }

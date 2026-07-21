@@ -1,4 +1,4 @@
-# Étape 1 : compilation Maven
+# Ãƒâ€°tape 1 : compilation Maven
 FROM maven:3.9-eclipse-temurin-21-alpine AS build
 
 WORKDIR /app
@@ -12,12 +12,14 @@ COPY src ./src
 RUN mvn clean package -DskipTests -B
 
 
-# Étape 2 : exécution
+# Ãƒâ€°tape 2 : exÃƒÂ©cution
 FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN apk add --no-cache wget \
+    && addgroup -S spring \
+    && adduser -S spring -G spring
 
 COPY --from=build \
   /app/target/cesizen-back-0.0.1-SNAPSHOT.jar \

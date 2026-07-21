@@ -17,20 +17,35 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "informationKind", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(
+        name = "informationKind",
+        discriminatorType = DiscriminatorType.STRING
+)
 public abstract class Information {
 
     @Id
     @GeneratedValue
     @UuidGenerator
-    @Column(name = "informationID", columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(
+            name = "informationID",
+            columnDefinition = "CHAR(36)",
+            updatable = false,
+            nullable = false
+    )
     private UUID informationId;
 
-    @Column(name = "informationTitle", nullable = false, length = 150)
+    @Column(
+            name = "informationTitle",
+            nullable = false,
+            length = 150
+    )
     private String title;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "categoryID", nullable = false)
+    @JoinColumn(
+            name = "categoryID",
+            nullable = false
+    )
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,10 +56,18 @@ public abstract class Information {
     private User owner;
 
     @CreationTimestamp
-    @Column(name = "informationCreatedAt", nullable = false, updatable = false)
+    @Column(
+            name = "informationCreatedAt",
+            nullable = false,
+            updatable = false
+    )
     private LocalDateTime createdAt;
 
-    @Column(name = "informationAuthor", nullable = false, length = 100)
+    @Column(
+            name = "informationAuthor",
+            nullable = false,
+            length = 100
+    )
     private String author;
 
     @ElementCollection
@@ -52,25 +75,52 @@ public abstract class Information {
             name = "information_tags",
             joinColumns = @JoinColumn(name = "informationID")
     )
-    @Column(name = "tag", length = 50)
+    @Column(
+            name = "tag",
+            length = 50
+    )
     private List<String> tags = new ArrayList<>();
 
-    @Column(name = "informationSlug", nullable = false, unique = true, length = 200)
+    @Column(
+            name = "informationSlug",
+            nullable = false,
+            unique = true,
+            length = 200
+    )
     private String slug;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "informationType", nullable = false, length = 20)
+    @Column(
+            name = "informationType",
+            nullable = false,
+            length = 20
+    )
     private InformationType type;
 
-    public Information(String title,
-                       String author,
-                       String slug,
-                       List<String> tags,
-                       Category category) {
+    public Information(
+            String title,
+            String author,
+            String slug,
+            List<String> tags,
+            Category category
+    ) {
         this.title = title;
         this.author = author;
         this.slug = slug;
-        this.tags = tags != null ? tags : new ArrayList<>();
+        this.tags = tags != null
+                ? new ArrayList<>(tags)
+                : new ArrayList<>();
         this.category = category;
+    }
+
+    @PrePersist
+    protected void initializeCreatedAt() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
     }
 }
