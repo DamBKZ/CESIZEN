@@ -4,6 +4,13 @@ import { Observable } from 'rxjs';
 
 export type InformationType = 'ARTICLE' | 'VIDEO' | 'PDF';
 
+export interface InformationCategory {
+  categoryId: string;
+  name: string;
+  description?: string;
+  createdAt?: string;
+}
+
 export interface Information {
   informationId: string;
   title: string;
@@ -29,31 +36,60 @@ export class InformationService {
     return this.http.get<Information[]>('/api/information');
   }
 
-  search(params: { keyword?: string }): Observable<Information[]> {
+  search(params: {
+    keyword?: string;
+  }): Observable<Information[]> {
     let httpParams = new HttpParams();
 
     if (params.keyword?.trim()) {
-      httpParams = httpParams.set('keyword', params.keyword.trim());
+      httpParams = httpParams.set(
+        'keyword',
+        params.keyword.trim()
+      );
     }
 
-    return this.http.get<Information[]>('/api/information/search', {
-      params: httpParams
-    });
+    return this.http.get<Information[]>(
+      '/api/information/search',
+      { params: httpParams }
+    );
   }
 
-  getById(identifier: string | number): Observable<Information> {
-    return this.http.get<Information>(`/api/information/${identifier}`);
+  getById(
+    identifier: string | number
+  ): Observable<Information> {
+    return this.http.get<Information>(
+      `/api/information/${identifier}`
+    );
   }
 
-  create(payload: any): Observable<Information> {
-    return this.http.post<Information>('/api/information', payload);
+  getCategories(): Observable<InformationCategory[]> {
+    return this.http.get<InformationCategory[]>(
+      '/api/category'
+    );
   }
 
-  update(identifier: string | number, payload: any): Observable<Information> {
-    return this.http.put<Information>(`/api/information/${identifier}`, payload);
+  create(payload: unknown): Observable<Information> {
+    return this.http.post<Information>(
+      '/api/information',
+      payload
+    );
   }
 
-  delete(identifier: string | number): Observable<void> {
-    return this.http.delete<void>(`/api/information/${identifier}`);
+  update(
+    identifier: string | number,
+    payload: unknown
+  ): Observable<Information> {
+    return this.http.put<Information>(
+      `/api/information/${identifier}`,
+      payload
+    );
+  }
+
+  delete(
+    identifier: string | number
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `/api/information/${identifier}`
+    );
   }
 }

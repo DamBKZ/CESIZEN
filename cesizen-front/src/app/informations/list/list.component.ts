@@ -1,7 +1,8 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { InformationService } from '../information.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+
+import { InformationService } from '../information.service';
 import { UserStore } from '../../core/stores/user.store';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { UiStore } from '../../core/stores/ui.store';
@@ -20,10 +21,10 @@ export class ListComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
   private readonly ui = inject(UiStore);
 
-  items = signal<any[]>([]);
-  keyword = signal('');
+  readonly items = signal<any[]>([]);
+  readonly keyword = signal('');
 
-  filteredItems = computed(() => {
+  readonly filteredItems = computed(() => {
     const query = this.keyword().trim().toLowerCase();
 
     if (!query) {
@@ -32,12 +33,12 @@ export class ListComponent implements OnInit {
 
     return this.items().filter((item) => {
       const haystack = [
-        item.title,
-        item.author,
-        item.slug,
-        item.categoryName,
-        item.content,
-        ...(item.tags ?? [])
+        item?.title,
+        item?.author,
+        item?.slug,
+        item?.categoryName,
+        item?.content,
+        ...this.getTags(item)
       ]
         .filter(Boolean)
         .join(' ')
@@ -46,6 +47,55 @@ export class ListComponent implements OnInit {
       return haystack.includes(query);
     });
   });
+
+  ngOnInit(): void {
+    this.service.getAll().subscribe({
+      next: (response: any) => {
+        const items = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.content)
+            ? response.content
+            : Array.isArray(response?.items)
+              ? response.items
+              : [];
+
+        this.items.set(items);
+      },
+      error: () => {
+        this.items.set([]);
+
+        this.ui.showSnackbar(
+          'Erreur lors du chargement des informations',
+          'error'
+        );
+      }
+    });
+  }
+
+  getTags(item: any): string[] {
+    const tags = item?.tags;
+
+    if (Array.isArray(tags)) {
+      return tags
+        .map((tag) => {
+          if (typeof tag === 'string') {
+            return tag;
+          }
+
+          return tag?.name ?? tag?.tagName ?? tag?.label ?? '';
+        })
+        .filter(Boolean);
+    }
+
+    if (typeof tags === 'string') {
+      return tags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+    }
+
+    return [];
+  }
 
   canEditOrDelete(item: any): boolean {
     const current = this.userStore.user();
@@ -61,13 +111,6 @@ export class ListComponent implements OnInit {
     return item.ownerId === current.userId;
   }
 
-  ngOnInit(): void {
-    this.service.getAll().subscribe({
-      next: (res) => this.items.set(res),
-      error: () => this.ui.showSnackbar('Erreur lors du chargement des informations', 'error')
-    });
-  }
-
   open(slug: string): void {
     this.router.navigate(['/informations/details', slug]);
   }
@@ -80,19 +123,30 @@ export class ListComponent implements OnInit {
   async delete(item: any, event: Event): Promise<void> {
     event.stopPropagation();
 
-    const ok = await this.confirmService.confirm('Confirmer la suppression de cette information ?');
+    const confirmed = await this.confirmService.confirm(
+      'Confirmer la suppression de cette information ?'
+    );
 
-    if (!ok) {
+    if (!confirmed) {
       return;
     }
 
     this.service.delete(item.informationId).subscribe({
       next: () => {
-        this.items.set(this.items().filter(i => i.informationId !== item.informationId));
+        this.items.update((items) =>
+          items.filter(
+            (currentItem) =>
+              currentItem.informationId !== item.informationId
+          )
+        );
+
         this.ui.showSnackbar('Information supprimée', 'success');
       },
       error: () => {
-        this.ui.showSnackbar('Échec de la suppression', 'error');
+        this.ui.showSnackbar(
+          'Échec de la suppression',
+          'error'
+        );
       }
     });
   }
