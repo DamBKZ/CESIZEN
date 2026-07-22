@@ -1,18 +1,23 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
+import {
+  Component,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
+import { finalize } from 'rxjs';
+
 import { AdminService } from '../admin.service';
-import { ConfirmService } from '../../shared/services/confirm.service';
-import { UiStore } from '../../core/stores/ui.store';
 import { AdminUser } from '../models/user-admin.model';
+import { UiStore } from '../../core/stores/ui.store';
+import { ConfirmService } from '../../shared/services/confirm.service';
 
 @Component({
-  selector: 'app-users',
+  selector: 'app-admin-users',
   standalone: true,
   imports: [
-    CommonModule,
     MatTableModule,
     MatButtonModule,
     MatIconModule
@@ -21,55 +26,159 @@ import { AdminUser } from '../models/user-admin.model';
   styleUrls: ['./users.component.scss']
 })
 export class UsersComponent implements OnInit {
+  private readonly adminService = inject(AdminService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly ui = inject(UiStore);
 
-  private adminService = inject(AdminService);
-  private confirmService = inject(ConfirmService);
-  private ui = inject(UiStore);
+  readonly displayedColumns = [
+    'email',
+    'pseudo',
+    'role',
+    'active',
+    'actions'
+  ];
 
-  // Colonnes attendues par le template : email, pseudo, role, active, actions
-  displayedColumns = ['email', 'pseudo', 'role', 'active', 'actions'];
-  users: AdminUser[] = [];
+  readonly users = signal<AdminUser[]>([]);
+  readonly loading = signal(true);
+  readonly processingUserId = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadUsers();
   }
 
-  loadUsers(): void {
-    this.adminService.getAllUsers().subscribe(data => {
-      this.users = data;
-    });
+  private loadUsers(): void {
+    this.loading.set(true);
+
+    this.adminService
+      .getAllUsers()
+      .pipe(
+        finalize(() => this.loading.set(false))
+      )
+      .subscribe({
+        next: (users) => {
+          this.users.set(users);
+        },
+        error: () => {
+          this.users.set([]);
+
+          this.ui.showSnackbar(
+            'Erreur lors du chargement des utilisateurs',
+            'error'
+          );
+        }
+      });
   }
 
-  activate(id: string): void {
-    this.adminService.activateUser(id).subscribe({
-      next: () => {
-        this.ui.showSnackbar('Utilisateur activé', 'success');
-        this.loadUsers();
-      },
-      error: () => this.ui.showSnackbar('Erreur lors de l’activation', 'error')
-    });
+  activate(userId: string): void {
+    if (this.processingUserId()) {
+      return;
+    }
+
+    this.processingUserId.set(userId);
+
+    this.adminService
+      .activateUser(userId)
+      .pipe(
+        finalize(() => this.processingUserId.set(null))
+      )
+      .subscribe({
+        next: () => {
+          this.updateUserStatus(userId, true);
+
+          this.ui.showSnackbar(
+            'Utilisateur activé',
+            'success'
+          );
+        },
+        error: () => {
+          this.ui.showSnackbar(
+            'Erreur lors de l’activation',
+            'error'
+          );
+        }
+      });
   }
 
-  deactivate(id: string): void {
-    this.adminService.deactivateUser(id).subscribe({
-      next: () => {
-        this.ui.showSnackbar('Utilisateur désactivé', 'success');
-        this.loadUsers();
-      },
-      error: () => this.ui.showSnackbar('Erreur lors de la désactivation', 'error')
-    });
+  deactivate(userId: string): void {
+    if (this.processingUserId()) {
+      return;
+    }
+
+    this.processingUserId.set(userId);
+
+    this.adminService
+      .deactivateUser(userId)
+      .pipe(
+        finalize(() => this.processingUserId.set(null))
+      )
+      .subscribe({
+        next: () => {
+          this.updateUserStatus(userId, false);
+
+          this.ui.showSnackbar(
+            'Utilisateur désactivé',
+            'success'
+          );
+        },
+        error: () => {
+          this.ui.showSnackbar(
+            'Erreur lors de la désactivation',
+            'error'
+          );
+        }
+      });
   }
 
-  async delete(id: string): Promise<void> {
-    const ok = await this.confirmService.confirm('Confirmer la suppression de cet utilisateur ?');
-    if (!ok) { return; }
+  async deleteUser(userId: string): Promise<void> {
+    if (this.processingUserId()) {
+      return;
+    }
 
-    this.adminService.deleteUser(id).subscribe({
-      next: () => {
-        this.ui.showSnackbar('Utilisateur supprimé', 'success');
-        this.loadUsers();
-      },
-      error: () => this.ui.showSnackbar('Erreur lors de la suppression', 'error')
-    });
+    const confirmed = await this.confirmService.confirm(
+      'Confirmer la suppression de cet utilisateur ?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.processingUserId.set(userId);
+
+    this.adminService
+      .deleteUser(userId)
+      .pipe(
+        finalize(() => this.processingUserId.set(null))
+      )
+      .subscribe({
+        next: () => {
+          this.users.update((users) =>
+            users.filter((user) => user.userId !== userId)
+          );
+
+          this.ui.showSnackbar(
+            'Utilisateur supprimé',
+            'success'
+          );
+        },
+        error: () => {
+          this.ui.showSnackbar(
+            'Erreur lors de la suppression',
+            'error'
+          );
+        }
+      });
+  }
+
+  private updateUserStatus(
+    userId: string,
+    active: boolean
+  ): void {
+    this.users.update((users) =>
+      users.map((user) =>
+        user.userId === userId
+          ? { ...user, active }
+          : user
+      )
+    );
   }
 }

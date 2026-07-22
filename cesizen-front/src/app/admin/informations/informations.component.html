@@ -1,52 +1,82 @@
 <h1 class="title">Gestion des informations</h1>
 
-<table mat-table [dataSource]="informations" class="mat-elevation-z2">
-
+@if (loading()) {
+<p class="loading">
+    Chargement des informations...
+</p>
+} @else if (informations().length === 0) {
+<p class="empty-state">
+    Aucune information disponible.
+</p>
+} @else {
+<table mat-table [dataSource]="informations()" class="mat-elevation-z2">
     <ng-container matColumnDef="title">
-        <th mat-header-cell *matHeaderCellDef>Titre</th>
-        <td mat-cell *matCellDef="let i">{{ i.title }}</td>
+        <th mat-header-cell *matHeaderCellDef>
+            Titre
+        </th>
+
+        <td mat-cell *matCellDef="let information">
+            {{ information.title }}
+        </td>
     </ng-container>
 
     <ng-container matColumnDef="type">
-        <th mat-header-cell *matHeaderCellDef>Type</th>
-        <td mat-cell *matCellDef="let i">
-            <span class="badge type" [class.article]="i.type === 'ARTICLE'" [class.video]="i.type === 'VIDEO'"
-                [class.pdf]="i.type === 'PDF'">
-                {{ i.type }}
+        <th mat-header-cell *matHeaderCellDef>
+            Type
+        </th>
+
+        <td mat-cell *matCellDef="let information">
+            <span class="badge type" [class.article]="information.type === 'ARTICLE'"
+                [class.video]="information.type === 'VIDEO'" [class.pdf]="information.type === 'PDF'">
+                {{ information.type }}
             </span>
         </td>
     </ng-container>
 
     <ng-container matColumnDef="category">
-        <th mat-header-cell *matHeaderCellDef>Catégorie</th>
-        <td mat-cell *matCellDef="let i">
-            <span class="badge category">{{ i.categoryName }}</span>
+        <th mat-header-cell *matHeaderCellDef>
+            Catégorie
+        </th>
+
+        <td mat-cell *matCellDef="let information">
+            <span class="badge category">
+                {{ information.categoryName }}
+            </span>
         </td>
     </ng-container>
 
     <ng-container matColumnDef="createdAt">
-        <th mat-header-cell *matHeaderCellDef>Créé le</th>
-        <td mat-cell *matCellDef="let i">
-            {{ i.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        <th mat-header-cell *matHeaderCellDef>
+            Créé le
+        </th>
+
+        <td mat-cell *matCellDef="let information">
+            {{ information.createdAt | date: 'dd/MM/yyyy HH:mm' }}
         </td>
     </ng-container>
 
     <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let i">
+        <th mat-header-cell *matHeaderCellDef>
+            Actions
+        </th>
 
-            <button mat-icon-button color="primary" (click)="edit(i.slug)">
+        <td mat-cell *matCellDef="let information">
+            <button mat-icon-button color="primary" type="button" aria-label="Modifier l’information"
+                title="Modifier l’information" [disabled]="processingInformationId() !== null"
+                (click)="edit(information.slug)">
                 <mat-icon>edit</mat-icon>
             </button>
 
-            <button mat-icon-button color="warn" (click)="delete(i.informationId)">
+            <button mat-icon-button color="warn" type="button" aria-label="Supprimer l’information"
+                title="Supprimer l’information" [disabled]="processingInformationId() !== null"
+                (click)="deleteInformation(information.informationId)">
                 <mat-icon>delete</mat-icon>
             </button>
-
         </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 </table>
+}

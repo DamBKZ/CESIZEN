@@ -1,19 +1,35 @@
-<h1 class="title">Dashboard Administrateur</h1>
+<h1 class="title">Dashboard administrateur</h1>
 
+@if (loading()) {
+<p>Chargement des statistiques...</p>
+} @else {
 <div class="kpi-grid">
-    @for (s of stats; track s.key) {
+    @for (stat of stats(); track stat.key) {
     <mat-card class="kpi-card">
-        <mat-icon class="kpi-icon">{{ s.icon }}</mat-icon>
+        <mat-icon class="kpi-icon">
+            {{ stat.icon }}
+        </mat-icon>
 
         <div class="kpi-content">
-            <span class="kpi-value">{{ s.value }}</span>
-            <span class="kpi-label">{{ s.label }}</span>
+            <span class="kpi-value">
+                {{ stat.value }}
+            </span>
+
+            <span class="kpi-label">
+                {{ stat.label }}
+            </span>
         </div>
     </mat-card>
     }
 </div>
+}
 
 <div class="actions">
-    <button mat-raised-button color="primary" (click)="goToUsers()">Gérer les utilisateurs</button>
-    <button mat-raised-button color="accent" (click)="goToInformations()">Gérer les informations</button>
+    <button mat-raised-button color="primary" type="button" (click)="goToUsers()">
+        Gérer les utilisateurs
+    </button>
+
+    <button mat-raised-button color="accent" type="button" (click)="goToInformations()">
+        Gérer les informations
+    </button>
 </div>
