@@ -1,29 +1,38 @@
 <aside class="sidebar">
     @if (isAuthenticated()) {
-
     <div class="brand-block">
         <div class="brand-line">
             <img class="brand-logo" src="/Logo.png" alt="Logo CESIZEN" />
+
             <div>
                 <div class="brand-title">CESIZEN</div>
-                <div class="brand-subtitle">Bien-être & Gestion du stress</div>
+
+                <div class="brand-subtitle">
+                    Bien-être & Gestion du stress
+                </div>
             </div>
         </div>
 
-        <button class="logout-btn" type="button" (click)="logout(); $event.stopPropagation()" [disabled]="isLoggingOut">
-            <span *ngIf="!isLoggingOut">Déconnexion</span>
-            <span *ngIf="isLoggingOut">Déconnexion…</span>
+        <button class="logout-btn" type="button" [disabled]="isLoggingOut()" (click)="logout()">
+            @if (isLoggingOut()) {
+            Déconnexion…
+            } @else {
+            Déconnexion
+            }
         </button>
     </div>
 
     <div class="profile-entry">
-        <span class="profile-label">Espace personnel</span>
-        <a routerLink="/profile" routerLinkActive="active" class="profile-link">
+        <span class="profile-label">
+            Espace personnel
+        </span>
+
+        <a class="profile-link" routerLink="/profile" routerLinkActive="active">
             Mon profil
         </a>
     </div>
 
-    <nav class="menu">
+    <nav class="menu" aria-label="Navigation principale">
         <a routerLink="/diagnostic" routerLinkActive="active">
             Diagnostic
         </a>
@@ -33,7 +42,7 @@
         </a>
 
         @if (role()?.roleName === 'ADMIN') {
-        <a routerLink="/admin/dashboard" routerLinkActive="active" class="back-office-link">
+        <a class="back-office-link" routerLink="/admin/dashboard" routerLinkActive="active">
             Back-office
         </a>
 
@@ -42,6 +51,5 @@
         </a>
         }
     </nav>
-
     }
 </aside>

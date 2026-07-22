@@ -6,11 +6,18 @@
 
     @if (isAuthenticated()) {
     <div class="right">
-        <span class="user">{{ user()?.pseudo }}</span>
-        <button class="logout-btn" type="button" (click)="logout()" [disabled]="isLoggingOut">
-            <span *ngIf="!isLoggingOut">Déconnexion</span>
-            <span *ngIf="isLoggingOut">Déconnexion…</span>
+        <span class="user">
+            {{ user()?.pseudo }}
+        </span>
+
+        <button class="logout-btn" type="button" [disabled]="isLoggingOut()" (click)="logout()">
+            @if (isLoggingOut()) {
+            Déconnexion…
+            } @else {
+            Déconnexion
+            }
         </button>
     </div>
     }
+
 </header>

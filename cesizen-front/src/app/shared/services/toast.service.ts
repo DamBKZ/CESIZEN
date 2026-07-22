@@ -1,35 +1,90 @@
-import { ApplicationRef, ComponentRef, Injectable, createComponent } from '@angular/core';
-import { ToastComponent } from '../components/toast/toast.component';
+import {
+  ApplicationRef,
+  ComponentRef,
+  Injectable,
+  createComponent
+} from '@angular/core';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ToastComponent,
+  ToastType
+} from '../components/toast/toast.component';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class ToastService {
-  constructor(private appRef: ApplicationRef) {}
+  constructor(
+    private readonly appRef: ApplicationRef
+  ) {}
 
-  private show(message: string, type: 'success' | 'error' = 'success', duration = 3000) {
-    const compRef: ComponentRef<ToastComponent> = createComponent(ToastComponent, {
-      environmentInjector: this.appRef.injector
-    });
-
-    compRef.instance.message = message;
-    compRef.instance.type = type;
-
-    this.appRef.attachView(compRef.hostView);
-    const domNode = (compRef.hostView as any).rootNodes[0] as HTMLElement;
-    document.body.appendChild(domNode);
-
-    setTimeout(() => {
-      try {
-        this.appRef.detachView(compRef.hostView);
-        compRef.destroy();
-      } catch (_) {}
-    }, duration);
-  }
-
-  success(message: string, duration?: number) {
+  success(
+    message: string,
+    duration = 3000
+  ): void {
     this.show(message, 'success', duration);
   }
 
-  error(message: string, duration?: number) {
+  error(
+    message: string,
+    duration = 3000
+  ): void {
     this.show(message, 'error', duration);
+  }
+
+  info(
+    message: string,
+    duration = 3000
+  ): void {
+    this.show(message, 'info', duration);
+  }
+
+  private show(
+    message: string,
+    type: ToastType,
+    duration: number
+  ): void {
+    const normalizedMessage = message.trim();
+
+    if (!normalizedMessage) {
+      return;
+    }
+
+    const componentRef: ComponentRef<ToastComponent> =
+      createComponent(ToastComponent, {
+        environmentInjector: this.appRef.injector
+      });
+
+    componentRef.instance.message = normalizedMessage;
+    componentRef.instance.type = type;
+
+    this.appRef.attachView(componentRef.hostView);
+
+    const hostElement =
+      componentRef.location.nativeElement as HTMLElement;
+
+    document.body.appendChild(hostElement);
+
+    window.setTimeout(
+      () => this.destroyComponent(componentRef),
+      Math.max(0, duration)
+    );
+  }
+
+  private destroyComponent(
+    componentRef: ComponentRef<ToastComponent>
+  ): void {
+    const hostElement =
+      componentRef.location.nativeElement as HTMLElement;
+
+    try {
+      this.appRef.detachView(componentRef.hostView);
+
+      if (hostElement.isConnected) {
+        hostElement.remove();
+      }
+    } finally {
+      componentRef.destroy();
+    }
   }
 }

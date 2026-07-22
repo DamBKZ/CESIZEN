@@ -32,15 +32,15 @@ export class LegalDialogComponent {
   get content() {
     switch (this.data.type) {
       case 'legal':
-        return `CESIZEN est un projet pédagogique. Les informations relatives à l’éditeur, 
+        return `CESIZEN est un projet pédagogique. Les informations relatives à l’éditeur,
         au responsable légal et à l’hébergement seront complétées en cas de mise en production publique.`;
 
       case 'privacy':
-        return `Les données collectées dans CESIZEN sont utilisées uniquement dans le cadre pédagogique du projet. 
+        return `Les données collectées dans CESIZEN sont utilisées uniquement dans le cadre pédagogique du projet.
         Une politique de confidentialité complète conforme au RGPD sera publiée avant tout déploiement public.`;
 
       case 'cookies':
-        return `CESIZEN n’utilise actuellement aucun cookie non essentiel. 
+        return `CESIZEN n’utilise actuellement aucun cookie non essentiel.
         Une politique de gestion des cookies sera ajoutée en cas de mise en ligne publique.`;
 
       default:

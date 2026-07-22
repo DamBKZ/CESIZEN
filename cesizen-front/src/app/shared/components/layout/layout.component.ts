@@ -1,18 +1,19 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+
+import { FooterComponent } from '../footer/footer.component';
+import { SidebarComponent } from '../sidebar/sidebar.component';
 import { SnackbarComponent } from '../snackbar/snackbar.component';
-import { SidebarComponent } from "../sidebar/sidebar.component";
-import { FooterComponent } from "../footer/footer.component";
 
 @Component({
   selector: 'app-layout',
   standalone: true,
   imports: [
     RouterOutlet,
-    SnackbarComponent,
     SidebarComponent,
-    FooterComponent
-],
+    FooterComponent,
+    SnackbarComponent
+  ],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss']
 })
