@@ -1,96 +1,220 @@
-import { HttpBackend, HttpClient, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import {
+  HttpBackend,
+  HttpClient,
+  HttpErrorResponse,
+  HttpEvent,
+  HttpHeaders,
+  HttpInterceptorFn,
+  HttpRequest
+} from '@angular/common/http';
+
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, switchMap } from 'rxjs/operators';
-import { throwError } from 'rxjs';
+
+import {
+  BehaviorSubject,
+  catchError,
+  filter,
+  finalize,
+  Observable,
+  switchMap,
+  take,
+  throwError
+} from 'rxjs';
+
 import { UserStore } from '../stores/user.store';
 import { ToastService } from '../../shared/services/toast.service';
-import { ApiService } from '../services/api.service';
 
-function readCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)'));
-  return match ? decodeURIComponent(match[2]) : null;
+interface RefreshTokenResponse {
+  accessToken: string;
 }
 
-export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+const SAFE_METHODS = new Set([
+  'GET',
+  'HEAD',
+  'OPTIONS'
+]);
+
+let refreshInProgress = false;
+
+const refreshedTokenSubject =
+  new BehaviorSubject<string | null>(null);
+
+function readCookie(name: string): string | null {
+  const prefix = `${encodeURIComponent(name)}=`;
+
+  const cookie = document.cookie
+    .split(';')
+    .map(value => value.trim())
+    .find(value => value.startsWith(prefix));
+
+  if (!cookie) {
+    return null;
+  }
+
+  const value = cookie.substring(prefix.length);
+
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function isAuthRequest(url: string): boolean {
+  return url.includes('/auth/login')
+    || url.includes('/auth/refresh')
+    || url.includes('/auth/logout')
+    || url.includes('/auth/reset-password');
+}
+
+function addAuthenticationHeaders(
+  request: HttpRequest<unknown>,
+  accessToken: string
+): HttpRequest<unknown> {
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${accessToken}`
+  };
+
+  const method = request.method.toUpperCase();
+  const isMutatingRequest = !SAFE_METHODS.has(method);
+
+  if (isMutatingRequest) {
+    const xsrfToken = readCookie('XSRF-TOKEN');
+
+    if (xsrfToken) {
+      headers['X-XSRF-TOKEN'] = xsrfToken;
+    }
+  }
+
+  return request.clone({
+    withCredentials: true,
+    setHeaders: headers
+  });
+}
+
+function createRefreshHeaders(): HttpHeaders {
+  const xsrfToken = readCookie('XSRF-TOKEN');
+
+  if (!xsrfToken) {
+    return new HttpHeaders();
+  }
+
+  return new HttpHeaders({
+    'X-XSRF-TOKEN': xsrfToken
+  });
+}
+
+export const errorInterceptor: HttpInterceptorFn = (
+  request,
+  next
+): Observable<HttpEvent<unknown>> => {
   const router = inject(Router);
   const userStore = inject(UserStore);
-  const backend = inject(HttpBackend);
-  const http = new HttpClient(backend);
-  const api = inject(ApiService);
   const toast = inject(ToastService);
+  const backend = inject(HttpBackend);
+  const rawHttp = new HttpClient(backend);
 
-  return next(req).pipe(
-    catchError((error: HttpErrorResponse) => {
-      const isAuthRequest = req.url.includes('/auth/login')
-        || req.url.includes('/auth/refresh')
-        || req.url.includes('/auth/logout')
-        || req.url.includes('/auth/reset-password');
+  const expireSession = (): void => {
+    userStore.clear();
 
-      if (error.status === 401 && !isAuthRequest) {
-        const xsrf = readCookie('XSRF-TOKEN');
+    toast.error(
+      'Session expirée, reconnectez-vous'
+    );
 
-        const options: any = { withCredentials: true };
+    void router.navigate(['/login']);
+  };
 
-        if (xsrf) {
-          options.headers = { 'X-XSRF-TOKEN': xsrf };
-        }
+  const refreshAndRetry =
+    (): Observable<HttpEvent<unknown>> => {
+      if (refreshInProgress) {
+        return refreshedTokenSubject.pipe(
+          filter(
+            (token): token is string =>
+              token !== null
+          ),
+          take(1),
+          switchMap(token =>
+            next(
+              addAuthenticationHeaders(
+                request,
+                token
+              )
+            )
+          )
+        );
+      }
 
-        const refreshUrl = api.url('/auth/refresh');
+      refreshInProgress = true;
+      refreshedTokenSubject.next(null);
 
-        return http.post(refreshUrl, {}, options).pipe(
-          switchMap((res: any) => {
-            const newToken = res?.accessToken;
+      return rawHttp
+        .post<RefreshTokenResponse>(
+          '/auth/refresh',
+          {},
+          {
+            withCredentials: true,
+            headers: createRefreshHeaders()
+          }
+        )
+        .pipe(
+          switchMap(response => {
+            const newToken =
+              response.accessToken?.trim();
 
             if (!newToken) {
-              userStore.clear();
-              toast.error('Session expirée, reconnectez-vous');
-              router.navigate(['/login']);
-              return throwError(() => error);
+              expireSession();
+
+              return throwError(() =>
+                new Error(
+                  'Access token manquant après refresh.'
+                )
+              );
             }
 
             userStore.login(newToken);
+            refreshedTokenSubject.next(newToken);
 
-            let retryReq = req.clone({
-              withCredentials: true,
-              setHeaders: {
-                Authorization: `Bearer ${newToken}`
-              }
-            });
-
-            const retryXsrf = readCookie('XSRF-TOKEN');
-            const isMutatingRequest = !['GET', 'HEAD', 'OPTIONS'].includes(req.method.toUpperCase());
-
-            if (isMutatingRequest && retryXsrf) {
-              retryReq = retryReq.clone({
-                setHeaders: {
-                  'X-XSRF-TOKEN': retryXsrf
-                }
-              });
-            }
-
-            return next(retryReq);
+            return next(
+              addAuthenticationHeaders(
+                request,
+                newToken
+              )
+            );
           }),
-          catchError((err) => {
-            userStore.clear();
-            toast.error('Session expirée, reconnectez-vous');
-            router.navigate(['/login']);
-            return throwError(() => err);
+
+          catchError(refreshError => {
+            expireSession();
+            refreshedTokenSubject.next(null);
+
+            return throwError(() => refreshError);
+          }),
+
+          finalize(() => {
+            refreshInProgress = false;
           })
         );
+    };
+
+  return next(request).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (
+        error.status === 401
+        && !isAuthRequest(request.url)
+      ) {
+        return refreshAndRetry();
       }
 
       if (error.status === 403) {
         toast.error('Accès refusé');
-        router.navigate(['/login']);
-      }
-
-      if (error.status >= 500) {
-        toast.error('Erreur serveur, réessayez plus tard');
-      }
-
-      if (error.status === 0) {
-        toast.error('Erreur réseau — vérifiez votre connexion');
+      } else if (error.status >= 500) {
+        toast.error(
+          'Erreur serveur, réessayez plus tard'
+        );
+      } else if (error.status === 0) {
+        toast.error(
+          'Erreur réseau — vérifiez votre connexion'
+        );
       }
 
       return throwError(() => error);

@@ -37,9 +37,15 @@
                     <label class="auth-label">Confirmer le mot de passe</label>
                     <input class="auth-input" type="password" formControlName="confirmPassword" />
 
-                    @if (form.get('confirmPassword')?.touched && form.value.password !== form.value.confirmPassword) {
-                    <small class="auth-error">Les mots de passe ne correspondent pas</small>
+                    @if (
+                    form.controls.confirmPassword.touched &&
+                    passwordsDontMatch
+                    ) {
+                    <small class="auth-error">
+                        Les mots de passe ne correspondent pas
+                    </small>
                     }
+
                 </div>
 
                 <button type="submit" class="auth-primary">Créer mon compte</button>

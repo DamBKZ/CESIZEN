@@ -1,15 +1,20 @@
-import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
-import { UserStore } from '../stores/user.store';
+import {
+  CanActivateFn,
+  Router
+} from '@angular/router';
+
+import {
+  UserStore
+} from '../stores/user.store';
 
 export const authGuard: CanActivateFn = () => {
   const userStore = inject(UserStore);
   const router = inject(Router);
 
-  if (!userStore.isAuthenticated()) {
-    router.navigate(['/login']);
-    return false;
+  if (userStore.isAuthenticated()) {
+    return true;
   }
 
-  return true;
+  return router.createUrlTree(['/login']);
 };

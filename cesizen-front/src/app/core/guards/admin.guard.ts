@@ -1,8 +1,22 @@
-import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
-import { UserStore } from '../stores/user.store';
-import { ProfileService } from '../services/profile.service';
-import { catchError, map, of } from 'rxjs';
+import {
+  CanActivateFn,
+  Router
+} from '@angular/router';
+
+import {
+  catchError,
+  map,
+  of
+} from 'rxjs';
+
+import {
+  ProfileService
+} from '../services/profile.service';
+
+import {
+  UserStore
+} from '../stores/user.store';
 
 export const adminGuard: CanActivateFn = () => {
   const userStore = inject(UserStore);
@@ -10,36 +24,32 @@ export const adminGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (!userStore.isAuthenticated()) {
-    router.navigate(['/login']);
-    return false;
+    return router.createUrlTree(['/login']);
   }
 
   const cachedUser = userStore.user();
 
   if (cachedUser) {
-    if (cachedUser.role?.roleName === 'ADMIN') {
-      return true;
-    }
-
-    router.navigate(['/login']);
-    return false;
+    return cachedUser.role?.roleName === 'ADMIN'
+      ? true
+      : router.createUrlTree(['/informations/list']);
   }
 
   return profileService.getCurrentUser().pipe(
-    map((user: any) => {
+    map(user => {
       userStore.setUser(user);
 
-      if (user.role?.roleName === 'ADMIN') {
-        return true;
-      }
-
-      router.navigate(['/login']);
-      return false;
+      return user.role?.roleName === 'ADMIN'
+        ? true
+        : router.createUrlTree(['/informations/list']);
     }),
+
     catchError(() => {
       userStore.clear();
-      router.navigate(['/login']);
-      return of(false);
+
+      return of(
+        router.createUrlTree(['/login'])
+      );
     })
   );
 };

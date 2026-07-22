@@ -7,7 +7,7 @@ export interface User {
   userCreatedAt: string;
   active: boolean;
   role: {
-    roleId: string;
+    roleId: number;
     roleName: string;
   };
 }
