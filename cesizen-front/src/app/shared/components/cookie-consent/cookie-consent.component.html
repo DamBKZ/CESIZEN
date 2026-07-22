@@ -1,0 +1,15 @@
+<section class="cookie-banner" *ngIf="visible" role="dialog" aria-live="polite" aria-label="Consentement cookies">
+    <div class="cookie-banner__content">
+        <h2>Cookies</h2>
+        <p>
+            CESIZEN utilise uniquement des cookies strictement nécessaires au fonctionnement du site.
+            Vous pouvez accepter ou refuser les cookies optionnels s’ils sont ajoutés plus tard.
+        </p>
+    </div>
+
+    <div class="cookie-banner__actions">
+        <button mat-stroked-button type="button" (click)="openCookiesInfo()">En savoir plus</button>
+        <button mat-stroked-button type="button" (click)="reject()">Refuser</button>
+        <button mat-raised-button color="primary" type="button" (click)="accept()">Accepter</button>
+    </div>
+</section>

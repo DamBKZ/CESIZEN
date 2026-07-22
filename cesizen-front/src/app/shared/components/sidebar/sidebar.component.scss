@@ -1,0 +1,188 @@
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--md-sys-color-surface-container, #e8edf5), var(--md-sys-color-surface, #dee6f2));
+  border-right: 1px solid var(--md-sys-color-outline-variant, #c1cad8);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: var(--md-sys-elevation-level1);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  .brand-block {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(34, 79, 143, 0.14), rgba(255, 255, 255, 0.72));
+    border: 1px solid rgba(34, 79, 143, 0.15);
+
+    .brand-line {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #fff;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+    }
+
+    .brand-title {
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #15335d;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: #4d6887;
+      margin-top: 2px;
+    }
+
+    .logout-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: #2e6db2;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+
+      &:hover {
+        background: #1f5b98;
+        transform: translateY(-1px);
+      }
+    }
+  }
+
+  .profile-entry {
+    padding: 16px;
+    border-radius: 18px;
+    background: var(--md-sys-color-surface-container-high);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .profile-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .profile-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 14px;
+      border-radius: 999px;
+      background: var(--md-sys-color-primary, #224f8f);
+      color: var(--md-sys-color-on-primary, #ffffff);
+      text-decoration: none;
+      font-weight: 700;
+      transition: 0.2s;
+
+      &:hover {
+        transform: translateY(-1px);
+        background: var(--md-sys-color-primary-container);
+        color: var(--md-sys-color-on-primary-container);
+      }
+
+      &.active {
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 25%, transparent);
+      }
+    }
+  }
+
+  .menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    a {
+      padding: 10px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface, #172033);
+      transition: 0.2s;
+
+      &:hover {
+        background: var(--md-sys-color-primary-container);
+        color: var(--md-sys-color-on-primary-container);
+      }
+
+      &.active {
+        background: var(--md-sys-color-primary, #224f8f);
+        color: var(--md-sys-color-on-primary, #ffffff);
+      }
+    }
+
+    .profile-nav-link {
+      border: 1px solid color-mix(in srgb, var(--md-sys-color-primary, #224f8f) 40%, transparent);
+      font-weight: 700;
+    }
+
+    .back-office-link {
+      border: 1px solid color-mix(in srgb, #15335d 40%, transparent);
+      font-weight: 800;
+      background: rgba(21, 51, 93, 0.06);
+    }
+  }
+}
+
+@media (max-width: 700px) {
+  .sidebar {
+    width: 180px;
+    padding: 16px;
+
+    .brand-block {
+      padding: 14px;
+
+      .brand-subtitle {
+        display: none;
+      }
+    }
+
+    .profile-entry {
+      padding: 14px;
+    }
+  }
+}
+
+@media (min-width: 900px) {
+  .sidebar {
+    width: 240px;
+
+    .brand-block {
+      padding: 18px;
+
+      .brand-logo {
+        width: 46px;
+        height: 46px;
+      }
+    }
+
+    .profile-entry .profile-link {
+      padding: 13px 16px;
+    }
+
+    .menu a {
+      font-size: 15px;
+      padding: 12px 16px;
+    }
+  }
+}

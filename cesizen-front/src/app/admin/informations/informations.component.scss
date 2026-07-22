@@ -1,0 +1,39 @@
+.title {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.type.article {
+  background: #bbdefb;
+  color: #0d47a1;
+}
+
+.type.video {
+  background: #ffe0b2;
+  color: #e65100;
+}
+
+.type.pdf {
+  background: #ffcdd2;
+  color: #b71c1c;
+}
+
+.category {
+  background: #e0e0e0;
+  color: #424242;
+}

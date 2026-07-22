@@ -1,0 +1,23 @@
+<header class="header">
+    <div class="left">
+        <img class="app-logo" src="/Logo.png" alt="Logo CESIZEN" />
+        <span class="app-title">CESIZEN</span>
+    </div>
+
+    @if (isAuthenticated()) {
+    <div class="right">
+        <span class="user">
+            {{ user()?.pseudo }}
+        </span>
+
+        <button class="logout-btn" type="button" [disabled]="isLoggingOut()" (click)="logout()">
+            @if (isLoggingOut()) {
+            Déconnexion…
+            } @else {
+            Déconnexion
+            }
+        </button>
+    </div>
+    }
+
+</header>

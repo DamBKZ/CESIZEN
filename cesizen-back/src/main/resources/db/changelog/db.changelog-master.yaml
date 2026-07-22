@@ -1,3 +1,33 @@
 databaseChangeLog:
   - include:
       file: db/changelog/001_init_schema.sql
+
+  - include:
+      file: db/changelog/002_relations.sql
+
+  - include:
+      file: db/changelog/003_diagnostic.sql
+
+  - include:
+      file: db/changelog/004_auth.sql
+
+  - include:
+      file: db/changelog/005_information_content.sql
+
+  - include:
+      file: db/changelog/006_seed_roles.sql
+
+  - include:
+      file: db/changelog/007_seed_diagnostic_events.sql
+
+  - include:
+      file: db/changelog/011_create_logs_table.sql
+
+  - include:
+      file: db/changelog/012_information_owner.sql
+
+  - include:
+      file: db/changelog/013_fix_diagnostic_schema.sql
+
+  - include:
+      file: db/changelog/014_seed_categories.sql

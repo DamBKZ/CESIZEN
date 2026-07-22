@@ -1,0 +1,53 @@
+<h1 class="title">Logs système</h1>
+
+@if (loading()) {
+<p class="loading">
+    Chargement des logs...
+</p>
+} @else if (logs().length === 0) {
+<p class="empty-state">
+    Aucun log disponible.
+</p>
+} @else {
+<table mat-table [dataSource]="logs()" class="mat-elevation-z2">
+    <ng-container matColumnDef="user">
+        <th mat-header-cell *matHeaderCellDef>
+            Utilisateur
+        </th>
+
+        <td mat-cell *matCellDef="let log">
+            <span class="badge user" [class.system]="!log.userId">
+                {{
+                log.userPseudo ||
+                log.userEmail ||
+                'Système'
+                }}
+            </span>
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="content">
+        <th mat-header-cell *matHeaderCellDef>
+            Contenu
+        </th>
+
+        <td mat-cell *matCellDef="let log">
+            {{ log.content }}
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>
+            Date
+        </th>
+
+        <td mat-cell *matCellDef="let log">
+            {{ log.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+        </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>
+}

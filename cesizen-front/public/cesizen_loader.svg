@@ -1,0 +1,55 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dfe9f3"/>
+      <stop offset="100%" stop-color="#b8d8c7"/>
+    </linearGradient>
+
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b8ff5a"/>
+      <stop offset="100%" stop-color="#57b82c"/>
+    </linearGradient>
+
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#00000055"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="40" fill="url(#bg)"/>
+
+  <!-- Left leaf -->
+  <path d="M120 190C160 185 190 210 200 250C165 250 135 235 120 190Z"
+        fill="url(#leaf)"/>
+  <path d="M128 198C155 215 175 230 192 248"
+        stroke="#2E7D32" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Right leaf -->
+  <path d="M392 190C352 185 322 210 312 250C347 250 377 235 392 190Z"
+        fill="url(#leaf)"/>
+  <path d="M384 198C357 215 337 230 320 248"
+        stroke="#2E7D32" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Zen stones -->
+  <ellipse cx="256" cy="350" rx="80" ry="32" fill="#30343f" filter="url(#shadow)"/>
+  <ellipse cx="256" cy="330" rx="55" ry="22" fill="#cfd2d8"/>
+  <ellipse cx="280" cy="323" rx="22" ry="8" fill="#f5f5f5" opacity="0.7"/>
+
+  <!-- Main Z -->
+  <path d="M170 120H360L210 300H360"
+        stroke="white"
+        stroke-width="34"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        filter="url(#shadow)"/>
+
+  <!-- Text -->
+  <text x="256" y="450"
+        text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="64"
+        font-weight="700"
+        fill="white">
+    CESI<tspan fill="#9BEA4F">Zen</tspan>
+  </text>
+</svg>

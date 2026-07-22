@@ -1,0 +1,49 @@
+<div class="search-container">
+
+    <h1>Recherche d’informations</h1>
+
+    <input placeholder="Rechercher un article, une vidéo, un PDF..." [ngModel]="keyword()"
+        (ngModelChange)="keyword.set($event)" (keyup.enter)="search()" />
+
+    <button class="btn-primary" (click)="search()">
+        Rechercher
+    </button>
+
+    @if (loading()) {
+    <p class="loading">Recherche en cours...</p>
+    }
+
+    @if (!loading() && results().length === 0 && keyword().length > 0) {
+    <p class="no-results">Aucun résultat trouvé.</p>
+    }
+
+    @for (item of results(); track item.informationId) {
+
+    <div class="result-card" (click)="open(item.slug)">
+
+        <div class="header">
+            <h2>{{ item.title }}</h2>
+            <span class="type">{{ item.type }}</span>
+        </div>
+
+        <p class="meta">
+            <strong>Auteur :</strong> {{ item.author }} <br>
+            <strong>Slug :</strong> {{ item.slug }} <br>
+            <strong>Catégorie :</strong> {{ item.categoryName }}
+        </p>
+
+        <div class="tags">
+            @for (t of item.tags; track t) {
+            <span class="tag">{{ t }}</span>
+            }
+        </div>
+
+        <button class="edit-btn" (click)="edit(item.slug); $event.stopPropagation()">
+            Modifier
+        </button>
+
+    </div>
+
+    }
+
+</div>

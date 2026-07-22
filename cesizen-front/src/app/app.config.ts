@@ -1,11 +1,46 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  provideAppInitializer,
+  provideBrowserGlobalErrorListeners,
+  provideZoneChangeDetection
+} from '@angular/core';
+
+import {
+  provideHttpClient,
+  withInterceptors
+} from '@angular/common/http';
+
 import { provideRouter } from '@angular/router';
 
-import { routes } from './app.routes';
+import { APP_ROUTES } from './app.routes';
+import { AuthService } from './auth/auth.service';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { loaderInterceptor } from './core/interceptors/loader.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes)
+
+    provideZoneChangeDetection({
+      eventCoalescing: true
+    }),
+
+    provideRouter(APP_ROUTES),
+
+    provideHttpClient(
+      withInterceptors([
+        authInterceptor,
+        loaderInterceptor,
+        errorInterceptor
+      ])
+    ),
+
+    provideAppInitializer(() => {
+      const authService = inject(AuthService);
+
+      return authService.refreshOnStart();
+    })
   ]
 };

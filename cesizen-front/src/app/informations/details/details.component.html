@@ -1,0 +1,58 @@
+@if (info(); as information) {
+<div class="details-container">
+    <button class="back-btn" type="button" (click)="goBack()">
+        Revenir à la liste des informations
+    </button>
+
+    <h1>{{ information.title }}</h1>
+
+    <p class="meta">
+        <strong>Auteur :</strong>
+        {{ information.author }}
+        <br />
+
+        <strong>Catégorie :</strong>
+        {{ information.categoryName }}
+        <br />
+
+        <strong>Créé le :</strong>
+        {{ information.createdAt | date: 'dd/MM/yyyy' }}
+    </p>
+
+    @if (information.tags.length > 0) {
+    <div class="tags">
+        @for (tag of information.tags; track tag) {
+        <span class="tag">{{ tag }}</span>
+        }
+    </div>
+    }
+
+    @if (information.type === 'ARTICLE') {
+    <div class="article-content">
+        {{ information.content }}
+    </div>
+    }
+
+    @if (information.type === 'VIDEO') {
+    @if (videoEmbedUrl(); as embedUrl) {
+    <div class="video-wrapper">
+        <iframe [src]="embedUrl" [title]="information.title"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    } @else {
+    <p class="empty-state">
+        L’URL de cette vidéo n’est pas valide.
+    </p>
+    }
+    }
+
+    @if (information.type === 'PDF' && information.pdfUrl) {
+    <div class="pdf-wrapper">
+        <a class="pdf-link" [href]="information.pdfUrl" target="_blank" rel="noopener noreferrer">
+            📄 Ouvrir le PDF
+        </a>
+    </div>
+    }
+</div>
+}

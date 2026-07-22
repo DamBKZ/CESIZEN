@@ -1,0 +1,64 @@
+<div class="edit-container">
+    <button class="back-btn" type="button" (click)="goBack()">
+        Revenir à la liste des informations
+    </button>
+
+    <h1>Modifier une information</h1>
+
+    <input placeholder="Auteur" [ngModel]="form().author" (ngModelChange)="updateFormField('author', $event)" />
+
+    <input placeholder="Slug" required [ngModel]="form().slug" (ngModelChange)="updateFormField('slug', $event)" />
+
+    <input placeholder="Tags séparés par des virgules" [ngModel]="form().tags.join(', ')"
+        (ngModelChange)="updateTags($event)" />
+
+    <label for="information-type">Type</label>
+
+    <select id="information-type" [ngModel]="type()" (ngModelChange)="type.set($event)">
+        <option value="ARTICLE">Article</option>
+        <option value="VIDEO">Vidéo</option>
+        <option value="PDF">PDF</option>
+    </select>
+
+    <label for="information-category">Catégorie</label>
+
+    <select id="information-category" required [ngModel]="form().categoryId"
+        (ngModelChange)="updateFormField('categoryId', $event)">
+        <option value="" disabled>
+            Sélectionnez une catégorie
+        </option>
+
+        @for (category of categories(); track category.categoryId) {
+        <option [value]="category.categoryId">
+            {{ category.name }}
+        </option>
+        }
+    </select>
+
+    <input placeholder="Titre" required [ngModel]="form().title" (ngModelChange)="updateFormField('title', $event)" />
+
+    @if (type() === 'ARTICLE') {
+    <textarea placeholder="Contenu" required [ngModel]="form().content"
+        (ngModelChange)="updateFormField('content', $event)"></textarea>
+    }
+
+    @if (type() === 'VIDEO') {
+    <input placeholder="URL de la vidéo" required [ngModel]="form().videoUrl"
+        (ngModelChange)="updateFormField('videoUrl', $event)" />
+    }
+
+    @if (type() === 'PDF') {
+    <input placeholder="URL du PDF" required [ngModel]="form().pdfUrl"
+        (ngModelChange)="updateFormField('pdfUrl', $event)" />
+
+    @if (form().pdfUrl) {
+    <a [href]="form().pdfUrl" target="_blank" rel="noopener noreferrer">
+        Voir le PDF
+    </a>
+    }
+    }
+
+    <button class="btn-primary" type="button" [disabled]="!isFormValid()" (click)="submit()">
+        Enregistrer les modifications
+    </button>
+</div>

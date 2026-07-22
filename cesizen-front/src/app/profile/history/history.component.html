@@ -1,0 +1,35 @@
+<h1>Historique de mes diagnostics</h1>
+
+<button class="back-btn" type="button" (click)="backToProfile()">
+    Revenir à mon profil
+</button>
+
+@if (loading()) {
+<p>Chargement de l’historique...</p>
+} @else if (history().length === 0) {
+<p>Aucun diagnostic pour le moment.</p>
+} @else {
+<ul>
+    @for (
+    item of history();
+    track item.surveyId
+    ) {
+    <li>
+        <strong>Score :</strong>
+        {{ item.score }}
+
+        <br />
+
+        <strong>Niveau de risque :</strong>
+        {{ item.riskLevel }}
+
+        <br />
+
+        <strong>Date :</strong>
+        {{ item.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+
+        <hr />
+    </li>
+    }
+</ul>
+}

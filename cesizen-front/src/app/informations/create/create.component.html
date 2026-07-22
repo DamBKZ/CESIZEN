@@ -1,0 +1,76 @@
+<div class="create-container">
+    <button class="back-btn" type="button" (click)="goBack()">
+        Revenir à la liste des informations
+    </button>
+
+    <h1>Créer une information</h1>
+
+    <input placeholder="Auteur" [ngModel]="form().author" (ngModelChange)="updateFormField('author', $event)" />
+
+    <input placeholder="Slug unique" [ngModel]="form().slug" (ngModelChange)="updateFormField('slug', $event)"
+        required />
+
+    <input placeholder="Tags séparés par des virgules" [ngModel]="form().tags.join(', ')"
+        (ngModelChange)="updateTags($event)" />
+
+    <label for="information-type">Type</label>
+
+    <select id="information-type" [ngModel]="type()" (ngModelChange)="type.set($event)">
+        <option value="ARTICLE">Article</option>
+        <option value="VIDEO">Vidéo</option>
+        <option value="PDF">PDF</option>
+    </select>
+
+    <label for="information-category">
+        Catégorie
+    </label>
+
+    <select id="information-category" [ngModel]="form().categoryId"
+        (ngModelChange)="updateFormField('categoryId', $event)" required>
+        <option value="" disabled>
+            Sélectionnez une catégorie
+        </option>
+
+        @for (
+        category of categories();
+        track category.categoryId
+        ) {
+        <option [value]="category.categoryId">
+            {{ category.name }}
+        </option>
+        }
+    </select>
+
+    @if (categories().length === 0) {
+    <p class="empty-categories">
+        Aucune catégorie disponible.
+    </p>
+    }
+
+    <input placeholder="Titre" [ngModel]="form().title" (ngModelChange)="updateFormField('title', $event)" required />
+
+    @if (type() === 'ARTICLE') {
+    <textarea placeholder="Contenu" [ngModel]="form().content" (ngModelChange)="updateFormField('content', $event)"
+        required></textarea>
+    }
+
+    @if (type() === 'VIDEO') {
+    <input placeholder="URL de la vidéo" [ngModel]="form().videoUrl"
+        (ngModelChange)="updateFormField('videoUrl', $event)" required />
+    }
+
+    @if (type() === 'PDF') {
+    <input placeholder="URL du PDF" [ngModel]="form().pdfUrl" (ngModelChange)="updateFormField('pdfUrl', $event)"
+        required />
+
+    @if (form().pdfUrl) {
+    <a [href]="form().pdfUrl" target="_blank" rel="noopener noreferrer">
+        Voir le PDF
+    </a>
+    }
+    }
+
+    <button class="btn-primary" type="button" [disabled]="!isFormValid()" (click)="submit()">
+        Créer
+    </button>
+</div>

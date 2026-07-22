@@ -1,0 +1,7 @@
+<button class="btn-primary" type="button" [disabled]="!canSubmit()" (click)="submit()">
+    @if (submitting()) {
+    Enregistrement…
+    } @else {
+    Voir le résultat
+    }
+</button>
