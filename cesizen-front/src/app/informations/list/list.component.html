@@ -1,19 +1,24 @@
 <div class="list-container">
-
     <div class="page-head">
         <div>
             <h1>Liste des informations</h1>
-            <p class="subtitle">Des contenus sur le stress et le bien-être pour vous accompagner.</p>
+
+            <p class="subtitle">
+                Des contenus sur le stress et le bien-être pour vous accompagner.
+            </p>
         </div>
 
+        @if (isAuthenticated()) {
         <button class="add-btn" type="button" (click)="addInformation()">
             Ajouter une information
         </button>
+        }
     </div>
 
     <div class="search-bar">
-        <input placeholder="Rechercher par titre, auteur, catégorie ou mot-clé..." [ngModel]="keyword()"
-            (ngModelChange)="keyword.set($event)" />
+        <input type="search" aria-label="Rechercher des informations"
+            placeholder="Rechercher par titre, auteur, catégorie ou mot-clé..." [ngModel]="keyword()"
+            (ngModelChange)="keyword.set($event)">
 
         @if (keyword()) {
         <button class="reset-btn" type="button" (click)="clearSearch()">
@@ -23,46 +28,62 @@
     </div>
 
     <div class="infos-grid">
-        @for (item of filteredItems(); track item.informationId) {
-
-        <div class="info-card" (click)="open(item.slug)" [class.info-card--article]="item.type === 'ARTICLE'"
-            [class.info-card--video]="item.type === 'VIDEO'" [class.info-card--pdf]="item.type === 'PDF'">
-
+        @for (
+        item of filteredItems();
+        track item.informationId
+        ) {
+        <article class="info-card" tabindex="0" role="link" [class.info-card--article]="item.type === 'ARTICLE'"
+            [class.info-card--video]="item.type === 'VIDEO'" [class.info-card--pdf]="item.type === 'PDF'"
+            (click)="open(item.slug)" (keydown.enter)="open(item.slug)"
+            (keydown.space)="open(item.slug); $event.preventDefault()">
             <div class="header">
                 <h2>{{ item.title }}</h2>
-                <span class="type">{{ item.type }}</span>
+
+                <span class="type">
+                    {{ item.type }}
+                </span>
             </div>
 
             @if (canEditOrDelete(item)) {
-            <button class="delete-cross" type="button" title="Supprimer" (click)="delete(item, $event)">
+            <button class="delete-cross" type="button" title="Supprimer" [attr.aria-label]="'Supprimer ' + item.title"
+                (click)="delete(item, $event)">
                 ✕
             </button>
             }
 
             <p class="meta">
-                <strong>Auteur :</strong> {{ item.author }} <br>
-                <strong>Catégorie :</strong> {{ item.categoryName }}
+                <strong>Auteur :</strong>
+                {{ item.author }}
+
+                <br>
+
+                <strong>Catégorie :</strong>
+                {{ item.categoryName }}
             </p>
 
-            <div class="tags">
-                @for (tag of getTags(item); track $index) {
-                <span class="tag">{{ tag }}</span>
+            @if (item.tags.length > 0) {
+            <div class="tags" aria-label="Mots-clés">
+                @for (tag of item.tags; track tag) {
+                <span class="tag">
+                    {{ tag }}
+                </span>
                 }
             </div>
-
+            }
 
             @if (canEditOrDelete(item)) {
-            <button class="edit-btn" type="button" (click)="edit(item.slug, $event)">
+            <button class="edit-btn" type="button" [attr.aria-label]="'Modifier ' + item.title"
+                (click)="edit(item.slug, $event)">
                 Modifier
             </button>
             }
-
-        </div>
-
+        </article>
         }
     </div>
 
     @if (filteredItems().length === 0) {
-    <p class="empty-state">Aucune information ne correspond à votre recherche.</p>
+    <p class="empty-state">
+        Aucune information ne correspond à votre recherche.
+    </p>
     }
 </div>

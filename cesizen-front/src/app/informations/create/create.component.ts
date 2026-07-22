@@ -1,35 +1,33 @@
+import { InformationForm } from '../information.models';
+
+
 import {
   Component,
   inject,
   OnInit,
   signal
 } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
 
 import { InformationFactory } from '../information.factory';
+
 import {
   InformationCategory,
   InformationService,
   InformationType
 } from '../information.service';
-import { UiStore } from '../../core/stores/ui.store';
 
-interface InformationForm {
-  author: string;
-  slug: string;
-  tags: string[];
-  categoryId: string;
-  title: string;
-  content: string;
-  videoUrl: string;
-  pdfUrl: string;
-}
+import { UiStore } from '../../core/stores/ui.store';
 
 @Component({
   selector: 'app-information-create',
   standalone: true,
-  imports: [FormsModule],
+  imports: [
+    FormsModule
+  ],
   templateUrl: './create.component.html',
   styleUrls: ['./create.component.scss']
 })
@@ -39,8 +37,11 @@ export class CreateComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly ui = inject(UiStore);
 
-  readonly categories = signal<InformationCategory[]>([]);
-  readonly type = signal<InformationType>('ARTICLE');
+  readonly categories =
+    signal<InformationCategory[]>([]);
+
+  readonly type =
+    signal<InformationType>('ARTICLE');
 
   readonly form = signal<InformationForm>({
     author: '',
@@ -57,29 +58,11 @@ export class CreateComponent implements OnInit {
     this.loadCategories();
   }
 
-  private loadCategories(): void {
-    this.service.getCategories().subscribe({
-      next: (response) => {
-        this.categories.set(
-          Array.isArray(response) ? response : []
-        );
-      },
-      error: () => {
-        this.categories.set([]);
-
-        this.ui.showSnackbar(
-          'Erreur lors du chargement des catégories',
-          'error'
-        );
-      }
-    });
-  }
-
   updateFormField<K extends keyof InformationForm>(
     field: K,
     value: InformationForm[K]
   ): void {
-    this.form.update((current) => ({
+    this.form.update(current => ({
       ...current,
       [field]: value
     }));
@@ -88,62 +71,39 @@ export class CreateComponent implements OnInit {
   updateTags(value: string): void {
     const tags = value
       .split(',')
-      .map((tag) => tag.trim())
+      .map(tag => tag.trim())
       .filter(Boolean);
 
     this.updateFormField('tags', tags);
   }
 
-  getEmbedUrl(url: string): string {
-    if (!url) {
-      return '';
-    }
-
-    if (url.includes('youtube.com/watch')) {
-      const id = url.split('v=')[1]?.split('&')[0];
-
-      return id
-        ? `https://www.youtube.com/embed/${id}`
-        : url;
-    }
-
-    if (url.includes('youtu.be/')) {
-      const id = url
-        .split('youtu.be/')[1]
-        ?.split('?')[0];
-
-      return id
-        ? `https://www.youtube.com/embed/${id}`
-        : url;
-    }
-
-    return url;
-  }
-
   goBack(): void {
-    this.router.navigate(['/informations/list']);
+    void this.router.navigate([
+      '/informations/list'
+    ]);
   }
 
   isFormValid(): boolean {
     const current = this.form();
 
     if (
-      !current.slug.trim() ||
-      !current.categoryId.trim() ||
-      !current.title.trim()
+      !current.slug.trim()
+      || !current.categoryId.trim()
+      || !current.title.trim()
     ) {
       return false;
     }
 
-    if (this.type() === 'ARTICLE') {
-      return Boolean(current.content.trim());
-    }
+    switch (this.type()) {
+      case 'ARTICLE':
+        return current.content.trim().length > 0;
 
-    if (this.type() === 'VIDEO') {
-      return Boolean(current.videoUrl.trim());
-    }
+      case 'VIDEO':
+        return current.videoUrl.trim().length > 0;
 
-    return Boolean(current.pdfUrl.trim());
+      case 'PDF':
+        return current.pdfUrl.trim().length > 0;
+    }
   }
 
   submit(): void {
@@ -163,27 +123,65 @@ export class CreateComponent implements OnInit {
 
     this.ui.setLoading(true);
 
-    this.service.create(payload).subscribe({
-      next: () => {
-        this.ui.showSnackbar(
-          'Information créée',
-          'success'
-        );
+    this.service
+      .create(payload)
+      .pipe(
+        finalize(() => {
+          this.ui.setLoading(false);
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.ui.showSnackbar(
+            'Information créée',
+            'success'
+          );
 
-        this.router.navigate([
-          '/informations/list'
-        ]);
+          void this.router.navigate([
+            '/informations/list'
+          ]);
+        },
+
+        error: () => {
+          this.ui.showSnackbar(
+            'Erreur lors de la création',
+            'error'
+          );
+        }
+      });
+  }
+
+  private loadCategories(): void {
+    this.service.getCategories().subscribe({
+      next: categories => {
+        this.categories.set(categories);
+
+        const selectedCategoryId =
+          this.form().categoryId;
+
+        const categoryStillExists =
+          categories.some(
+            category =>
+              category.categoryId
+                === selectedCategoryId
+          );
+
+        if (!categoryStillExists) {
+          this.updateFormField(
+            'categoryId',
+            ''
+          );
+        }
       },
+
       error: () => {
-        this.ui.setLoading(false);
+        this.categories.set([]);
+        this.updateFormField('categoryId', '');
 
         this.ui.showSnackbar(
-          'Erreur lors de la création',
+          'Erreur lors du chargement des catégories',
           'error'
         );
-      },
-      complete: () => {
-        this.ui.setLoading(false);
       }
     });
   }

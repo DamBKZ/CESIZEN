@@ -1,43 +1,58 @@
-@if (info()) {
+@if (info(); as information) {
 <div class="details-container">
-
     <button class="back-btn" type="button" (click)="goBack()">
         Revenir à la liste des informations
     </button>
 
-    <h1>{{ info().title }}</h1>
+    <h1>{{ information.title }}</h1>
 
     <p class="meta">
-        <strong>Auteur :</strong> {{ info().author }} <br>
-        <strong>Catégorie :</strong> {{ info().categoryName }} <br>
-        <strong>Créé le :</strong> {{ info().createdAt | date:'dd-MM-yyyy' }}
+        <strong>Auteur :</strong>
+        {{ information.author }}
+        <br />
+
+        <strong>Catégorie :</strong>
+        {{ information.categoryName }}
+        <br />
+
+        <strong>Créé le :</strong>
+        {{ information.createdAt | date: 'dd/MM/yyyy' }}
     </p>
 
+    @if (information.tags.length > 0) {
     <div class="tags">
-        @for (t of info().tags; track t) {
-        <span class="tag">{{ t }}</span>
+        @for (tag of information.tags; track tag) {
+        <span class="tag">{{ tag }}</span>
         }
     </div>
+    }
 
-    @if (info().type === 'ARTICLE') {
+    @if (information.type === 'ARTICLE') {
     <div class="article-content">
-        {{ info().content }}
+        {{ information.content }}
     </div>
     }
 
-    @if (info().type === 'VIDEO') {
+    @if (information.type === 'VIDEO') {
+    @if (videoEmbedUrl(); as embedUrl) {
     <div class="video-wrapper">
-        <iframe [src]="getEmbedUrl(info().videoUrl)" [title]="info().title" frameborder="0" allowfullscreen></iframe>
+        <iframe [src]="embedUrl" [title]="information.title"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </div>
+    } @else {
+    <p class="empty-state">
+        L’URL de cette vidéo n’est pas valide.
+    </p>
+    }
     }
 
-    @if (info().type === 'PDF') {
+    @if (information.type === 'PDF' && information.pdfUrl) {
     <div class="pdf-wrapper">
-        <a [href]="info().pdfUrl" target="_blank" class="pdf-link">
+        <a class="pdf-link" [href]="information.pdfUrl" target="_blank" rel="noopener noreferrer">
             📄 Ouvrir le PDF
         </a>
     </div>
     }
-
 </div>
 }

@@ -1,9 +1,22 @@
-import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { InformationService } from '../information.service';
+import {
+  Component,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { finalize } from 'rxjs';
+
+import {
+  Information,
+  InformationCategory,
+  InformationService,
+  InformationType
+} from '../information.service';
+import { InformationFactory } from '../information.factory';
+import { InformationForm } from '../information.models';
 import { UiStore } from '../../core/stores/ui.store';
-import { INFORMATION_CATEGORIES } from '../information.categories';
 
 @Component({
   selector: 'app-information-edit',
@@ -12,19 +25,17 @@ import { INFORMATION_CATEGORIES } from '../information.categories';
   templateUrl: './edit.component.html',
   styleUrls: ['./edit.component.scss']
 })
-export class EditComponent {
+export class EditComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly service = inject(InformationService);
+  private readonly factory = inject(InformationFactory);
   private readonly router = inject(Router);
   private readonly ui = inject(UiStore);
 
-  categories = INFORMATION_CATEGORIES;
+  readonly categories = signal<InformationCategory[]>([]);
+  readonly type = signal<InformationType>('ARTICLE');
 
-  slug = this.route.snapshot.paramMap.get('slug') ?? '';
-
-  type = signal<'ARTICLE' | 'VIDEO' | 'PDF'>('ARTICLE');
-
-  form = signal<any>({
+  readonly form = signal<InformationForm>({
     author: '',
     slug: '',
     tags: [],
@@ -35,87 +46,154 @@ export class EditComponent {
     pdfUrl: ''
   });
 
-  constructor() {
-    this.service.getById(this.slug).subscribe({
-      next: (res: any) => {
-        if (!res) {
-          return;
-        }
+  private informationId = '';
+  private routeSlug = '';
 
-        this.type.set(res.type);
-        this.form.set({
-          author: res.author ?? '',
-          slug: res.slug ?? '',
-          tags: res.tags ?? [],
-          categoryId: res.categoryId ?? '',
-          title: res.title ?? '',
-          content: res.content ?? '',
-          videoUrl: res.videoUrl ?? '',
-          pdfUrl: res.pdfUrl ?? ''
-        });
+  ngOnInit(): void {
+    this.routeSlug =
+      this.route.snapshot.paramMap.get('slug') ?? '';
+
+    if (!this.routeSlug) {
+      this.handleNotFound();
+      return;
+    }
+
+    this.loadCategories();
+    this.loadInformation();
+  }
+
+  private loadCategories(): void {
+    this.service.getCategories().subscribe({
+      next: (categories) => {
+        this.categories.set(categories);
       },
       error: () => {
-        this.ui.showSnackbar('Information introuvable', 'error');
-        this.router.navigate(['/informations/list']);
+        this.categories.set([]);
+
+        this.ui.showSnackbar(
+          'Erreur lors du chargement des catégories',
+          'error'
+        );
       }
     });
   }
 
-  getEmbedUrl(url: string): string {
-    if (!url) {
-      return '';
-    }
+  private loadInformation(): void {
+    this.service.getBySlug(this.routeSlug).subscribe({
+      next: (information: Information) => {
+        this.informationId = information.informationId;
+        this.type.set(information.type);
 
-    if (url.includes('youtube.com/watch')) {
-      const id = url.split('v=')[1]?.split('&')[0];
-      return id ? `https://www.youtube.com/embed/${id}` : url;
-    }
-
-    if (url.includes('youtu.be/')) {
-      const id = url.split('youtu.be/')[1]?.split('?')[0];
-      return id ? `https://www.youtube.com/embed/${id}` : url;
-    }
-
-    return url;
+        this.form.set({
+          author: information.author ?? '',
+          slug: information.slug ?? '',
+          tags: information.tags ?? [],
+          categoryId: information.categoryId ?? '',
+          title: information.title ?? '',
+          content: information.content ?? '',
+          videoUrl: information.videoUrl ?? '',
+          pdfUrl: information.pdfUrl ?? ''
+        });
+      },
+      error: () => this.handleNotFound()
+    });
   }
 
-  goBack(): void {
+  private handleNotFound(): void {
+    this.ui.showSnackbar(
+      'Information introuvable',
+      'error'
+    );
+
     this.router.navigate(['/informations/list']);
+  }
+
+  updateFormField<K extends keyof InformationForm>(
+    field: K,
+    value: InformationForm[K]
+  ): void {
+    this.form.update((current) => ({
+      ...current,
+      [field]: value
+    }));
+  }
+
+  updateTags(value: string): void {
+    const tags = value
+      .split(',')
+      .map((tag: string) => tag.trim())
+      .filter(Boolean);
+
+    this.updateFormField('tags', tags);
   }
 
   isFormValid(): boolean {
     const current = this.form();
 
-    if (!current.slug?.trim() || !current.categoryId?.trim() || !current.title?.trim()) {
+    if (
+      !current.slug.trim() ||
+      !current.categoryId.trim() ||
+      !current.title.trim()
+    ) {
       return false;
     }
 
-    if (this.type() === 'ARTICLE') {
-      return Boolean(current.content?.trim());
-    }
+    switch (this.type()) {
+      case 'ARTICLE':
+        return Boolean(current.content.trim());
 
-    if (this.type() === 'VIDEO') {
-      return Boolean(current.videoUrl?.trim());
-    }
+      case 'VIDEO':
+        return Boolean(current.videoUrl.trim());
 
-    return Boolean(current.pdfUrl?.trim());
+      case 'PDF':
+        return Boolean(current.pdfUrl.trim());
+    }
   }
 
   submit(): void {
-    if (!this.isFormValid()) {
-      this.ui.showSnackbar('Les champs obligatoires ne sont pas remplis', 'error');
+    if (!this.informationId) {
+      this.handleNotFound();
       return;
     }
 
-    this.ui.setLoading(true);
+    if (!this.isFormValid()) {
+      this.ui.showSnackbar(
+        'Les champs obligatoires ne sont pas remplis',
+        'error'
+      );
 
-    this.service.update(this.slug, this.form()).subscribe({
-      next: () => {
-        this.ui.showSnackbar('Information mise à jour', 'success');
-        this.router.navigate(['/informations/list']);
-      },
-      error: () => this.ui.showSnackbar('Erreur lors de la mise à jour', 'error'),
-      complete: () => this.ui.setLoading(false)
-    });
+      return;
+    }
+
+    const payload = this.factory.create(
+      this.type(),
+      this.form()
+    );
+
+    this.service
+      .update(this.informationId, payload)
+      .pipe(
+        finalize(() => this.ui.setLoading(false))
+      )
+      .subscribe({
+        next: () => {
+          this.ui.showSnackbar(
+            'Information mise à jour',
+            'success'
+          );
+
+          this.router.navigate(['/informations/list']);
+        },
+        error: () => {
+          this.ui.showSnackbar(
+            'Erreur lors de la mise à jour',
+            'error'
+          );
+        }
+      });
+  }
+
+  goBack(): void {
+    this.router.navigate(['/informations/list']);
   }
 }
