@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { finalize } from 'rxjs';
+
 import { ProfileService } from '../../core/services/profile.service';
 import { UiStore } from '../../core/stores/ui.store';
 
@@ -11,7 +12,6 @@ import { UiStore } from '../../core/stores/ui.store';
   selector: 'app-change-password',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatInputModule,
     MatButtonModule
@@ -20,27 +20,58 @@ import { UiStore } from '../../core/stores/ui.store';
   styleUrls: ['./change-password.component.scss']
 })
 export class ChangePasswordComponent {
+  private readonly fb = inject(FormBuilder);
+  private readonly profileService = inject(ProfileService);
+  private readonly ui = inject(UiStore);
+  private readonly router = inject(Router);
 
-  private fb = inject(FormBuilder);
-  private profileService = inject(ProfileService);
-  private ui = inject(UiStore);
-  private router = inject(Router);
-
-  form = this.fb.group({
-    currentPassword: ['', Validators.required],
-    newPassword: ['', [Validators.required, Validators.minLength(10)]]
+  readonly form = this.fb.nonNullable.group({
+    currentPassword: [
+      '',
+      Validators.required
+    ],
+    newPassword: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(10)
+      ]
+    ]
   });
 
+  readonly submitting = false;
+
   backToProfile(): void {
-    this.router.navigate(['/profile']);
+    void this.router.navigate(['/profile']);
   }
 
-  save() {
-    if (this.form.invalid) return;
+  save(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
-    this.profileService.changePassword(this.form.value).subscribe({
-      next: () => this.ui.showSnackbar('Mot de passe modifié', 'success'),
-      error: () => this.ui.showSnackbar('Erreur lors du changement', 'error')
-    });
+    const payload = this.form.getRawValue();
+
+    this.profileService
+      .changePassword(payload)
+      .subscribe({
+        next: () => {
+          this.form.reset();
+
+          this.ui.showSnackbar(
+            'Mot de passe modifié',
+            'success'
+          );
+
+          void this.router.navigate(['/profile']);
+        },
+        error: () => {
+          this.ui.showSnackbar(
+            'Erreur lors du changement de mot de passe',
+            'error'
+          );
+        }
+      });
   }
 }
