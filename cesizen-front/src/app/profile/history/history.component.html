@@ -4,22 +4,31 @@
     Revenir à mon profil
 </button>
 
-@if (history.length === 0) {
-<div>
-    Aucun diagnostic pour le moment.
-</div>
-}
-
-@if (history.length > 0) {
+@if (loading()) {
+<p>Chargement de l’historique...</p>
+} @else if (history().length === 0) {
+<p>Aucun diagnostic pour le moment.</p>
+} @else {
 <ul>
-    @for (item of history; track item) {
+    @for (
+    item of history();
+    track item.surveyId
+    ) {
     <li>
-        <strong>Score :</strong> {{ item.score }}
-        <br>
-        <strong>Niveau de risque :</strong> {{ item.riskLevel }}
-        <br>
-        <strong>Date :</strong> {{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}
-        <hr>
+        <strong>Score :</strong>
+        {{ item.score }}
+
+        <br />
+
+        <strong>Niveau de risque :</strong>
+        {{ item.riskLevel }}
+
+        <br />
+
+        <strong>Date :</strong>
+        {{ item.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+
+        <hr />
     </li>
     }
 </ul>

@@ -1,30 +1,62 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  Component,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { ProfileService } from '../../core/services/profile.service';
+import { finalize } from 'rxjs';
+
+import {
+  DiagnosticHistory,
+  ProfileService
+} from '../../core/services/profile.service';
+import { UiStore } from '../../core/stores/ui.store';
 
 @Component({
-  selector: 'app-history',
+  selector: 'app-profile-history',
   standalone: true,
-  imports: [CommonModule],
+  imports: [DatePipe],
   templateUrl: './history.component.html',
   styleUrls: ['./history.component.scss']
 })
 export class HistoryComponent implements OnInit {
   private readonly profileService = inject(ProfileService);
   private readonly router = inject(Router);
+  private readonly ui = inject(UiStore);
 
-  history: any[] = [];
-
-  backToProfile(): void {
-    this.router.navigate(['/profile']);
-  }
+  readonly history = signal<DiagnosticHistory[]>([]);
+  readonly loading = signal(true);
 
   ngOnInit(): void {
-    this.profileService.getHistory().subscribe({
-      next: (data) => {
-        this.history = data;
-      }
-    });
+    this.loadHistory();
+  }
+
+  private loadHistory(): void {
+    this.loading.set(true);
+
+    this.profileService
+      .getHistory()
+      .pipe(
+        finalize(() => this.loading.set(false))
+      )
+      .subscribe({
+        next: (history) => {
+          this.history.set(history);
+        },
+        error: () => {
+          this.history.set([]);
+
+          this.ui.showSnackbar(
+            'Erreur lors du chargement de l’historique',
+            'error'
+          );
+        }
+      });
+  }
+
+  backToProfile(): void {
+    void this.router.navigate(['/profile']);
   }
 }

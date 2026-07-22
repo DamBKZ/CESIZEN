@@ -1,23 +1,56 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, of } from 'rxjs';
-import { DIAGNOSTIC_EVENTS_MOCK } from './diagnostic.mock';
+import { Observable } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+export interface DiagnosticEvent {
+  eventId: string;
+  label: string;
+  lcu: number;
+}
+
+
+export interface DiagnosticSubmitRequest {
+  answers: Record<string, boolean>;
+}
+
+export interface DiagnosticResponse {
+  surveyId: string;
+  score: number;
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  createdAt: string;
+}
+
+export interface DiagnosticHistory {
+  surveyId: string;
+  score: number;
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  createdAt: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
 export class DiagnosticService {
   private readonly http = inject(HttpClient);
 
-  getEvents() {
-    return this.http.get('/api/diagnostic/events').pipe(
-      catchError(() => of(DIAGNOSTIC_EVENTS_MOCK))
+  getEvents(): Observable<DiagnosticEvent[]> {
+    return this.http.get<DiagnosticEvent[]>(
+      '/api/diagnostic/events'
     );
   }
 
-  submitDiagnostic(payload: any) {
-    return this.http.post('/api/diagnostic/submit', payload);
+  submitDiagnostic(
+    payload: DiagnosticSubmitRequest
+  ): Observable<DiagnosticResponse> {
+    return this.http.post<DiagnosticResponse>(
+      '/api/diagnostic/submit',
+      payload
+    );
   }
 
-  getHistory() {
-    return this.http.get<any[]>('/api/diagnostic/history/me');
+  getHistory(): Observable<DiagnosticHistory[]> {
+    return this.http.get<DiagnosticHistory[]>(
+      '/api/diagnostic/history/me'
+    );
   }
 }

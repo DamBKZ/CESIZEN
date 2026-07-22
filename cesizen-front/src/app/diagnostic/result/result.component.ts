@@ -1,111 +1,171 @@
-import { Component, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import { Router } from '@angular/router';
-import { DiagnosticService } from '../diagnostic.service';
+import { finalize } from 'rxjs';
+
+import {
+  DiagnosticResponse,
+  DiagnosticService
+} from '../diagnostic.service';
 import { UiStore } from '../../core/stores/ui.store';
 
-type ApiRiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
+type RiskLevel = DiagnosticResponse['riskLevel'];
+
+interface ResultPresentation {
+  label: 'Faible' | 'Modéré' | 'Élevé';
+  emoji: string;
+  cssClass:
+    | 'risk-box--low'
+    | 'risk-box--medium'
+    | 'risk-box--high';
+  interpretation: string;
+  adviceItems: string[];
+}
 
 @Component({
-  selector: 'app-result',
+  selector: 'app-diagnostic-result',
   standalone: true,
   templateUrl: './result.component.html',
   styleUrls: ['./result.component.scss']
 })
-export class ResultComponent {
+export class ResultComponent implements OnInit {
   private readonly router = inject(Router);
-  private readonly diagnosticService = inject(DiagnosticService);
+  private readonly diagnosticService =
+    inject(DiagnosticService);
   private readonly ui = inject(UiStore);
 
-  score = signal<number | null>(null);
-  interpretation = signal<string>('');
-  riskLevel = signal<'Faible' | 'Modéré' | 'Élevé' | ''>('');
-  riskEmoji = signal<string>('');
-  riskBoxClass = signal<'risk-box--low' | 'risk-box--medium' | 'risk-box--high' | ''>('');
-  adviceItems = signal<string[]>([]);
+  readonly score = signal<number | null>(null);
+  readonly riskLevel = signal<RiskLevel | null>(null);
+  readonly loading = signal(true);
 
-  constructor() {
-    const state = history.state;
+  readonly presentation = computed<ResultPresentation | null>(
+    () => {
+      const level = this.riskLevel();
 
-    if (state && state.score !== undefined) {
-      this.score.set(state.score);
-      this.computeInterpretation(state.score, state.riskLevel);
-    } else {
-      this.loadLatestHistory();
+      return level
+        ? this.getPresentation(level)
+        : null;
     }
+  );
+
+  ngOnInit(): void {
+    const navigationState =
+      window.history.state as Partial<DiagnosticResponse>;
+
+    if (
+      typeof navigationState.score === 'number' &&
+      this.isRiskLevel(navigationState.riskLevel)
+    ) {
+      this.score.set(navigationState.score);
+      this.riskLevel.set(navigationState.riskLevel);
+      this.loading.set(false);
+      return;
+    }
+
+    this.loadLatestHistory();
   }
 
-  loadLatestHistory(): void {
-    this.ui.setLoading(true);
+  private loadLatestHistory(): void {
+    this.loading.set(true);
 
-    this.diagnosticService.getHistory().subscribe({
-      next: (res: any[]) => {
-        if (res && res.length > 0) {
-          const last = res[0];
-          this.score.set(last.score);
-          this.computeInterpretation(last.score, last.riskLevel);
+    this.diagnosticService
+      .getHistory()
+      .pipe(
+        finalize(() => this.loading.set(false))
+      )
+      .subscribe({
+        next: (history) => {
+          const latest = history[0];
+
+          if (!latest) {
+            this.ui.showSnackbar(
+              'Aucun résultat de diagnostic disponible',
+              'info'
+            );
+
+            void this.router.navigate(['/diagnostic/list']);
+            return;
+          }
+
+          this.score.set(latest.score);
+          this.riskLevel.set(latest.riskLevel);
+        },
+        error: () => {
+          this.ui.showSnackbar(
+            'Erreur lors du chargement du résultat',
+            'error'
+          );
+
+          void this.router.navigate(['/diagnostic/list']);
         }
-      },
-      error: () => {
-        this.ui.showSnackbar('Erreur lors du chargement du résultat', 'error');
-      },
-      complete: () => this.ui.setLoading(false)
-    });
+      });
   }
 
-  computeInterpretation(score: number, apiRiskLevel?: ApiRiskLevel): void {
-    const level = apiRiskLevel ?? this.computeApiRiskLevel(score);
-
-    if (level === 'LOW') {
-      this.riskLevel.set('Faible');
-      this.riskEmoji.set('🙂');
-      this.riskBoxClass.set('risk-box--low');
-      this.interpretation.set('Niveau faible : stress léger.');
-      this.adviceItems.set([
-        'Respiration courte: 2 minutes de respiration lente (4-6).',
-        'Micro-pauses: 3 pauses de 1 minute dans la journée.',
-        'Organisation simple: noter 3 priorités maximum.'
-      ]);
-      return;
-    }
-
-    if (level === 'MEDIUM') {
-      this.riskLevel.set('Modéré');
-      this.riskEmoji.set('😐');
-      this.riskBoxClass.set('risk-box--medium');
-      this.interpretation.set('Niveau modéré : stress notable.');
-      this.adviceItems.set([
-        "Routines anti-stress: 10 minutes par jour d'activité apaisante.",
-        'Réduction de charge: identifier 1 tâche à déléguer ou reporter.',
-        'Sommeil régulier: heure de coucher fixe et moins d’écrans.'
-      ]);
-      return;
-    }
-
-    this.riskLevel.set('Élevé');
-    this.riskEmoji.set('😟');
-    this.riskBoxClass.set('risk-box--high');
-    this.interpretation.set('Niveau élevé : stress intense.');
-    this.adviceItems.set([
-      'Priorisation stricte: réduire au minimum les obligations non essentielles.',
-      'Techniques d’ancrage: respiration profonde, cohérence cardiaque, ancrage 5-4-3-2-1.',
-      'Soutien social: parler à un proche, collègue ou personne de confiance.',
-      'Pause obligatoire: s’accorder un vrai temps de récupération.'
-    ]);
+  private isRiskLevel(
+    value: unknown
+  ): value is RiskLevel {
+    return (
+      value === 'LOW' ||
+      value === 'MEDIUM' ||
+      value === 'HIGH'
+    );
   }
 
-  computeApiRiskLevel(score: number): ApiRiskLevel {
-    if (score < 150) {
-      return 'LOW';
-    }
+  private getPresentation(
+    level: RiskLevel
+  ): ResultPresentation {
+    switch (level) {
+      case 'LOW':
+        return {
+          label: 'Faible',
+          emoji: '🙂',
+          cssClass: 'risk-box--low',
+          interpretation:
+            'Niveau faible : stress léger.',
+          adviceItems: [
+            'Pratiquez deux minutes de respiration lente.',
+            'Faites plusieurs micro-pauses dans la journée.',
+            'Limitez-vous à trois priorités principales.'
+          ]
+        };
 
-    if (score < 300) {
-      return 'MEDIUM';
-    }
+      case 'MEDIUM':
+        return {
+          label: 'Modéré',
+          emoji: '😐',
+          cssClass: 'risk-box--medium',
+          interpretation:
+            'Niveau modéré : stress notable.',
+          adviceItems: [
+            'Prévoyez dix minutes quotidiennes d’activité apaisante.',
+            'Identifiez une tâche à déléguer ou à reporter.',
+            'Conservez des horaires de sommeil réguliers.'
+          ]
+        };
 
-    return 'HIGH';
+      case 'HIGH':
+        return {
+          label: 'Élevé',
+          emoji: '😟',
+          cssClass: 'risk-box--high',
+          interpretation:
+            'Niveau élevé : stress intense.',
+          adviceItems: [
+            'Réduisez les obligations non essentielles.',
+            'Pratiquez une technique de respiration ou d’ancrage.',
+            'Parlez-en à une personne de confiance.',
+            'Accordez-vous un véritable temps de récupération.'
+          ]
+        };
+    }
   }
 
   restart(): void {
-    this.router.navigate(['/diagnostic/list']);
+    void this.router.navigate(['/diagnostic/run']);
   }
 }

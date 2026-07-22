@@ -1,44 +1,55 @@
 <div class="result-container">
-
     <h1>Résultat du diagnostic</h1>
 
-    @if (score() !== null) {
+    @if (loading()) {
+    <p>Chargement du résultat...</p>
+    } @else if (
+    score() !== null &&
+    presentation();
+    as result
+    ) {
     <div class="score-box">
         <p class="label">Votre score :</p>
         <p class="value">{{ score() }}</p>
     </div>
 
-    <div class="risk-box" [class.risk-box--low]="riskBoxClass() === 'risk-box--low'"
-        [class.risk-box--medium]="riskBoxClass() === 'risk-box--medium'"
-        [class.risk-box--high]="riskBoxClass() === 'risk-box--high'">
+    <div class="risk-box" [class]="result.cssClass">
         <p class="label">Niveau de risque :</p>
-        <p class="value">{{ riskEmoji() }} {{ riskLevel() }}</p>
+
+        <p class="value">
+            {{ result.emoji }} {{ result.label }}
+        </p>
     </div>
 
     <p class="interpretation">
-        {{ interpretation() }}
+        {{ result.interpretation }}
     </p>
 
-    @if (adviceItems().length > 0) {
     <div class="advice-card">
         <h2>Conseils</h2>
+
         <ul>
-            @for (advice of adviceItems(); track advice) {
+            @for (
+            advice of result.adviceItems;
+            track advice
+            ) {
             <li>{{ advice }}</li>
             }
         </ul>
-        @if (riskLevel() === 'Élevé') {
-        <p class="urgent-note"><strong>En cas de stress élevé, il est conseillé de voir son médecin traitant ou un
-                centre médico-psychologique.</strong></p>
+
+        @if (riskLevel() === 'HIGH') {
+        <p class="urgent-note">
+            <strong>
+                En cas de stress élevé, il est conseillé
+                de consulter votre médecin traitant ou un
+                centre médico-psychologique.
+            </strong>
+        </p>
         }
     </div>
-    }
 
     <button class="btn-primary" type="button" (click)="restart()">
         Refaire un diagnostic
     </button>
-    } @else {
-    <p>Chargement du résultat...</p>
     }
-
 </div>

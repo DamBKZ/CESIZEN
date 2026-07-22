@@ -1,35 +1,7 @@
-<div class="run-container">
-
-    <p class="eyebrow">Questionnaire</p>
-    <h1>Cocher les événements qui correspondent à votre situation durant les 24 derniers mois</h1>
-    <p class="subtitle">Chaque item reprend un événement de vie avec son score LCU. Le total se calcule en direct.</p>
-
-    @if (loadingEvents()) {
-    <p class="loading">Chargement du questionnaire...</p>
+<button class="btn-primary" type="button" [disabled]="!canSubmit()" (click)="submit()">
+    @if (submitting()) {
+    Enregistrement…
+    } @else {
+    Voir le résultat
     }
-
-    <p class="questionnaire-help" id="questionnaire-help">
-        Sélectionnez au moins un événement pour activer la validation du diagnostic.
-    </p>
-
-    <fieldset class="questionnaire" aria-describedby="questionnaire-help">
-        <legend class="sr-only">Événements du questionnaire</legend>
-
-        @for (event of events(); track event.eventId) {
-        <label class="event-item" [class.selected]="selectedEvents().has(normalizeId(event.eventId))">
-            <input type="checkbox" [checked]="selectedEvents().has(normalizeId(event.eventId))"
-                (change)="toggleEvent(event.eventId)" />
-            <span class="event-text">
-                <span class="event-label">{{ event.label }}</span>
-                <span class="event-meta">Score LCU {{ event.lcu }}</span>
-            </span>
-            <span class="score">+{{ event.lcu }}</span>
-        </label>
-        }
-    </fieldset>
-
-    <button class="btn-primary" type="button" (click)="submit()" [disabled]="!canSubmit()">
-        Voir le résultat
-    </button>
-
-</div>
+</button>
