@@ -30,6 +30,13 @@ public class InformationController {
     public Page<InformationResponse> search(@RequestParam String keyword, Pageable pageable) {
         return service.search(keyword, pageable);
     }
+    @GetMapping("/slug/{slug}")
+public InformationResponse findBySlug(
+        @PathVariable String slug
+) {
+    return service.findBySlug(slug);
+}
+
 
     @GetMapping("/{id}")
     public InformationResponse findById(@PathVariable UUID id) {

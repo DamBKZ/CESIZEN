@@ -193,6 +193,28 @@ public class InformationServiceImpl implements InformationService {
                 .map(mapper::toResponse);
     }
 
+@Override
+@Transactional(readOnly = true)
+public InformationResponse findBySlug(String slug) {
+    if (slug == null || slug.isBlank()) {
+        throw new BadRequestException(
+                "Le slug est obligatoire."
+        );
+    }
+
+    Information information = repo
+            .findBySlug(slug.trim())
+            .orElseThrow(() ->
+                    new NotFoundException(
+                            "Information introuvable."
+                    )
+            );
+
+    return mapper.toResponse(information);
+}
+
+
+
     @Override
     @Transactional(readOnly = true)
     public Page<InformationResponse> search(

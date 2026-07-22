@@ -14,6 +14,8 @@ public interface InformationService {
 
     InformationResponse create(InformationRequest request, User currentUser);
 
+    InformationResponse findBySlug(String slug);
+
     InformationResponse update(UUID id, InformationRequest request, User currentUser);
 
     void delete(UUID id, User currentUser);
@@ -25,4 +27,6 @@ public interface InformationService {
     Page<InformationResponse> filter(InformationType type, UUID categoryId, Pageable pageable);
 
     Page<InformationResponse> search(String keyword, Pageable pageable);
+
+
 }
