@@ -17,9 +17,11 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache wget \
+RUN apk upgrade --no-cache \
+    && apk add --no-cache wget \
     && addgroup -S spring \
     && adduser -S spring -G spring
+
 
 COPY --from=build \
   /app/target/cesizen-back-0.0.1-SNAPSHOT.jar \
