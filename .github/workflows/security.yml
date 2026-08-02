@@ -1,0 +1,91 @@
+name: Security Scan
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+    branches:
+      - main
+      - develop
+
+  schedule:
+    - cron: "0 6 * * 1"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  filesystem-scan:
+    name: Trivy - sources et configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Récupérer les sources
+        uses: actions/checkout@v5
+
+      - name: Scanner le dépôt
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: "1"
+
+  docker-images:
+    name: Trivy - images Docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Récupérer les sources
+        uses: actions/checkout@v5
+
+      - name: Construire l’image backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./cesizen-back
+          load: true
+          push: false
+          tags: cesizen-back:security-scan
+
+      - name: Construire l’image frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./cesizen-front
+          load: true
+          push: false
+          tags: cesizen-front:security-scan
+
+      - name: Scanner l’image backend
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: cesizen-back:security-scan
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: "1"
+
+      - name: Scanner l’image frontend
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: cesizen-front:security-scan
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: "1"
