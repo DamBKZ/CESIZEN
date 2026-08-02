@@ -13,7 +13,7 @@ RUN npm run build
 
 
 # Étape 2 : serveur Nginx non privilégié
-FROM nginxinc/nginx-unprivileged:1.28-alpine
+FROM nginxinc/nginx-unprivileged:1.31.3-alpine3.24
 
 COPY --chown=nginx:nginx nginx.conf /etc/nginx/conf.d/default.conf
 
