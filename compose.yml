@@ -80,7 +80,7 @@ services:
         condition: service_healthy
 
     ports:
-      - "4200:80"
+      - "4200:8080"
 
 volumes:
   cesizen-database-data:

@@ -12,13 +12,18 @@ COPY . .
 RUN npm run build
 
 
-# Étape 2 : serveur Nginx
-FROM nginx:1.28-alpine
+# Étape 2 : serveur Nginx non privilégié
+FROM nginxinc/nginx-unprivileged:1.28-alpine
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --chown=nginx:nginx nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY --from=build /app/dist/cesizen-front/browser /usr/share/nginx/html
+COPY --chown=nginx:nginx \
+    --from=build \
+    /app/dist/cesizen-front/browser \
+    /usr/share/nginx/html
 
-EXPOSE 80
+USER nginx
+
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
