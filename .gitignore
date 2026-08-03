@@ -20,3 +20,5 @@ Thumbs.db
 **/.env
 # Sauvegardes locales
 backups/
+
+.env.monitoring

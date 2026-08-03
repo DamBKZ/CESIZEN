@@ -1,0 +1,42 @@
+groups:
+  - name: cesizen-monitoring
+    rules:
+      - alert: PrometheusTargetDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          application: cesizen
+        annotations:
+          summary: "Cible Prometheus indisponible"
+          description: "La cible {{ $labels.job }} sur {{ $labels.instance }} est indisponible depuis plus d’une minute."
+
+      - alert: CadvisorDown
+        expr: up{job="cadvisor"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          application: cesizen
+        annotations:
+          summary: "Collecte Docker indisponible"
+          description: "Prometheus ne reçoit plus les métriques de cAdvisor."
+
+      - alert: HighDockerMemoryUsage
+        expr: container_memory_working_set_bytes{id="/"} > 3 * 1024 * 1024 * 1024
+        for: 5m
+        labels:
+          severity: warning
+          application: cesizen
+        annotations:
+          summary: "Consommation mémoire Docker élevée"
+          description: "La consommation mémoire globale de Docker dépasse 3 Gio depuis plus de cinq minutes."
+
+      - alert: HighDockerCpuUsage
+        expr: rate(container_cpu_usage_seconds_total{id="/"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          application: cesizen
+        annotations:
+          summary: "Consommation CPU Docker élevée"
+          description: "La consommation CPU globale de Docker dépasse 80 % depuis plus de cinq minutes."
