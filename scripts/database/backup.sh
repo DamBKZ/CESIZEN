@@ -60,6 +60,6 @@ find "${BACKUP_PATH}" \
   -mtime "+${RETENTION_DAYS}" \
   -delete
 
-echo "Sauvegarde créée : ${BACKUP_FILE}"
+echo "Sauvegarde creee : ${BACKUP_FILE}"
 echo "Taille : $(du -h "${BACKUP_FILE}" | cut -f1)"
 echo "Somme SHA-256 : $(sha256sum "${BACKUP_FILE}" | cut -d ' ' -f1)"
