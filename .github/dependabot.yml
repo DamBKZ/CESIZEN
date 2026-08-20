@@ -1,59 +1,193 @@
 version: 2
 
 updates:
-  - package-ecosystem: maven
-    directory: /cesizen-back
+  # Dépendances Maven du backend
+  - package-ecosystem: "maven"
+    directory: "/cesizen-back"
+    target-branch: "develop"
+
     schedule:
-      interval: weekly
-      day: monday
-      time: "07:00"
-      timezone: Europe/Paris
-    target-branch: develop
-    open-pull-requests-limit: 5
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Paris"
+
     labels:
-      - dependencies
-      - component:backend
-      - type:maintenance
-    commit-message:
-      prefix: "chore(deps-back)"
+      - "dependencies"
+      - "backend"
+
+    open-pull-requests-limit: 5
+
     groups:
       backend-minor-patch:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
         update-types:
-          - minor
-          - patch
+          - "minor"
+          - "patch"
 
-  - package-ecosystem: npm
-    directory: /cesizen-front
-    schedule:
-      interval: weekly
-      day: monday
-      time: "07:15"
-      timezone: Europe/Paris
-    target-branch: develop
-    open-pull-requests-limit: 5
-    labels:
-      - dependencies
-      - component:frontend
-      - type:maintenance
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
     commit-message:
-      prefix: "chore(deps-front)"
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+
+
+  # Dépendances npm du frontend
+  - package-ecosystem: "npm"
+    directory: "/cesizen-front"
+    target-branch: "develop"
+
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:15"
+      timezone: "Europe/Paris"
+
+    labels:
+      - "dependencies"
+      - "frontend"
+
+    open-pull-requests-limit: 5
+
     groups:
       frontend-minor-patch:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
         update-types:
-          - minor
-          - patch
+          - "minor"
+          - "patch"
 
-  - package-ecosystem: github-actions
-    directory: /
-    schedule:
-      interval: monthly
-      time: "07:30"
-      timezone: Europe/Paris
-    target-branch: develop
-    open-pull-requests-limit: 3
-    labels:
-      - dependencies
-      - component:deployment
-      - type:maintenance
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
     commit-message:
-      prefix: "chore(deps-ci)"
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+
+
+  # Actions utilisées dans les workflows GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "develop"
+
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:30"
+      timezone: "Europe/Paris"
+
+    labels:
+      - "dependencies"
+      - "ci"
+
+    open-pull-requests-limit: 3
+
+    groups:
+      github-actions-minor-patch:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+
+  # Images référencées dans les Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/cesizen-back"
+    target-branch: "develop"
+
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:45"
+      timezone: "Europe/Paris"
+
+    labels:
+      - "dependencies"
+      - "backend"
+      - "docker"
+
+    open-pull-requests-limit: 3
+
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+
+  - package-ecosystem: "docker"
+    directory: "/cesizen-front"
+    target-branch: "develop"
+
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Paris"
+
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "docker"
+
+    open-pull-requests-limit: 3
+
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+
+  - package-ecosystem: "docker"
+    directory: "/honeypot"
+    target-branch: "develop"
+
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:15"
+      timezone: "Europe/Paris"
+
+    labels:
+      - "dependencies"
+      - "security"
+      - "docker"
+
+    open-pull-requests-limit: 3
+
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
+    commit-message:
+      prefix: "chore"
+      include: "scope"
