@@ -1,0 +1,41 @@
+discovery.docker "cesizen" {
+  host = "unix:///var/run/docker.sock"
+
+  filter {
+    name   = "label"
+    values = ["com.docker.compose.project=cesizen"]
+  }
+}
+
+discovery.relabel "cesizen" {
+  targets = discovery.docker.cesizen.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+    replacement   = "$1"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_log_stream"]
+    target_label  = "stream"
+  }
+}
+
+loki.source.docker "cesizen" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.cesizen.output
+  forward_to = [loki.write.cesizen.receiver]
+}
+
+loki.write "cesizen" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

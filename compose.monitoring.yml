@@ -60,11 +60,19 @@ services:
     restart: unless-stopped
     depends_on:
       - prometheus
+    env_file:
+      - .env.monitoring
     environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD obligatoire}
-      GF_USERS_ALLOW_SIGN_UP: "false"
-      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=smtp.gmail.com:587
+      - GF_SMTP_USER=${GRAFANA_SMTP_USER}
+      - GF_SMTP_PASSWORD=${GRAFANA_SMTP_PASSWORD}
+      - GF_SMTP_FROM_ADDRESS=${GRAFANA_SMTP_FROM_ADDRESS}
+      - GF_SMTP_FROM_NAME=CESIZen Alerting
+      - GF_SMTP_STARTTLS_POLICY=MandatoryStartTLS
     ports:
       - "3000:3000"
     volumes:
@@ -72,6 +80,39 @@ services:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
     networks:
       - monitoring
+
+  loki:
+    image: grafana/loki:3.6.3
+    container_name: cesizen-loki
+    restart: unless-stopped
+    command:
+      - -config.file=/etc/loki/loki.yml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/loki.yml:/etc/loki/loki.yml:ro
+      - cesizen-loki-data:/loki
+    networks:
+      - monitoring
+
+  alloy:
+    image: grafana/alloy:v1.12.2
+    container_name: cesizen-alloy
+    restart: unless-stopped
+    depends_on:
+      - loki
+    command:
+      - run
+      - /etc/alloy/config.alloy
+      - --server.http.listen-addr=0.0.0.0:12345
+    ports:
+      - "12345:12345"
+    volumes:
+      - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitoring
+
 
 networks:
   monitoring:
@@ -82,3 +123,4 @@ volumes:
   cesizen-prometheus-data:
   cesizen-alertmanager-data:
   cesizen-grafana-data:
+  cesizen-loki-data:

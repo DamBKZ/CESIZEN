@@ -1,0 +1,46 @@
+services:
+  opencanary:
+    build:
+      context: ./honeypot
+      dockerfile: Dockerfile
+
+    image: cesizen-opencanary:local
+    container_name: cesizen-honeypot
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:2121:2121"
+      - "127.0.0.1:2222:2222"
+      - "127.0.0.1:8088:8088"
+
+    networks:
+      - honeypot
+
+
+    security_opt:
+      - no-new-privileges:true
+
+    cap_drop:
+      - ALL
+
+    cap_add:
+      - SETUID
+      - SETGID
+
+
+    read_only: true
+
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+      - /var/tmp:size=16m,mode=1777
+      - /var/run:size=4m,mode=0755
+      - /var/log/opencanary:size=16m,mode=1777
+
+    mem_limit: 128m
+    cpus: 0.50
+
+networks:
+  honeypot:
+    name: cesizen-honeypot-network
+    driver: bridge
+
