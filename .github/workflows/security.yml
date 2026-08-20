@@ -55,7 +55,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Construire l’image backend
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./cesizen-back
           load: true
@@ -63,7 +63,7 @@ jobs:
           tags: cesizen-back:security-scan
 
       - name: Construire l’image frontend
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./cesizen-front
           load: true
