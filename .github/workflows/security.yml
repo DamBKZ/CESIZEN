@@ -89,3 +89,15 @@ jobs:
           ignore-unfixed: true
           format: table
           exit-code: "1"
+
+      - name: Construire l’image OpenCanary
+        run: docker build -t cesizen-opencanary:security-scan ./honeypot
+
+      - name: Analyser l’image OpenCanary avec Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: cesizen-opencanary:security-scan
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
