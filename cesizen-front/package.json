@@ -42,8 +42,8 @@
     "zone.js": "^0.16.2"
   },
   "devDependencies": {
-    "@angular/build": "^21.2.19",
-    "@angular/cli": "^21.2.19",
+    "@angular/build": "^21.2.21",
+    "@angular/cli": "^21.2.21",
     "@angular/compiler-cli": "^21.2.19",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
@@ -51,6 +51,6 @@
     "angular-eslint": "21.4.0",
     "eslint": "^10.3.0",
     "typescript": "~5.9.2",
-    "typescript-eslint": "8.59.2"
+    "typescript-eslint": "8.67.0"
   }
 }
