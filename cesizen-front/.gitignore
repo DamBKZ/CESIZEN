@@ -45,3 +45,11 @@ Thumbs.db
 # Environnement
 .env
 src/environments/environment.local.ts
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
