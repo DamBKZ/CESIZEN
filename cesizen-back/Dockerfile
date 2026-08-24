@@ -1,35 +1,31 @@
-# Ãƒâ€°tape 1 : compilation Maven
+# Étape 1 : compilation Maven
 FROM maven:3.9-eclipse-temurin-21-alpine AS build
 
 WORKDIR /app
 
 COPY pom.xml ./
+COPY checkstyle.xml ./
 
-RUN mvn dependency:go-offline -B
-
-COPY checkstyle.xml .
+RUN mvn --batch-mode --no-transfer-progress dependency:go-offline
 
 COPY src ./src
 
-RUN mvn clean package -DskipTests -B
+RUN mvn --batch-mode --no-transfer-progress clean package -DskipTests
 
 
-# Ãƒâ€°tape 2 : exÃƒÂ©cution
+# Étape 2 : exécution
 FROM eclipse-temurin:21-jre-alpine
-
-WORKDIR /app
 
 RUN apk upgrade --no-cache \
     && apk add --no-cache wget \
-    && addgroup -S spring \
-    && adduser -S spring -G spring
+    && addgroup --system spring \
+    && adduser --system --ingroup spring spring
 
+WORKDIR /app
 
-COPY --from=build \
-  /app/target/cesizen-back-0.0.1-SNAPSHOT.jar \
-  app.jar
-
-RUN chown spring:spring app.jar
+COPY --from=build --chown=spring:spring \
+    /app/target/cesizen-back-0.0.1-SNAPSHOT.jar \
+    /app/app.jar
 
 USER spring:spring
 
