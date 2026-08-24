@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class CesizenBackApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(CesizenBackApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(CesizenBackApplication.class, args);
+    }
 }

@@ -5,9 +5,10 @@
     <input placeholder="Rechercher un article, une vidéo, un PDF..." [ngModel]="keyword()"
         (ngModelChange)="keyword.set($event)" (keyup.enter)="search()" />
 
-    <button class="btn-primary" (click)="search()">
+    <button type="button" class="btn-primary" (click)="search()">
         Rechercher
     </button>
+
 
     @if (loading()) {
     <p class="loading">Recherche en cours...</p>
@@ -19,7 +20,9 @@
 
     @for (item of results(); track item.informationId) {
 
-    <div class="result-card" (click)="open(item.slug)">
+    <div class="result-card" role="link" tabindex="0" (click)="open(item.slug)" (keydown.enter)="open(item.slug)"
+        (keydown.space)="open(item.slug); $event.preventDefault()">
+
 
         <div class="header">
             <h2>{{ item.title }}</h2>
@@ -38,7 +41,7 @@
             }
         </div>
 
-        <button class="edit-btn" (click)="edit(item.slug); $event.stopPropagation()">
+        <button type="button" class="edit-btn" (click)="edit(item.slug); $event.stopPropagation()">
             Modifier
         </button>
 

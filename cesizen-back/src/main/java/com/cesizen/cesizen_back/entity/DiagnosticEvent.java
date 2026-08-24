@@ -25,4 +25,3 @@ public class DiagnosticEvent {
     @Column(name = "eventLCU", nullable = false)
     private int lcu; // Life Change Unit
 }
-

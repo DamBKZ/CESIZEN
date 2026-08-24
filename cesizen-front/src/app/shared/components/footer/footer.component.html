@@ -1,13 +1,29 @@
 <footer class="footer">
 
     <div class="footer-left">
-        <button class="link-btn" (click)="openLegal()">Mentions légales</button>
-        <button class="link-btn" (click)="openPrivacy()">Confidentialité</button>
-        <button class="link-btn" (click)="openCookies()">Cookies</button>
+        <button type="button" class="link-btn" (click)="openLegal()">
+            Mentions légales
+        </button>
+
+        <button type="button" class="link-btn" (click)="openPrivacy()">
+            Confidentialité
+        </button>
+
+        <button type="button" class="link-btn" (click)="openCookies()">
+            Cookies
+        </button>
     </div>
 
     <div class="footer-center">
-        <span>© {{ currentYear }} CESIZEN — Tous droits réservés</span>
+        <span>
+            © {{ currentYear }} CESIZEN — Tous droits réservés
+
+            @if (showApplicationVersion) {
+            <span class="footer-version">
+                — v{{ applicationVersion }}
+            </span>
+            }
+        </span>
     </div>
 
     <div class="footer-right">

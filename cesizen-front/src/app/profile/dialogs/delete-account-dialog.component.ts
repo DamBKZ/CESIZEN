@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
@@ -11,9 +11,9 @@ import { MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from
   styleUrls: ['./delete-account-dialog.component.scss']
 })
 export class DeleteAccountDialogComponent {
-  confirmed = false;
+  private readonly dialogRef = inject<MatDialogRef<DeleteAccountDialogComponent>>(MatDialogRef);
 
-  constructor(private readonly dialogRef: MatDialogRef<DeleteAccountDialogComponent>) {}
+  confirmed = false;
 
   cancel(): void {
     this.dialogRef.close(false);
