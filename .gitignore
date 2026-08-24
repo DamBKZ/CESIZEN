@@ -22,3 +22,7 @@ Thumbs.db
 backups/
 
 .env.monitoring
+
+# JMeter
+/performance/jmeter/results/
+/performance/jmeter/report/
