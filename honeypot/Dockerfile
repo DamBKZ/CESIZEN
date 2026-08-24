@@ -25,7 +25,23 @@ RUN apt-get update \
         "jaraco.context>=6.1.0" \
         "msgpack>=1.2.1" \
         "setuptools==78.1.1" \
-        "wheel>=0.46.2"
+        "wheel>=0.46.2" \
+    && find /usr/local/lib/python3.13/site-packages/setuptools/_vendor \
+        -type d \
+        
+
+$$
+\
+            -name 'jaraco.context-*.dist-info' \
+            -o -name 'wheel-*.dist-info' \
+$$
+
+ \
+        -prune \
+        -exec rm -rf {} + \
+    && if [ -d /usr/local/lib/python3.13/site-packages/pkg_resources/tests ]; then \
+        rm -rf /usr/local/lib/python3.13/site-packages/pkg_resources/tests; \
+    fi
 
 WORKDIR /opt/opencanary
 
@@ -40,4 +56,3 @@ RUN mkdir -p /var/log/opencanary \
 EXPOSE 2121 2222 8088
 
 CMD ["opencanaryd", "--dev", "--uid=opencanary", "--gid=opencanary"]
-
