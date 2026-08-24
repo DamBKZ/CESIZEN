@@ -41,4 +41,3 @@ public class AdminCategoryController {
         return ResponseEntity.ok(Map.of("message", "Catégorie supprimée."));
     }
 }
-

@@ -3,8 +3,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
-import { finalize } from 'rxjs';
-
 import { ProfileService } from '../../core/services/profile.service';
 import { UiStore } from '../../core/stores/ui.store';
 

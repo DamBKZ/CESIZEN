@@ -18,4 +18,3 @@ public interface CategoryService {
 
     List<CategoryResponse> findAll();
 }
-

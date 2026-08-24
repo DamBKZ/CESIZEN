@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  signal
-} from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 
 import {
   ToastService
@@ -21,6 +18,8 @@ export interface SnackbarMessage {
   providedIn: 'root'
 })
 export class UiStore {
+  private readonly toast = inject(ToastService);
+
   private readonly _loading = signal(false);
 
   readonly loading =
@@ -34,10 +33,6 @@ export class UiStore {
 
   private clearSnackbarTimer:
     ReturnType<typeof setTimeout> | null = null;
-
-  constructor(
-    private readonly toast: ToastService
-  ) {}
 
   setLoading(value: boolean): void {
     this._loading.set(value);

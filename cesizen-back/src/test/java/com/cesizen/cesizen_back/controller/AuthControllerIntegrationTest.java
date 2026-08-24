@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Disabled("Requires testcontainers or a running DB; enable when infra available")
 public class AuthControllerIntegrationTest {
@@ -18,16 +19,25 @@ public class AuthControllerIntegrationTest {
     @LocalServerPort
     int port;
 
-    @Test
-    void login_and_logout_flow_should_work_end_to_end() {
-        var rest = new RestTemplate();
-        var url = "http://localhost:" + port + "/auth/login";
+@Test
+void login_and_logout_flow_should_work_end_to_end() {
+    var rest = new RestTemplate();
+    var url = "http://localhost:" + port + "/auth/login";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-        String body = "{\"email\":\"test@test.fr\",\"password\":\"testtesttest\"}";
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Content-Type", "application/json");
 
-        ResponseEntity<String> resp = rest.exchange(url, HttpMethod.POST, new HttpEntity<>(body, headers), String.class);
-        assertThat(resp.getStatusCode().is2xxSuccessful()).isTrue();
-    }
+    String body =
+            "{\"email\":\"test@test.fr\",\"password\":\"testtesttest\"}";
+
+    ResponseEntity<String> response = rest.exchange(
+            url,
+            HttpMethod.POST,
+            new HttpEntity<>(body, headers),
+            String.class
+    );
+
+    assertThat(response.getStatusCode().is2xxSuccessful())
+            .isTrue();
+}
 }

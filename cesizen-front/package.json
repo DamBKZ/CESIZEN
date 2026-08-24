@@ -1,17 +1,17 @@
 {
   "name": "cesizen-front",
   "version": "0.0.0",
-"scripts": {
-  "ng": "ng",
-  "start": "ng serve",
-  "build": "ng build",
-  "watch": "ng build --watch --configuration development",
-  "test": "ng test",
-  "test:e2e": "playwright test",
-  "test:e2e:ui": "playwright test --ui",
-  "test:e2e:report": "playwright show-report"
-},
-
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report",
+    "lint": "ng lint"
+  },
   "prettier": {
     "printWidth": 100,
     "singleQuote": true,
@@ -45,8 +45,12 @@
     "@angular/build": "^21.2.19",
     "@angular/cli": "^21.2.19",
     "@angular/compiler-cli": "^21.2.18",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.2.0",
-    "typescript": "~5.9.2"
+    "angular-eslint": "21.4.0",
+    "eslint": "^10.3.0",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "8.59.2"
   }
 }

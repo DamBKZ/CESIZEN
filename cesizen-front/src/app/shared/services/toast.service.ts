@@ -1,9 +1,4 @@
-import {
-  ApplicationRef,
-  ComponentRef,
-  Injectable,
-  createComponent
-} from '@angular/core';
+import { ApplicationRef, ComponentRef, Injectable, createComponent, inject } from '@angular/core';
 
 import {
   ToastComponent,
@@ -14,9 +9,8 @@ import {
   providedIn: 'root'
 })
 export class ToastService {
-  constructor(
-    private readonly appRef: ApplicationRef
-  ) {}
+  private readonly appRef = inject(ApplicationRef);
+
 
   success(
     message: string,

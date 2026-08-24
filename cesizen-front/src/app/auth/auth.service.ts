@@ -6,11 +6,9 @@ import {
   catchError,
   finalize,
   firstValueFrom,
-  map,
   Observable,
   of,
   switchMap,
-  tap
 } from 'rxjs';
 
 import { UserStore } from '../core/stores/user.store';

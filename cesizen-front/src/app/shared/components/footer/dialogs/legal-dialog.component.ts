@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -10,11 +10,11 @@ import { MatButtonModule } from '@angular/material/button';
   imports: [MatDialogContent, MatDialogActions, MatButtonModule]
 })
 export class LegalDialogComponent {
+  data = inject<{
+    type: string;
+}>(MAT_DIALOG_DATA);
+  private readonly dialogRef = inject<MatDialogRef<LegalDialogComponent>>(MatDialogRef);
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { type: string },
-    private readonly dialogRef: MatDialogRef<LegalDialogComponent>
-  ) {}
 
   close(): void {
     this.dialogRef.close();

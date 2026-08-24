@@ -1,9 +1,10 @@
-import { ApplicationRef, ComponentRef, Injectable, Injector, createComponent } from '@angular/core';
+import { ApplicationRef, ComponentRef, Injectable, EmbeddedViewRef, createComponent, inject } from '@angular/core';
 import { ConfirmComponent } from '../components/confirm/confirm.component';
 
 @Injectable({ providedIn: 'root' })
 export class ConfirmService {
-  constructor(private injector: Injector, private appRef: ApplicationRef) {}
+  private readonly appRef = inject(ApplicationRef);
+
 
   confirm(message: string): Promise<boolean> {
     return new Promise((resolve) => {
@@ -20,7 +21,8 @@ export class ConfirmService {
       });
 
       this.appRef.attachView(compRef.hostView);
-      const domNode = (compRef.hostView as any).rootNodes[0] as HTMLElement;
+const hostView = compRef.hostView as EmbeddedViewRef<unknown>;
+const domNode = hostView.rootNodes[0] as HTMLElement;
       document.body.appendChild(domNode);
     });
   }

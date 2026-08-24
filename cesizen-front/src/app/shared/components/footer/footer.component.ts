@@ -1,7 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
+
+import { environment } from '../../../../environments/environment';
 import { LegalDialogComponent } from './dialogs/legal-dialog.component';
-import { MatIcon } from "@angular/material/icon";
 
 @Component({
   selector: 'app-footer',
@@ -12,18 +14,31 @@ import { MatIcon } from "@angular/material/icon";
 })
 export class FooterComponent {
 
-  private dialog = inject(MatDialog);
-  currentYear = new Date().getFullYear();
+  private readonly dialog = inject(MatDialog);
 
-  openLegal() {
-    this.dialog.open(LegalDialogComponent, { data: { type: 'legal' } });
+  readonly currentYear = new Date().getFullYear();
+
+  readonly applicationVersion = environment.applicationVersion;
+
+  readonly showApplicationVersion =
+    environment.production &&
+    environment.applicationVersion.trim().length > 0;
+
+  openLegal(): void {
+    this.dialog.open(LegalDialogComponent, {
+      data: { type: 'legal' }
+    });
   }
 
-  openPrivacy() {
-    this.dialog.open(LegalDialogComponent, { data: { type: 'privacy' } });
+  openPrivacy(): void {
+    this.dialog.open(LegalDialogComponent, {
+      data: { type: 'privacy' }
+    });
   }
 
-  openCookies() {
-    this.dialog.open(LegalDialogComponent, { data: { type: 'cookies' } });
+  openCookies(): void {
+    this.dialog.open(LegalDialogComponent, {
+      data: { type: 'cookies' }
+    });
   }
 }

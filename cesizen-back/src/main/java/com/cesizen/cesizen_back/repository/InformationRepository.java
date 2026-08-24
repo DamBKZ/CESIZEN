@@ -34,4 +34,3 @@ public interface InformationRepository extends JpaRepository<Information, UUID> 
                              @Param("categoryId") UUID categoryId,
                              Pageable pageable);
 }
-
