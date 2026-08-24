@@ -36,7 +36,8 @@ RUN apt-get update \
         -exec rm -rf {} + \
     && rm -rf \
         /usr/local/lib/python3.13/site-packages/pkg_resources/tests \
-        /usr/local/lib/python3.13/site-packages/setuptools/tests
+        /usr/local/lib/python3.13/site-packages/setuptools/tests \
+        /usr/local/lib/python3.13/site-packages/pip/_vendor/bom.cdx.json
 
 WORKDIR /opt/opencanary
 
