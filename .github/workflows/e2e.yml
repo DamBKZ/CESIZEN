@@ -1,0 +1,102 @@
+name: E2E Playwright
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+    branches:
+      - main
+      - develop
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    name: Tests E2E Playwright
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Récupérer les sources
+        uses: actions/checkout@v5
+
+      - name: Construire et démarrer CESIZen
+        run: docker compose up -d --build
+        env:
+          DB_PASSWORD: cesizen_e2e_password
+          DB_ROOT_PASSWORD: cesizen_e2e_root_password
+          JWT_SECRET: cesizen-e2e-jwt-secret-key-with-at-least-32-characters
+
+      - name: Attendre le frontend et le backend
+        shell: bash
+        run: |
+          timeout 180 bash -c '
+            until curl --silent --fail http://127.0.0.1:4200/ > /dev/null; do
+              sleep 3
+            done
+          '
+
+          timeout 180 bash -c '
+            until status=$(curl --silent --output /dev/null --write-out "%{http_code}" http://127.0.0.1:8081/) &&
+              [[ "$status" =~ ^(200|401|403|404)$ ]]; do
+              sleep 3
+            done
+          '
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: cesizen-front/package-lock.json
+
+      - name: Installer les dépendances
+        working-directory: cesizen-front
+        run: npm ci
+
+      - name: Installer Chromium
+        working-directory: cesizen-front
+        run: npx playwright install --with-deps chromium
+
+      - name: Exécuter les tests E2E
+        working-directory: cesizen-front
+        run: npm run test:e2e
+        env:
+          CI: "true"
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4200
+
+      - name: Publier le rapport Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: cesizen-front/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Publier les résultats en cas d’échec
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: cesizen-front/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Afficher les logs Docker en cas d’échec
+        if: failure()
+        run: docker compose logs --no-color --tail=200
+
+      - name: Arrêter les conteneurs
+        if: always()
+        run: docker compose down -v
