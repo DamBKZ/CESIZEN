@@ -28,20 +28,14 @@ RUN apt-get update \
         "wheel>=0.46.2" \
     && find /usr/local/lib/python3.13/site-packages/setuptools/_vendor \
         -type d \
-        
-
-$$
-\
-            -name 'jaraco.context-*.dist-info' \
-            -o -name 'wheel-*.dist-info' \
-$$
-
- \
-        -prune \
+        -name 'jaraco.context-*.dist-info' \
         -exec rm -rf {} + \
-    && if [ -d /usr/local/lib/python3.13/site-packages/pkg_resources/tests ]; then \
-        rm -rf /usr/local/lib/python3.13/site-packages/pkg_resources/tests; \
-    fi
+    && find /usr/local/lib/python3.13/site-packages/setuptools/_vendor \
+        -type d \
+        -name 'wheel-*.dist-info' \
+        -exec rm -rf {} + \
+    && rm -rf \
+        /usr/local/lib/python3.13/site-packages/pkg_resources/tests
 
 WORKDIR /opt/opencanary
 
