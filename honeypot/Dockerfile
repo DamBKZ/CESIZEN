@@ -35,7 +35,8 @@ RUN apt-get update \
         -name 'wheel-*.dist-info' \
         -exec rm -rf {} + \
     && rm -rf \
-        /usr/local/lib/python3.13/site-packages/pkg_resources/tests
+        /usr/local/lib/python3.13/site-packages/pkg_resources/tests \
+        /usr/local/lib/python3.13/site-packages/setuptools/tests
 
 WORKDIR /opt/opencanary
 
