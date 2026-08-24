@@ -1,0 +1,5 @@
+# OpenCanary démarre avec les privilèges nécessaires à son initialisation,
+# puis abandonne ses droits avec --uid=opencanary --gid=opencanary.
+# Mesures compensatoires : cap_drop ALL, uniquement SETUID/SETGID,
+# système de fichiers en lecture seule et réseau Docker dédié.
+AVD-DS-0002
