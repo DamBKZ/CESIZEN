@@ -71,6 +71,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**")
                         .permitAll()
 
+                        // Supervision technique
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/health/**",
+                                "/actuator/info",
+                                "/actuator/prometheus"
+                        )
+                        .permitAll()
+
+
+
                         // Authentification publique
                         .requestMatchers("/auth/**")
                         .permitAll()

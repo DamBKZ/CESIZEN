@@ -141,12 +141,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 && authHeader.startsWith(BEARER_PREFIX);
     }
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
+@Override
+protected boolean shouldNotFilter(HttpServletRequest request) {
+    String path = request.getServletPath();
 
-        return path.equals("/auth")
-                || path.startsWith("/auth/")
-                || path.equals("/api/users/register");
-    }
+    return path.equals("/auth")
+            || path.startsWith("/auth/")
+            || path.equals("/api/users/register")
+            || path.equals("/actuator")
+            || path.startsWith("/actuator/");
+}
 }
