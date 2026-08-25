@@ -22,3 +22,13 @@ Thumbs.db
 backups/
 
 .env.monitoring
+
+# JMeter
+/performance/jmeter/results/
+/performance/jmeter/report/
+
+# SonarQube
+.env.sonar
+
+# SonarScanner
+**/.scannerwork/

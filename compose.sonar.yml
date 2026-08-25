@@ -1,0 +1,72 @@
+services:
+  sonar-database:
+    image: postgres:17-alpine
+    container_name: cesizen-sonar-database
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sonarqube
+      POSTGRES_USER: sonarqube
+      POSTGRES_PASSWORD: ${SONAR_DB_PASSWORD}
+    volumes:
+      - cesizen-sonar-database-data:/var/lib/postgresql/data
+    networks:
+      - sonar
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U sonarqube -d sonarqube
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: cesizen-sonarqube
+    restart: unless-stopped
+    depends_on:
+      sonar-database:
+        condition: service_healthy
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonar-database:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonarqube
+      SONAR_JDBC_PASSWORD: ${SONAR_DB_PASSWORD}
+    ports:
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - cesizen-sonarqube-data:/opt/sonarqube/data
+      - cesizen-sonarqube-extensions:/opt/sonarqube/extensions
+      - cesizen-sonarqube-logs:/opt/sonarqube/logs
+    networks:
+      - sonar
+
+  github-runner:
+    build:
+      context: ./monitoring/github-runner
+      dockerfile: Dockerfile
+    container_name: cesizen-github-runner
+    restart: unless-stopped
+    depends_on:
+      sonarqube:
+        condition: service_started
+    environment:
+      REPO_URL: https://github.com/DamBKZ/CESIZEN
+      RUNNER_NAME: cesizen-sonar-runner
+      RUNNER_LABELS: sonar,cesizen,docker
+      RUNNER_TOKEN: ${GITHUB_RUNNER_TOKEN}
+    volumes:
+      - cesizen-github-runner-data:/home/runner/runner-data
+    networks:
+      - sonar
+
+networks:
+  sonar:
+    name: cesizen-sonar-network
+    driver: bridge
+
+volumes:
+  cesizen-sonar-database-data:
+  cesizen-sonarqube-data:
+  cesizen-sonarqube-extensions:
+  cesizen-sonarqube-logs:
+  cesizen-github-runner-data:
