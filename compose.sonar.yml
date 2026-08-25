@@ -40,6 +40,25 @@ services:
     networks:
       - sonar
 
+  github-runner:
+    build:
+      context: ./monitoring/github-runner
+      dockerfile: Dockerfile
+    container_name: cesizen-github-runner
+    restart: unless-stopped
+    depends_on:
+      sonarqube:
+        condition: service_started
+    environment:
+      REPO_URL: https://github.com/DamBKZ/CESIZEN
+      RUNNER_NAME: cesizen-sonar-runner
+      RUNNER_LABELS: sonar,cesizen,docker
+      RUNNER_TOKEN: ${GITHUB_RUNNER_TOKEN}
+    volumes:
+      - cesizen-github-runner-data:/home/runner/runner-data
+    networks:
+      - sonar
+
 networks:
   sonar:
     name: cesizen-sonar-network
@@ -50,3 +69,4 @@ volumes:
   cesizen-sonarqube-data:
   cesizen-sonarqube-extensions:
   cesizen-sonarqube-logs:
+  cesizen-github-runner-data:

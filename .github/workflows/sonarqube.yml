@@ -1,0 +1,92 @@
+name: SonarQube Analysis
+
+on:
+  push:
+    branches:
+      - develop
+      - preprod
+      - main
+
+  pull_request:
+    branches:
+      - develop
+      - preprod
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sonar-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: SonarQube - Backend
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - sonar
+      - cesizen
+
+    steps:
+      - name: Récupérer les sources
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Vérifier SonarQube
+        run: curl --fail --silent http://cesizen-sonarqube:9000/api/system/status
+
+      - name: Analyser le backend
+        working-directory: cesizen-back
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_BACK_TOKEN }}
+        run: |
+          mvn --batch-mode --no-transfer-progress \
+            clean verify \
+            org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar \
+            -Dsonar.projectKey=cesizen \
+            -Dsonar.projectName=CESIZen \
+            -Dsonar.host.url=http://cesizen-sonarqube:9000 \
+            -Dsonar.token="$SONAR_TOKEN" \
+            -Dsonar.qualitygate.wait=true
+
+  frontend:
+    name: SonarQube - Frontend
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - sonar
+      - cesizen
+
+    steps:
+      - name: Récupérer les sources
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Installer les dépendances
+        working-directory: cesizen-front
+        run: npm ci
+
+      - name: Analyser le frontend
+        working-directory: cesizen-front
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_FRONT_TOKEN }}
+        run: |
+          npx @sonar/scan \
+            -Dsonar.projectKey=cesizen-front \
+            -Dsonar.projectName="CESIZen Frontend" \
+            -Dsonar.sources=src \
+            -Dsonar.tests=e2e \
+            -Dsonar.test.inclusions="e2e/**/*.spec.ts" \
+            -Dsonar.exclusions="**/node_modules/**,**/dist/**,**/test-results/**,**/playwright-report/**" \
+            -Dsonar.typescript.tsconfigPaths=tsconfig.app.json,tsconfig.playwright.json \
+            -Dsonar.host.url=http://cesizen-sonarqube:9000 \
+            -Dsonar.token="$SONAR_TOKEN" \
+            -Dsonar.qualitygate.wait=true
