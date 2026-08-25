@@ -70,44 +70,46 @@ export class DetailsComponent implements OnInit {
     );
   }
 
-  private toYouTubeEmbedUrl(url: string): string | null {
-    try {
-      const parsedUrl = new URL(url);
-      let videoId: string | null = null;
+private toYouTubeEmbedUrl(url: string): string | null {
+  try {
+    const parsedUrl = new URL(url);
 
-      if (
-        parsedUrl.hostname === 'youtube.com' ||
-        parsedUrl.hostname === 'www.youtube.com'
-      ) {
-        if (parsedUrl.pathname === '/watch') {
-          videoId = parsedUrl.searchParams.get('v');
-        } else if (parsedUrl.pathname.startsWith('/embed/')) {
-          videoId = parsedUrl.pathname.split('/')[2] ?? null;
-        }
-      }
-
-      if (
-        parsedUrl.hostname === 'youtu.be' ||
-        parsedUrl.hostname === 'www.youtu.be'
-      ) {
-        videoId = parsedUrl.pathname
-          .replace(/^\/+/, '')
-          .split('/')[0] || null;
-      }
-
-      if (!videoId) {
-        return null;
-      }
-
-      if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
-        return null;
-      }
-
-      return `https://www.youtube-nocookie.com/embed/${videoId}`;
-    } catch {
+    if (parsedUrl.protocol !== 'https:') {
       return null;
     }
+
+    let videoId: string | null = null;
+
+    if (
+      parsedUrl.hostname === 'youtube.com' ||
+      parsedUrl.hostname === 'www.youtube.com'
+    ) {
+      if (parsedUrl.pathname === '/watch') {
+        videoId = parsedUrl.searchParams.get('v');
+      } else if (parsedUrl.pathname.startsWith('/embed/')) {
+        videoId = parsedUrl.pathname.split('/')[2] ?? null;
+      }
+    } else if (
+      parsedUrl.hostname === 'youtu.be' ||
+      parsedUrl.hostname === 'www.youtu.be'
+    ) {
+      videoId = parsedUrl.pathname
+        .replace(/^\/+/, '')
+        .split('/')[0] || null;
+    }
+
+    if (
+      !videoId ||
+      !/^[a-zA-Z0-9_-]{11}$/.test(videoId)
+    ) {
+      return null;
+    }
+
+    return `https://www.youtube-nocookie.com/embed/${videoId}`;
+  } catch {
+    return null;
   }
+}
 
   private handleNotFound(): void {
     this.info.set(null);
